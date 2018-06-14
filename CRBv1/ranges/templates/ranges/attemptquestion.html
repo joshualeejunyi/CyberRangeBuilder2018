@@ -1,0 +1,199 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title_outer %}
+	<title>
+		{%block title %}
+			Cyber Range
+		{% endblock %}
+	</title>
+{% endblock %}
+
+{% block content_header%}
+	<section class="content-header">
+		<h1>
+			{% block page_name %}{{question.title}}{% endblock %}
+			<small>{% block page_description %}{% endblock %}</small>
+		</h1>
+		{% block breadcrumbs %}
+
+		{% endblock %}
+{% endblock%}
+
+{% block content %}
+
+<div class="float-left">
+{% if not attempted %}
+{% for question in question %}
+	{% if question.questiontype == 'FL'%}
+	<div class="row justify-content-md-center">
+		<!-- left  -->
+		<div class="col-md-5">
+			<div class="box box-solid box-primary">
+				<div class="box-header with-border">
+					<h3 class="box-title">{{ question.title}}</h3>
+					<div class="box-tools pull-right">
+						<button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+					</div>
+				</div>
+				<div class="box-body">
+					<p>{{question.text}}</p>
+					<form method="post" class="pull-right">
+						{% csrf_token %}
+						{{ form }}
+						&nbsp;
+						<button type="submit">Submit</button>
+					</form>
+				</div>
+				<div class="box-footer">
+					<p class="pull-right">{{ question.marks }} points</p>
+				</div>
+			</div>
+				<div style="width: 100px">
+			  		<a href="../play" class="btn btn-block btn-primary">Back</a>
+				</div>
+		</div>
+
+		<div class="float-right">
+			<div>
+				<iframe width="50%" height="700px" src="http://127.0.0.1:4200" frameborder="0"></iframe>
+			</div>
+		</div>
+	</div>
+	{% elif question.questiontype == 'MCQ' %}
+	<div class="row justify-content-md-center">
+		<!-- left  -->
+		<div class="col-md-5">
+			<div class="box box-solid box-primary">
+				<div class="box-header with-border">
+					<h3 class="box-title">{{ question.title}}</h3>
+					<div class="box-tools pull-right">
+						<button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+					</div>
+				</div>
+				<div class="box-body">
+					<p>{{question.text}}</p>
+					<div class="form-group">
+						<form method="post">
+							{% csrf_token %}
+							<div class="pull-right" style="width: 300px">
+							<!-- {% for option in mcqoptions %}
+								<input type="radio" name="answer" value={{option.optionone}}>{{option.optionone}}<br>
+								<input type="radio" name="answer" value={{option.optiontwo}}>{{option.optiontwo}}<br>
+								<input type="radio" name="answer" value={{option.optionthree}}>{{option.optionthree}}<br>
+								<input type="radio" name="answer" value={{option.optionfour}}>{{option.optionfour}}<br>
+							{% endfor %} -->
+							{{ form }}
+							</div>
+							<br>
+							
+					</div>
+				</div>
+				<div class="box-footer">
+					<button type="submit" class="btn btn-primary">Submit</button>
+						</form>
+					<p class="pull-right">{{ question.marks }} points</p>
+				</div>
+			</div>
+				<div style="width: 100px">
+			  		<a href="../../ play" class="btn btn-block btn-primary">Back</a>
+				</div>
+		</div>
+
+		<div class="float-right">
+			<div>
+				<iframe width="50%" height="700px" src="http://127.0.0.1:4200" frameborder="0"></iframe>
+			</div>
+		</div>
+	</div>
+	{% endif %}
+{% endfor %}
+{% else %}
+{% for question in question %}
+	{% for answer in result %}
+	{% if question.questiontype == 'FL' %}
+	<div class="row">
+		<!-- left  -->
+		<div class="col-md-5">
+			<div class="box box-solid box-primary">
+				<div class="box-header with-border">
+					<h3 class="box-title">{{ question.title}}</h3>
+					<div class="box-tools pull-right">
+						<button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+					</div>
+				</div>
+				<div class="box-body">
+					<p>{{question.text}}</p>
+					<div class="pull-right" style="width: 300px">
+					<form method="post">
+						Your Answer:
+						<input type="text" class="form-control" placeholder="{{answer.answergiven}}" disabled>
+						{% if answer.answercorrect %}
+							Correct!
+							<span class="glyphicon glyphicon-ok"></span>
+						{% else %}
+							Wrong! 
+							<span class="glyphicon glyphicon-remove"></span>
+						{% endif %}
+					</form>
+					</div>
+				</div>
+				<div class="box-footer">
+					<p class="pull-right">{{ question.marks }} points</p>
+				</div>
+			</div>
+			<div style="width: 100px">
+			  	<a href="../play" class="btn btn-block btn-primary">Back</a>
+			</div>
+		</div>
+		<div class="float-right">
+			<div>
+				<iframe width="50%" height="700px" src="http://127.0.0.1:4200" frameborder="0"></iframe>
+			</div>
+	</div>
+	</div>
+	{% elif question.questiontype == 'MCQ' %}
+	<div class="row">
+		<!-- left  -->
+		<div class="col-md-5">
+			<div class="box box-solid box-primary">
+				<div class="box-header with-border">
+					<h3 class="box-title">{{ question.title}}</h3>
+					<div class="box-tools pull-right">
+						<button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+					</div>
+				</div>
+				<div class="box-body">
+					<p>{{question.text}}</p>
+					<div class="pull-right" style="width: 300px">
+					<form method="post">
+						Your Answer:
+						<input type="text" class="form-control" placeholder="{{answer.answergiven}}" disabled>
+						{% if answer.answercorrect %}
+							Correct!
+							<span class="glyphicon glyphicon-ok"></span>
+						{% else %}
+							Wrong! 
+							<span class="glyphicon glyphicon-remove"></span>
+						{% endif %}
+					</form>
+					</div>
+				</div>
+				<div class="box-footer">
+					<p class="pull-right">{{ question.marks }} points</p>
+				</div>
+			</div>
+			<div style="width: 100px">
+			  	<a href="../../play" class="btn btn-block btn-primary">Back</a>
+			</div>
+		</div>
+		<div class="float-right">
+			<div>
+				<iframe width="50%" height="700px" src="http://127.0.0.1:4200" frameborder="0"></iframe>
+			</div>
+	</div>
+	</div>
+	{% endif %}
+	{% endfor %}
+{% endfor %}
+{% endif %}
+{% endblock %}

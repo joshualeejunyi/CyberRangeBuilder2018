@@ -1,0 +1,110 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title_outer %}
+	<title>
+		{%block title %}
+			Cyber Range
+		{% endblock %}
+	</title>
+{% endblock %}
+
+{% block content_header%}
+	<section class="content-header">
+		<h1>
+			{% block page_name %}{% block rangename %}{% endblock %}{% endblock %}
+		</h1>
+		{% block breadcrumbs %}
+
+		{% endblock %}
+{% endblock%}
+
+{% block content %}
+	{% for topic in topics %}
+	<div class="box box-solid box-primary" style="box-shadow: 1px 2px 5px grey;">
+        <div class="box-header with-border">
+          <h3 class="box-title">{{ topic.topicname }}</h3>
+          <div class="box-tools pull-right">
+            <button type="button" class="btn btn-box-tool" data-widget="collapse" data-toggle="tooltip" title="" data-original-title="Collapse">
+              <i class="fa fa-minus"></i></button>
+          </div>
+        </div>
+        <div class="box-body">
+        		{% for question in questionobject %}
+					{% if topic.topicid is question.topicid.topicid %}
+						{% for attempted in attemptedquestions %}
+							{% if attempted.questionid.questionid is question.questionid %}
+								{% if question.questiontype == 'MCQ' %}
+
+								<a href="Question{{ question.questionid }}/MCQ" style="color:black;">
+				    				<div class="col-md-4 col-sm-6 col-xs-5">
+					      				<div class="info-box" style="box-shadow: 1px 2px 5px grey;">
+						        			<span class="info-box-icon bg-green"><span class="glyphicon glyphicon-question-sign"></span></span>
+						        				<div class="info-box-content">
+						          					<span class="info-box-text">{{ question.title }}</span>
+						          					<span class="info-box-number">{{ question.marks }} points</span>
+							        			</div>
+					      				</div>
+				    				</div>
+								</a>
+								{% else %}
+								<a href="Question{{ question.questionid }}" style="color:black;">
+				    				<div class="col-md-4 col-sm-6 col-xs-5">
+					      				<div class="info-box" style="box-shadow: 1px 2px 5px grey;">
+						        			<span class="info-box-icon bg-green"><span class="glyphicon glyphicon-question-sign"></span></span>
+						        				<div class="info-box-content">
+						          					<span class="info-box-text">{{ question.title }}</span>
+						          					<span class="info-box-number">{{ question.marks }} points</span>
+							        			</div>
+					      				</div>
+				    				</div>
+								</a>
+								{% endif %}
+								{% endif %}
+						{% endfor %}
+
+						{% for unattempted in unattemptedquestions %}
+							{% if unattempted.questionid.questionid is question.questionid %}
+							{% if question.questiontype == 'MCQ' %}
+								<a href="Question{{ question.questionid }}/MCQ" style="color:black;">
+				    				<div class="col-md-4 col-sm-6 col-xs-5">
+					      				<div class="info-box" style="box-shadow: 1px 2px 5px grey;">
+						        			<span class="info-box-icon bg-red"><span class="glyphicon glyphicon-question-sign"></span></span>
+						        				<div class="info-box-content">
+						          					<span class="info-box-text">{{ question.title }}</span>
+						          					<span class="info-box-number">{{ question.marks }} points</span>
+							        			</div>
+					      				</div>
+				    				</div>
+								</a>
+							{% else %}
+							<a href="Question{{ question.questionid }}" style="color:black;">
+				    				<div class="col-md-4 col-sm-6 col-xs-5">
+					      				<div class="info-box" style="box-shadow: 1px 2px 5px grey;">
+						        			<span class="info-box-icon bg-red"><span class="glyphicon glyphicon-question-sign"></span></span>
+						        				<div class="info-box-content">
+						          					<span class="info-box-text">{{ question.title }}</span>
+						          					<span class="info-box-number">{{ question.marks }} points</span>
+							        			</div>
+					      				</div>
+				    				</div>
+								</a>
+							{% endif %}
+							{% endif %}
+						{% endfor %}
+					{% endif %}
+				{% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+
+    {% if questionobject == None %}
+    <div class="alert alert-danger alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+        <h4><i class="icon fa fa-warning"></i> Oops!</h4>
+        Something went wrong. Please contact the system administrator. <sup><i>sorry about that</i></sup>
+	</div>
+    {% endif %}
+   	<div style="width: 100px; box-shadow: 1px 2px 5px grey;">
+		<a href="../../" class="btn btn-block btn-primary">Back</a>
+	</div>
+{% endblock %}

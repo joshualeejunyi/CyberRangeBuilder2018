@@ -1,0 +1,23 @@
+{% extends 'adminlte/login.html' %}
+
+{% block title %}Login{% endblock %}
+
+{% block logo %}
+<div class="login-logo">
+	<a href="{% block logo_href %}/{% endblock %}">{% block logo_text %}cyber<b>RANGE</b>{% endblock %}</a>
+</div>
+{% endblock %}
+
+<p class="login-box-msg">Register a new membership</p>
+{% block form %}
+	<form method="post">
+	    {% csrf_token %}
+	    {{ form }}
+	    <button type="submit">Login</button>
+    	{% block login_form_links %}
+    	<a href="/passwordreset">I forgot my password</a>
+    	<br>
+    	<a href="/register">Don't have an account?</a>
+    {% endblock %}
+  	</form>
+{% endblock %}

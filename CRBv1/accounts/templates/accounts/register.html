@@ -1,0 +1,39 @@
+{% extends 'adminlte/login.html' %}
+
+{% block title %}Register{% endblock %}
+
+{% block logo %}
+<div class="login-logo">
+	<a href="{% block logo_href %}/{% endblock %}">{% block logo_text %}cyber<b>RANGE</b>{% endblock %}</a>
+</div>
+{% endblock %}
+
+{% block login_form %}
+<div class="register-box-body">
+	<p class="login-box-msg">Register an account</p>
+	<form method="post">
+		{% csrf_token %}		
+		<div class="form-group has-feedback">
+			<input type="email" name="email" class="form-control" placeholder="Email" required>
+			<span class="glyphicon glyphicon-envelope form-control-feedback">
+			</span>
+		</div>
+		<div class="form-group has-feedback">
+			<input type="text" name="username" class="form-control" placeholder="Username" required>
+			<span class="glyphicon glyphicon-user form-control-feedback">
+			</span>
+		</div>
+		<div class="form-group has-feedback">
+			<input type="password" name="password" class="form-control" placeholder="Password" required>
+			<span class="glyphicon glyphicon-lock form-control-feedback">
+			</span>
+		</div>
+		<div class="form-group has-feedback">
+			<input type="password" name="password1" class="form-control" placeholder="Confirm Password" required>
+			<span class="glyphicon glyphicon-lock form-control-feedback">
+			</span>
+		</div>
+		<button type="submit" class="btn btn-primary btn-block btn-flat">Register</button>
+	</form>
+</div>
+{% endblock %}
