@@ -4,7 +4,9 @@ from django.contrib.auth import authenticate, login
 # Create your views here.
 
 def loginsuccess(request):
-    if request.user.is_staff or request.user.is_superuser:
+    if request.user.is_staff:
+        return redirect("/teachers")    
+    elif request.user.is_superuser:
         return redirect("/admin")
     else:
         return redirect("/dashboard")

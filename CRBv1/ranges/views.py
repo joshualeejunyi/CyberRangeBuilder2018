@@ -382,6 +382,9 @@ class RangesView(ListView):
                 inactiveassignedranges= Range.objects.filter(rangeid=(currentranges[x][0]), rangeactive = 0)
                 inactiveranges = inactiveranges | inactiveassignedranges # if i didn't get the first object just now python will scold me
             print('3 -->' + str(inactiveranges))
+        
+        else:
+            inactiveranges = None
 
         context['inactive'] = inactiveranges
         return context

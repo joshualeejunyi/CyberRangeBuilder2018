@@ -28,4 +28,5 @@ urlpatterns = [
     url(r'^register/$', account.register, name='register'),
     url(r'^dashboard/', include('dashboard.urls')),
     url(r'^ranges/', include('ranges.urls')),
+    url(r'^teachers/', include('teachers.urls'))
 ]
