@@ -1,0 +1,27 @@
+{% extends 'adminlte/lib/_main_sidebar.html' %}
+
+{% block title %}
+Cyber Range
+{% endblock %}
+{% block nav_links %}
+	<li>
+		<a href="/teachers/">
+			<i class="fa fa-dashboard"></i><span>Teacher's Dashboard</span>
+		</a>
+    </li>
+    <li>
+            <a href="/teachers/rangemanagement/">
+                <i class="fa fa-user"></i><span>Range Management</span>
+            </a>
+        </li>
+	<li>
+		<a href="/teachers/usermanagement/">
+			<i class="fa fa-space-shuttle"></i><span>User Management</span>
+		</a>
+	</li>
+	<li>
+        <a href="/teachers/groupmanagement/">
+            <i class="fa fa-user"></i><span>Group Management</span>
+        </a>
+    </li>
+{% endblock nav_links %}

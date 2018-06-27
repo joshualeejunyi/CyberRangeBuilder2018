@@ -21,16 +21,19 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = 'jwftngrirhwff#+c2t_9p_ap!zd67t=n17xaui4(=71o^!8l4a'
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'dmit2.bulletplus.com']
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'teachers',
     'accounts',
     'dashboard',
     'ranges',
@@ -83,7 +86,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'CRB',
         'USER': 'root',
-        'PASSWORD': 'root',
+        'PASSWORD': 'r@nger2018',
         'HOST': 'localhost',
         'PORT': ''
     }   
@@ -116,7 +119,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Singapore'
 
 USE_I18N = True
 

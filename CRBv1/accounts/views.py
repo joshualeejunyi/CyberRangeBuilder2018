@@ -1,26 +1,43 @@
 from django.shortcuts import render, redirect
 from .forms import RegisterForm
 from django.contrib.auth import authenticate, login
+from django.views.generic.list import ListView
+from django.views.generic.edit import ModelFormMixin
+from django.views import generic 
+from accounts.models import *
 # Create your views here.
 
-def loginsuccess(request):
-    if request.user.is_staff or request.user.is_superuser:
-        return redirect("/admin")
-    else:
-        return redirect("/dashboard")
+class LoginRedirect():
+    def loginsuccess(request):
+        if request.user.is_staff:
+            return redirect("/teachers")    
+        elif request.user.is_superuser:
+            return redirect("/admin")
+        else:
+            return redirect("/dashboard")
 
-def register(request):
-    if request.method == 'POST':
-        form = RegisterForm(request.POST)
-        if form.is_valid():
-            form.save()
-            email = form.cleaned_data.get('email')
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password1')
-            user = authenticate(email = email, username = username, password = password)
-            login(request, user)
-            return redirect('dashboard')
+class RegisterView(ListView, ModelFormMixin):
+    template_name = 'accounts/register.html'
+    context_object_name = 'classesobject'
+    model = User
+    form_class = RegisterForm
 
-    else:
-        form = RegisterForm()
-    return render(request, 'accounts/register.html', {'form': form})
+    def get(self, request, *args, **kwargs):
+        self.object = None
+        self.form = self.get_form(self.form_class)
+        return ListView.get(self, request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        self.object = None
+        self.form = self.get_form(self.form_class)
+
+        if self.form.is_valid():
+            self.form.save()
+            return redirect('/register/success/')
+    
+    def get_queryset(self):
+        classes =  UserClass.objects.values_list('userclass')
+        return classes
+
+class RegistrationSucess(generic.TemplateView):
+    template_name = 'accounts/registersuccess.html'

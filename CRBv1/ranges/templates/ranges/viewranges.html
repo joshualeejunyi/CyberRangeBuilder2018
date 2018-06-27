@@ -1,13 +1,5 @@
 {% extends 'dashboard/base.html' %}
 
-{% block title_outer %}
-	<title>
-		{%block title %}
-			Cyber Range
-		{% endblock %}
-	</title>
-{% endblock %}
-
 {% block content_header%}
 	<section class="content-header">
 		<h1>
@@ -16,124 +8,127 @@
 		</h1>
 		{% block breadcrumbs %}
 		{% endblock %}
+	</section>
 {% endblock%}
 
 {% block content %}
-<div class="row">
-	<div>
-		<div class="box box-primary" style="box-shadow: 1px 2px 5px grey;">
-			<div class="box-header with-border">
-				<h3 class="box-title">Active Ranges</h3>
-				<div class="box-tools pull-right">
-					<button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+<section class = "content">
+	<div class="row">
+		<div>
+			<div class="box box-primary" style="box-shadow: 1px 2px 5px grey;">
+				<div class="box-header with-border">
+					<h3 class="box-title">Active Ranges</h3>
+					<div class="box-tools pull-right">
+						<button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+					</div>
 				</div>
-			</div>
-			<div class="box-body">
-				{% if rangeobject and userrange %}
-	    			<table class="table table-bordered table-hover dataTable" role="grid">
-	    				<thead>
-	    					<tr role="row">
-		    					<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-		    						Range Name
-		    					</th>
-		    					<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-		    						Date/Time Start
-		    					</th>
-		    					<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-		    						Date/Time End
-		    					</th>
-		    					<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-		    						Current Score
-		    					</th>
-		    					<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-		    						Ranking
-		    					</th>
-		    					<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-		    						Actions
-		    					</th>
-		    				</tr>
-	    				</thead>
-	    				<tbody>
-	    				{% for user in userrange %}
-	    					{% for range in rangeobject %}
-		    					{% if range.rangeactive %}
-		    						{% if user.rangeID.rangeid is range.rangeid %}
-			    						<tr role="row">
-			    							<td>{{ range.rangename }}</td>
-			    							<td>{{ range.datetimestart }}</td>
-			    							<td>{{ range.datetimeend  }}</td>
-			    							<td>{{ user.points }}</td>
-			    							<td>RANK/RANK</td>
-			    							<td><a style="width: 100px;" class="btn btn-block btn-primary" href="{{ range.rangeurl }}/play">Play Range</a></td>
-			    						</tr>
-		        					{% endif %}
-		        				{% endif %}
-	    					{% endfor %}
-	    				{% endfor %}
-	    				</tbody>
-	    			</table>
-	    		{% else %}
-	    			<p>You are not assigned to any ranges.</p>
-				{% endif %}
+				<div class="box-body">
+					{% if rangeobject and userrange %}
+						<table class="table table-bordered table-hover dataTable" role="grid">
+							<thead>
+								<tr role="row">
+									<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+										Range Name
+									</th>
+									<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+										Date/Time Start
+									</th>
+									<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+										Date/Time End
+									</th>
+									<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+										Current Score
+									</th>
+									<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+										Ranking
+									</th>
+									<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+										Actions
+									</th>
+								</tr>
+							</thead>
+							<tbody>
+							{% for user in userrange %}
+								{% for range in rangeobject %}
+									{% if range.rangeactive %}
+										{% if user.rangeID.rangeid is range.rangeid %}
+											<tr role="row">
+												<td>{{ range.rangename }}</td>
+												<td>{{ range.datetimestart }}</td>
+												<td>{{ range.datetimeend  }}</td>
+												<td>{{ user.points }}</td>
+												<td>RANK/RANK</td>
+												<td><a style="width: 100px;" class="btn btn-block btn-primary" href="{{ range.rangeurl }}/play">Play Range</a></td>
+											</tr>
+										{% endif %}
+									{% endif %}
+								{% endfor %}
+							{% endfor %}
+							</tbody>
+						</table>
+					{% else %}
+						<p>You are not assigned to any ranges.</p>
+					{% endif %}
+				</div>
 			</div>
 		</div>
 	</div>
-</div>
 
-<div class="row">
-	<div>
-		<div class="box box-primary" style="box-shadow: 1px 2px 5px grey;">
-			<div class="box-header with-border">
-				<h3 class="box-title">Past Ranges</h3>
-				<div class="box-tools pull-right">
-					<button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+	<div class="row">
+		<div>
+			<div class="box box-primary" style="box-shadow: 1px 2px 5px grey;">
+				<div class="box-header with-border">
+					<h3 class="box-title">Past Ranges</h3>
+					<div class="box-tools pull-right">
+						<button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+					</div>
 				</div>
-			</div>
-			<div class="box-body">
-				{% if inactive %}
-	    			<table class="table table-bordered table-hover dataTable" role="grid">
-	    				<thead>
-	    					<tr role="row">
-		    					<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-		    						Range Name
-		    					</th>
-		    					<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-		    						Date/Time Start
-		    					</th>
-		    					<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-		    						Date/Time End
-		    					</th>
-		    					<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-		    						Final Score
-		    					</th>
-		    					<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-		    						Final Ranking
-		    					</th>
-		    				</tr>
-	    				</thead>
-	    				<tbody>
-	    				{% for user in userrange %}
-	    					{% for range in inactive %}
-		    					{% if not range.rangeactive %}
-		    						{% if user.rangeID.rangeid is range.rangeid %}
-			    						<tr role="row">
-			    							<td>{{ range.rangename }}</td>
-			    							<td>{{ range.datetimestart }}</td>
-			    							<td>{{ range.datetimeend  }}</td>
-			    							<td>{{ user.points }}</td>
-			    							<td>RANK/RANK</td>
-			    						</tr>
-		        					{% endif %}
-		        				{% endif %}
-	    					{% endfor %}
-	    				{% endfor %}
-	    			</tbody>
-	    			</table>
-	    		{% else %}
-	    			<p>You have no past ranges</p>	
-				{% endif %}
+				<div class="box-body">
+					{% if inactive %}
+						<table class="table table-bordered table-hover dataTable" role="grid">
+							<thead>
+								<tr role="row">
+									<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+										Range Name
+									</th>
+									<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+										Date/Time Start
+									</th>
+									<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+										Date/Time End
+									</th>
+									<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+										Final Score
+									</th>
+									<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+										Final Ranking
+									</th>
+								</tr>
+							</thead>
+							<tbody>
+							{% for user in userrange %}
+								{% for range in inactive %}
+									{% if not range.rangeactive %}
+										{% if user.rangeID.rangeid is range.rangeid %}
+											<tr role="row">
+												<td>{{ range.rangename }}</td>
+												<td>{{ range.datetimestart }}</td>
+												<td>{{ range.datetimeend  }}</td>
+												<td>{{ user.points }}</td>
+												<td>RANK/RANK</td>
+											</tr>
+										{% endif %}
+									{% endif %}
+								{% endfor %}
+							{% endfor %}
+						</tbody>
+						</table>
+					{% else %}
+						<p>You have no past ranges</p>	
+					{% endif %}
+				</div>
 			</div>
 		</div>
 	</div>
-</div>
+</section>
 {% endblock %}

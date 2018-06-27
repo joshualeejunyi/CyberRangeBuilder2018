@@ -1,6 +1,4 @@
 from django.db import models
-from accounts.models import User
-
 # Create your models here.
 
 class Range(models.Model):
@@ -13,8 +11,8 @@ class Range(models.Model):
     maxscore = models.IntegerField(db_column='maxScore', blank=True, null=True)  # Field name made lowercase.
     lastmodifieddate = models.DateField(db_column='lastModifiedDate', blank=True, null=True)  # Field name made lowercase.
     rangecode = models.IntegerField(db_column='rangeCode', blank=True, null=True, unique=True)  # Field name made lowercase.
-    username = models.ForeignKey(User, models.DO_NOTHING, db_column='lastModifiedBy', blank=True, null=True, related_name='LMBR')  # Field name made lowercase.
-    username = models.ForeignKey(User, models.DO_NOTHING, db_column='createdby', related_name='CBR', default='super')  # Field name made lowercase.
+    username = models.ForeignKey('accounts.User', models.DO_NOTHING, db_column='lastModifiedBy', blank=True, null=True, related_name='LMBR')  # Field name made lowercase.
+    username = models.ForeignKey('accounts.User', models.DO_NOTHING, db_column='createdby', related_name='CBR', default='super')  # Field name made lowercase.
     rangeurl = models.CharField(db_column='rangeURL', max_length=50, null=True)
     studentsinrange = models.IntegerField(db_column='studentsInRange', null=True)
 
@@ -29,7 +27,7 @@ class RangeStudents(models.Model):
     teamName = models.CharField(db_column='teamName', max_length=45, null=True)
     points = models.IntegerField(db_column='points', default=0)
     rangeID = models.ForeignKey(Range, models.DO_NOTHING, db_column='rangeID',unique=False)  # Field name made lowercase.
-    studentID = models.ForeignKey(User, models.DO_NOTHING, db_column='email', unique=False)  # Field name made lowercase.
+    studentID = models.ForeignKey('accounts.User', models.DO_NOTHING, db_column='email', unique=False)  # Field name made lowercase.
     REQUIRED_FIELDS = ['rangeID', 'studentID']
 
     class Meta:
@@ -94,7 +92,7 @@ class RangeQuestions(models.Model):
         verbose_name_plural = 'RangeQuestions'
 
 class StudentQuestions(models.Model):
-    studentid = models.ForeignKey(User, models.DO_NOTHING, db_column='email', unique=False)
+    studentid = models.ForeignKey('accounts.User', models.DO_NOTHING, db_column='email', unique=False)
     rangeid = models.ForeignKey(Range, models.DO_NOTHING, db_column='rangeID',unique=False)
     questionid = models.ForeignKey(Questions, models.DO_NOTHING, db_column='questionid', unique=False)
     answergiven = models.CharField(db_column='answergiven', max_length=100)
