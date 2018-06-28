@@ -25,12 +25,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     last_login = models.DateTimeField(db_column='lastlogin', blank=True, null=True)
     is_superuser = models.BooleanField(db_column='admin', default=False)
     is_staff = models.BooleanField(db_column='teacher', default=False)
-<<<<<<< HEAD
     
-=======
-    #userclass = models.CharField(db)
-
->>>>>>> bdb8423ccba0c0ca03a04d379199759b9343dedf
     EMAIL_FIELD = 'email'
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email']

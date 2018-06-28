@@ -7,6 +7,7 @@ from .forms import *
 import datetime
 from django.utils import timezone
 from django.urls import reverse
+import requests
 
 
 class AttemptQuestionView(ListView, ModelFormMixin):
@@ -14,6 +15,28 @@ class AttemptQuestionView(ListView, ModelFormMixin):
     context_object_name = 'question'
     model = StudentQuestions
     form_class = AnswerForm
+
+    def dockerContainerStart(self):
+        data = {}
+        imagename = 'hello-world'
+        port = '8053'
+
+        payload = {"Image":imagename,
+                'ExposedPorts':''+port+'/tcp: { }',
+                }
+                   # 'Label':'{"question2" : label}'}
+        url = 'http://localhost:3125/containers/create'
+        response = requests.post(url, json=payload)
+        if response.status_code == 201:
+            test = True
+            data = response.json()
+        elif response.status_code == 400:
+            data['message'] = payload
+        elif response.status_code == 409:
+            data['message'] = 'conflict'
+        else:
+            data['message'] = 'server error'
+
 
     def checkattempted(self):
         attempted = False
@@ -66,6 +89,7 @@ class AttemptQuestionView(ListView, ModelFormMixin):
         #print("1 --> " + str(self.kwargs['questionid']))
         question = Questions.objects.filter(questionid = self.kwargs['questionid'])
         #print("2 --> "+ str(question))
+        self.dockerContainerStart()
         return question
 
     def get_context_data(self, **kwargs):
@@ -197,7 +221,7 @@ class QuestionsView(ListView):
         
         # get the current range id using rangename we got above
         currentrangeid = Range.objects.filter(rangeurl = rangeurl).values_list('rangeid')[0][0]
-        #print("rangeid ----->>>" + str(currentrangeid))
+        print("rangeid ----->>>" + str(currentrangeid))
 
         # now that i got the range id
         # what do i need?
@@ -209,19 +233,20 @@ class QuestionsView(ListView):
 
         # get the questionids of the questions in the range in a queryset
         questionidsinrange = RangeQuestions.objects.filter(rangeid = currentrangeid).values_list("questionid")
-        #print("firstquestionid ----->>>>>" + str(questionidsinrange))
+        print("firstquestionid ----->>>>>" + str(questionidsinrange))
 
         # create empty list for topics
         topiclist = []
 
         if len(questionidsinrange) != 0:
-            #print("number --->>>>> " + str(len(questionidsinrange)))
+            print("number --->>>>> " + str(len(questionidsinrange)))
             # get the queryset of the topicid of the first question
             topicidqueryset = Questions.objects.filter(questionid = (questionidsinrange[0][0]))
-            #print("firstquestiontopic ----->>>>>> " + str(topicidqueryset))
+            print("firstquestiontopic ----->>>>>> " + str(topicidqueryset))
 
             # loop so that i can get all the topic ids of the questions in the range
-            for x in range(1, len(questionidsinrange)):
+            for x in range(0, len(questionidsinrange)):
+                print("HI")
                 currenttopicidqueryset = Questions.objects.filter(questionid=(questionidsinrange[x][0]))
                 currenttopicidforlistinteger = Questions.objects.filter(questionid=(questionidsinrange[x][0])).values_list("topicid")[0][0]
 
@@ -232,7 +257,7 @@ class QuestionsView(ListView):
                     topicidqueryset = topicidqueryset | currenttopicidqueryset
 
                     # but i need the questiontopic queryset
-                    #print("TEST PLS WORK PLPSPLSPLS ----->>> " + str(topiclist[0]))
+                    print("TEST PLS WORK PLPSPLSPLS ----->>> " + str(topiclist[0]))
 
                     # get the first topicid for the loop
                     questiontopicqueryset = QuestionTopic.objects.filter(topicid = topiclist[0])
@@ -246,14 +271,14 @@ class QuestionsView(ListView):
                             questiontopicqueryset = questiontopicqueryset | qs
 
                 # test print
-                #print("TOPICS ------>>>>> " + str(questiontopicqueryset))
+                print("TOPICS ------>>>>> " + str(questiontopicqueryset))
         else:
             # probably won't be none but still
             questiontopicqueryset = None
 
         # return topics as a context YEBOI YAY ME
         context['topics'] = questiontopicqueryset
-        #print("OMG FML ___>>>" + str(context['topics']))
+        print("OMG FML ___>>>" + str(context['topics']))
 
         # gotta get the instance cause django
         rangeinstance = Range.objects.get(rangeurl = rangeurl)
@@ -340,7 +365,7 @@ class QuestionsView(ListView):
         else:
             # if there are no questions return None if not rip cause it shouldn't be none
             result = None
-        #print("FMLLLLLLLL " +str(result))
+        print("FMLLLLLLLL " +str(result))
         #final = result.order_by('rangequestions__questionorder')[1:]
         return result
 

@@ -7,7 +7,6 @@ from django.views import generic
 from accounts.models import *
 # Create your views here.
 
-<<<<<<< HEAD
 class LoginRedirect():
     def loginsuccess(request):
         if request.user.is_staff:
@@ -16,15 +15,6 @@ class LoginRedirect():
             return redirect("/admin")
         else:
             return redirect("/dashboard")
-=======
-def loginsuccess(request):
-    if request.user.is_staff:
-        return redirect("/teachers")    
-    elif request.user.is_superuser:
-        return redirect("/admin")
-    else:
-        return redirect("/dashboard")
->>>>>>> bdb8423ccba0c0ca03a04d379199759b9343dedf
 
 class RegisterView(ListView, ModelFormMixin):
     template_name = 'accounts/register.html'
