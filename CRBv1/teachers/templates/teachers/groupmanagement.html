@@ -15,7 +15,7 @@
 {% block content %}
     <section class="content">
         <div class="row">
-                <a class="btn btn-app" href="adduser" style="width: 150px;">
+                <a class="btn btn-app" href="addgroup" style="width: 150px;">
                         <i class="fa fa-plus"></i>
                         <b>Add New Group</b>
                 </a>
@@ -34,9 +34,6 @@
                                 Group Name
                             </th>
                             <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                Date Created
-                            </th>
-                            <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
                                 Group Leader
                             </th>
                             <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
@@ -47,15 +44,15 @@
                             </th>
                             <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
                                 Time Created
-                            </th>
-                            <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                Last Modified By
-                            </th>
                             <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
                                 Last Modified Date
                             </th>
                             <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
                                 Last Modified Time
+                            </th>
+                            </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                Last Modified By
                             </th>
                             <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
                                 Group Points
@@ -69,7 +66,6 @@
                     {% for group in groupobjects %}
                         <tr role="row">
                             <td>{{ group.groupname }}</td>
-                            <td>{{ group.datecreated }}</td>
                             <td>{{ group.groupleader }}</td>
                             <td>{{ group.createdby }}</td>
                             <td>{{ group.datecreated }}</td>
@@ -79,7 +75,7 @@
                             <td>{{ group.lastmodifiedby }}</td>
                             <td>{{ group.grouppoints }}</td>
                             <td style="text-align: center">
-                                <a style="width: 100px;" class="btn btn-block btn-primary" href="modifygroup/{{ group.groupname }}">Edit</a>
+                                <a style="width: 100px;" class="btn btn-block btn-primary" href="{{ group.groupname }}">View Group</a>
                                 <a style="width: 100px;" class="btn btn-block btn-primary" href="deletegroup/{{ group.groupname }}">Delete</a>
                             </td>
                         </tr>

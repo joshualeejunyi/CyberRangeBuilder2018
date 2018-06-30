@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic.list import ListView
 from django.views.generic.edit import ModelFormMixin
 from django.http import HttpResponse, HttpResponseRedirect
+from django.views import generic 
 from .models import *
 from .forms import *
 import datetime
@@ -16,26 +17,132 @@ class AttemptQuestionView(ListView, ModelFormMixin):
     model = StudentQuestions
     form_class = AnswerForm
 
-    def dockerContainerStart(self):
-        data = {}
-        imagename = 'hello-world'
-        port = '8053'
+    def checkPorts(self):
+        database = UnavailablePorts.objects.all().values_list('portnumber')
+        size = len(database)
+        #print(size)
 
-        payload = {"Image":imagename,
-                'ExposedPorts':''+port+'/tcp: { }',
-                }
-                   # 'Label':'{"question2" : label}'}
+        dockerserver = []
+        webserver = []
+
+        if size > 0:
+            # check if the database has any values
+            for x in range(0, size):
+                # if the port belongs to databaseserver, append to database list
+                if database[x][0] <= 8050:
+                    webserver.append(database[x])
+                # if the port belongs to dockerserver, append to dockerserver list
+                elif database[x][0] >=8052:
+                    dockerserver.append(database[x])
+        
+        else:
+            #return first available port for docker server
+            return 8052 
+
+        #print('FIRST --->')
+        #print(dockerserver, webserver)
+
+        webserversize = len(webserver)
+        dockerserversize = len(dockerserver)
+        #print('SECOND --->')
+        #print(webserversize, dockerserversize)
+        
+        if dockerserversize < 50:
+            if int(dockerserver[dockerserversize - 1][0]) == 8100:
+                for x in range(0, 48):
+                    if int(dockerserver[x + 1][0]) - int(dockerserver[x][0]) != 1:
+                        result = int(dockerserver[x][0]) + 1
+                        return result
+            else:
+                result = int(dockerserver[dockerserversize - 1][0]) + 1
+                return result
+        elif webserversize < 50:
+            if int(webserver[webserversize - 1][0]) == 8100:
+                for x in range(0, 48):
+                    if int(webserver[x + 1][0]) - int(webserver[x][0]) != 1:
+                        result = int(webserver[x][0]) + 1
+                        return result
+            else:
+                result = int(webserver[webserversize - 1][0]) + 1
+                return result
+        else:
+            return -1
+
+    def dockerContainerStart(self):
+        # okay so before we start a new docker container
+        # we need to check if there are any open containers
+        # we have stored it in the session
+        #print('HI ITS HERE')
+        if 'containeropen' in self.request.session:
+            containercheck = self.request.session['containeropen']
+        
+            if containercheck is True:
+                #print("HERES THE CONTAINERNAME")
+                oldcontainername = self.request.session['containername']
+                #print(oldcontainername)
+                endpoint = 'http://localhost:3125/containers/{conid}?force=True'
+                url = endpoint.format(conid=oldcontainername)
+                response = requests.delete(url)
+                #print(response.status_code)
+
+                # need to delete from db
+                deleteportsdb = UnavailablePorts.objects.filter(studentid = self.request.user)
+                deleteportsdb.delete()
+
+        data = {}
+        port = self.checkPorts()
+        serverip = ''
+        if port == -1:
+            return HttpResponse('SERVER BUSY. PLEASE TRY AGAIN LATER.')
+        # port 8051 is reserved for API
+        elif port >= 8052:
+            serverip = '192.168.100.42' #give dockerserver ip
+        elif port <= 8050:
+            serverip = '192.168.100.43'
+        #print(serverip)
+        port = str(port)
+        rangename = self.kwargs['rangeurl']
+        questionnumber = self.kwargs['questionid']
+        imagename = str(rangename + '.' + questionnumber)
+        image = 'siab_server'
+        payload = {
+            'Image':image,
+            'HostConfig': {
+                "PortBindings": {
+                "4200/tcp": [{
+                    "HostIp": "",
+                    "HostPort": port
+                    }
+                ]}
+            }
+        }
         url = 'http://localhost:3125/containers/create'
         response = requests.post(url, json=payload)
+        #print('HI IM HERE')
+        #print(response.status_code)
         if response.status_code == 201:
             test = True
             data = response.json()
+            containerid = data['Id']
+            self.request.session['containeropen'] = True
+            self.request.session['containername'] = containerid
+            starturl = 'http://localhost:3125/containers/%s/start' % containerid
+            response = requests.post(starturl)
+
+            portsdb = UnavailablePorts(portnumber = int(port), studentid = self.request.user)
+            portsdb.save()
+            # for testing
+            serverip = 'localhost'
+            finalsiaburl = serverip+':'+port
+            #print(finalsiaburl)
+            return finalsiaburl
+
         elif response.status_code == 400:
-            data['message'] = payload
+            return redirect('/error')
         elif response.status_code == 409:
-            data['message'] = 'conflict'
+            return redirect('/error')
         else:
-            data['message'] = 'server error'
+            return redirect('/error')
 
 
     def checkattempted(self):
@@ -70,6 +177,10 @@ class AttemptQuestionView(ListView, ModelFormMixin):
         return ListView.get(self, request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        if request.session.get('containeropen', True):
+            containerid = request.session.get('containername', {})
+            #print("CONTAINER")
+            #print(containerid)
         self.object = None
         self.form = self.get_form(self.form_class)
 
@@ -89,11 +200,12 @@ class AttemptQuestionView(ListView, ModelFormMixin):
         #print("1 --> " + str(self.kwargs['questionid']))
         question = Questions.objects.filter(questionid = self.kwargs['questionid'])
         #print("2 --> "+ str(question))
-        self.dockerContainerStart()
         return question
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        siab = self.dockerContainerStart()
+        context['siab'] = siab
         context['attempted'] = self.checkattempted()
         context['result'] = self.result()
         #print('ATTEMPTED ----->>>>> ' + str(context['attempted']))
@@ -102,14 +214,13 @@ class AttemptQuestionView(ListView, ModelFormMixin):
         #gotta check if it's mcq, and if it is, get options from database
         # first i gotta get the questionobject
         questiontype = Questions.objects.filter(questionid = self.kwargs['questionid']).values_list('questiontype')[0][0]
-        print("HI WADDUP --->" + str(questiontype))
+        #print("HI WADDUP --->" + str(questiontype))
 
         if questiontype == 'MCQ':
-            print("YAY")
+            #print("YAY")
             options = MCQOptions.objects.filter(questionid = self.kwargs['questionid'])
-            print("HERE ARE THE OPTIONS" + str(options))
+            #print("HERE ARE THE OPTIONS" + str(options))
             context['mcqoptions'] = options
-
 
         return context
 
@@ -196,12 +307,12 @@ class AttemptMCQQuestionView(ListView, ModelFormMixin):
         #gotta check if it's mcq, and if it is, get options from database
         # first i gotta get the questionobject
         questiontype = Questions.objects.filter(questionid = self.kwargs['questionid']).values_list('questiontype')[0][0]
-        print("HI WADDUP --->" + str(questiontype))
+        #print("HI WADDUP --->" + str(questiontype))
 
         if questiontype == 'MCQ':
-            print("YAY")
+            #print("YAY")
             options = MCQOptions.objects.filter(questionid = self.kwargs['questionid'])
-            print("HERE ARE THE OPTIONS" + str(options))
+            #print("HERE ARE THE OPTIONS" + str(options))
             context['mcqoptions'] = options
 
 
@@ -221,7 +332,7 @@ class QuestionsView(ListView):
         
         # get the current range id using rangename we got above
         currentrangeid = Range.objects.filter(rangeurl = rangeurl).values_list('rangeid')[0][0]
-        print("rangeid ----->>>" + str(currentrangeid))
+        #print("rangeid ----->>>" + str(currentrangeid))
 
         # now that i got the range id
         # what do i need?
@@ -233,20 +344,20 @@ class QuestionsView(ListView):
 
         # get the questionids of the questions in the range in a queryset
         questionidsinrange = RangeQuestions.objects.filter(rangeid = currentrangeid).values_list("questionid")
-        print("firstquestionid ----->>>>>" + str(questionidsinrange))
+        #print("firstquestionid ----->>>>>" + str(questionidsinrange))
 
         # create empty list for topics
         topiclist = []
 
         if len(questionidsinrange) != 0:
-            print("number --->>>>> " + str(len(questionidsinrange)))
+            #print("number --->>>>> " + str(len(questionidsinrange)))
             # get the queryset of the topicid of the first question
             topicidqueryset = Questions.objects.filter(questionid = (questionidsinrange[0][0]))
-            print("firstquestiontopic ----->>>>>> " + str(topicidqueryset))
+            #print("firstquestiontopic ----->>>>>> " + str(topicidqueryset))
 
             # loop so that i can get all the topic ids of the questions in the range
             for x in range(0, len(questionidsinrange)):
-                print("HI")
+                #print("HI")
                 currenttopicidqueryset = Questions.objects.filter(questionid=(questionidsinrange[x][0]))
                 currenttopicidforlistinteger = Questions.objects.filter(questionid=(questionidsinrange[x][0])).values_list("topicid")[0][0]
 
@@ -257,7 +368,7 @@ class QuestionsView(ListView):
                     topicidqueryset = topicidqueryset | currenttopicidqueryset
 
                     # but i need the questiontopic queryset
-                    print("TEST PLS WORK PLPSPLSPLS ----->>> " + str(topiclist[0]))
+                    #print("TEST PLS WORK PLPSPLSPLS ----->>> " + str(topiclist[0]))
 
                     # get the first topicid for the loop
                     questiontopicqueryset = QuestionTopic.objects.filter(topicid = topiclist[0])
@@ -271,14 +382,14 @@ class QuestionsView(ListView):
                             questiontopicqueryset = questiontopicqueryset | qs
 
                 # test print
-                print("TOPICS ------>>>>> " + str(questiontopicqueryset))
+                #print("TOPICS ------>>>>> " + str(questiontopicqueryset))
         else:
             # probably won't be none but still
             questiontopicqueryset = None
 
         # return topics as a context YEBOI YAY ME
         context['topics'] = questiontopicqueryset
-        print("OMG FML ___>>>" + str(context['topics']))
+        #print("OMG FML ___>>>" + str(context['topics']))
 
         # gotta get the instance cause django
         rangeinstance = Range.objects.get(rangeurl = rangeurl)
@@ -344,6 +455,22 @@ class QuestionsView(ListView):
     def get_queryset(self):
         self.rangeurl = get_object_or_404(Range, rangeurl=self.kwargs['rangeurl'], rangeactive=1)
 
+        if 'containeropen' in self.request.session:
+            containercheck = self.request.session['containeropen']
+        
+            if containercheck is True:
+                #print("HERES THE CONTAINERNAME")
+                oldcontainername = self.request.session['containername']
+                #print(oldcontainername)
+                endpoint = 'http://localhost:3125/containers/{conid}?force=True'
+                url = endpoint.format(conid=oldcontainername)
+                response = requests.delete(url)
+                #print(response.status_code)
+
+                # need to delete from db
+                deleteportsdb = UnavailablePorts.objects.filter(studentid = self.request.user)
+                deleteportsdb.delete()
+
         #print('RANGE -->' + str(self.kwargs['rangeurl']))
 
         # get the range id
@@ -365,7 +492,7 @@ class QuestionsView(ListView):
         else:
             # if there are no questions return None if not rip cause it shouldn't be none
             result = None
-        print("FMLLLLLLLL " +str(result))
+        #print("FMLLLLLLLL " +str(result))
         #final = result.order_by('rangequestions__questionorder')[1:]
         return result
 
@@ -374,7 +501,7 @@ class RangesView(ListView):
     context_object_name = 'rangeobject'
 
     def checkrangeexpiry(self, ranges):
-        print(ranges)
+        #print(ranges)
 
         for x in ranges:
             rangesqueryset = Range.objects.filter(rangeid = x[0]).values_list("datetimeend")[0][0]
@@ -386,7 +513,7 @@ class RangesView(ListView):
                     rangeobject = Range.objects.get(rangeid = x[0])
                     rangeobject.rangeactive = 0
                     rangeobject.save()
-                    print("ERM WHAT IS FALSE AGAIN" + str(rangeobject))
+                    #print("ERM WHAT IS FALSE AGAIN" + str(rangeobject))
 
 
     def get_context_data(self, **kwargs):
@@ -406,7 +533,7 @@ class RangesView(ListView):
                 #this for loop will concat all the assigned ranges together for our template to call
                 inactiveassignedranges= Range.objects.filter(rangeid=(currentranges[x][0]), rangeactive = 0)
                 inactiveranges = inactiveranges | inactiveassignedranges # if i didn't get the first object just now python will scold me
-            print('3 -->' + str(inactiveranges))
+            #print('3 -->' + str(inactiveranges))
         
         else:
             inactiveranges = None
@@ -415,6 +542,23 @@ class RangesView(ListView):
         return context
 
     def get_queryset(self):
+
+        if 'containeropen' in self.request.session:
+            containercheck = self.request.session['containeropen']
+        
+            if containercheck is True:
+                #print("HERES THE CONTAINERNAME")
+                oldcontainername = self.request.session['containername']
+                #print(oldcontainername)
+                endpoint = 'http://localhost:3125/containers/{conid}?force=True'
+                url = endpoint.format(conid=oldcontainername)
+                response = requests.delete(url)
+                #print(response.status_code)
+
+                # need to delete from db
+                deleteportsdb = UnavailablePorts.objects.filter(studentid = self.request.user)
+                deleteportsdb.delete()
+
         # get the email address of current user
         user = self.request.user
         # get the rangeIDs that are assigned to current user (in a queryset)
@@ -439,3 +583,6 @@ class RangesView(ListView):
         # return the whole damn thing
         #print(result[0])
         return activeranges
+
+class ErrorMessage(generic.TemplateView):
+    template_name = 'ranges/error.html'

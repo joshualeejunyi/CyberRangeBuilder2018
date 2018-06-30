@@ -57,7 +57,7 @@
                             <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
                                     Last Modified Time
                             </th>
-                            <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="2" colspan="1" aria-sort="asceding">
+                            <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
                                 Actions
                             </th>
                         </tr>
@@ -74,14 +74,38 @@
                             <td>{{ user.lastmodifiedby }}</td>
                             <td>{{ user.lastmodifieddate }}</td>
                             <td>{{ user.lastmodifiedtime }}</td>
-                            <td style="text-align: center">
-                                <a style="width: 100px;" class="btn btn-block btn-primary" href="modifyuser/{{ user.username }}">Edit</a>
-                                <a style="width: 100px;" class="btn btn-block btn-primary" href="deleteuser/{{ user.username }}">Delete</a>
+                            <td>
+                                <a class="btn btn-block btn-primary" href="modifyuser/{{ user.username }}">Edit</a>
+                                <a class="btn btn-block btn-primary" href="deleteuser/{{ user.username }}">Delete</a>
                             </td>
                         </tr>
                     {% endfor %}
                     </tbody>
                 </table>
+
+                {% if is_paginated %}
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                        <li><a href="?page={{ page_obj.previous_page_number }}">&laquo;</a></li>
+                    {% else %}
+                        <li class="disabled"><span>&laquo;</span></li>
+                    {% endif %}
+                        
+                    {% for i in paginator.page_range %}
+                        {% if page_obj.number == i %}
+                            <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+                        {% else %}
+                            <li><a href="?page={{ i }}">{{ i }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                        <li><a href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>
+                    {% else %}
+                        <li class="disabled"><span>&raquo;</span></li>
+                    {% endif %}
+                </ul>
+                {% endif %}
             </div>
         </div>
     </section>

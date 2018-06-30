@@ -8,10 +8,10 @@ ENV SIAB_VERSION=2.19 \
   SIAB_USERID=1000 \
   SIAB_GROUP=guest \
   SIAB_GROUPID=1000 \
-  SIAB_PASSWORD=redhat \
+  SIAB_PASSWORD=root \
   SIAB_SHELL=/bin/bash \
   SIAB_HOME=/home/guest \
-  SIAB_SUDO=false \
+  SIAB_SUDO=true \
   SIAB_SSL=false \
   SIAB_SERVICE=/:LOGIN \
   SIAB_PKGS=none \
@@ -28,15 +28,11 @@ RUN apt-get update && apt-get install -y openssl curl openssh-client sudo \
   ln -sf '/etc/shellinabox/options-enabled/01+Color Terminal.css' \
     /etc/shellinabox/options-enabled/01+Color-Terminal.css
 
-RUN groupadd -g 1001 docker
-RUN useradd test123 -g 1001 -p password -u 1001
-
 EXPOSE 4200
 
 VOLUME /etc/shellinabox /var/log/supervisor /home
 
-ADD ./entrypoint.sh /usr/local/sbin/
-RUN cut -d: -f1 /etc/passwd
+ADD assets/entrypoint.sh /usr/local/sbin/
 
 ENTRYPOINT ["entrypoint.sh"]
 CMD ["shellinabox"]

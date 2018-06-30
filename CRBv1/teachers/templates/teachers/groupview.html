@@ -1,0 +1,75 @@
+{% extends 'teachers/teacherbase.html' %}
+    <script src="../../plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="../../plugins/datatables/dataTables.bootstrap.min.js"></script>
+{% block content_header%}
+	<section class="content-header">
+		<h1>
+			{% block page_name %}{% endblock %}
+			<small>{% block page_description %}{% endblock %}</small>
+		</h1>
+		{% block breadcrumbs %}
+        {% endblock %}
+    </section>
+{% endblock%}
+
+{% block content %}
+    <section class="content">
+        <div class="row" style="width: 50%; margin: 0 auto" >
+                
+            <div class="box">
+                <div class="box-header with-border">
+                        <h3 class="box-title">Users in {{ groupname }} </h3>
+                        <div class="box-tools pull-right">
+                            <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                        </div>
+                </div>
+                <div class="box-body">
+                        <a class="btn btn-app" href="{{groupname}}/adduser" style="width: 300px;">
+                                <i class="fa fa-plus"></i>
+                                <b>Add Student in {{ groupname }}</b>
+                        </a>
+                    <table id="studentstable" class="table table-bordered table-hover dataTable" role="grid">
+                        <thead>
+                            <tr role="row">
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Name
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Email
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Username
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Class
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for user in usersobject %}
+                            <tr role="row">
+                                <td>{{ user.name }}</td>
+                                <td>{{ user.email }}</td>
+                                <td>{{ user.username }}</td>
+                                <td>{{ user.userclass }}</td>
+                                <td>
+                                    <a class="btn btn-block btn-primary" href="makeleader/{{ user.username }}" style="width: 50%">Make Group Leader</a>
+                                    <a class="btn btn-block btn-primary" href="remove/{{ user.username }}" style="width: 50%">Remove from Group</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+<script>
+    $(function () {
+       $("#studentstable").DataTable();
+    });
+</script>

@@ -28,6 +28,10 @@ class RangeStudents(models.Model):
     points = models.IntegerField(db_column='points', default=0)
     rangeID = models.ForeignKey(Range, models.DO_NOTHING, db_column='rangeID',unique=False)  # Field name made lowercase.
     studentID = models.ForeignKey('accounts.User', models.DO_NOTHING, db_column='email', unique=False)  # Field name made lowercase.
+    datecompleted = models.DateField(db_column='dateCompleted', null=True)
+    timecompleted = models.TimeField(db_column='timeCompleted', null=True)
+    lastaccess = models.DateTimeField(db_column='lastaccess', null=True)
+
     REQUIRED_FIELDS = ['rangeID', 'studentID']
 
     class Meta:
@@ -102,3 +106,11 @@ class StudentQuestions(models.Model):
     class Meta:
         db_table = 'StudentQuestions'
         verbose_name_plural = 'StudentQuestions'
+
+class UnavailablePorts(models.Model):
+    portnumber = models.IntegerField(db_column='portNumber', primary_key=True)
+    studentid = models.ForeignKey('accounts.User', models.DO_NOTHING, db_column='studentid')
+
+    class Meta:
+        db_table = 'UnavailablePorts'
+        verbose_name_plural = 'UnavailablePorts'

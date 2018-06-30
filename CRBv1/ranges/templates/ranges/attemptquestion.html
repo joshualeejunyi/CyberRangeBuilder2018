@@ -1,5 +1,4 @@
 {% extends 'dashboard/base.html' %}
-
 {% block content_header%}
 	<section class="content-header">
 		<h1>
@@ -50,7 +49,7 @@
 
 					<div class="float-right">
 						<div>
-							<iframe width="50%" height="700px" src="http://127.0.0.1:8053" frameborder="0"></iframe>
+							<iframe id ='siab' width="50%" height="700px" src="http://{{ siab }}" frameborder="0"></iframe>
 						</div>
 					</div>
 				</div>
@@ -90,7 +89,7 @@
 
 				<div class="float-right">
 					<div>
-						<iframe width="50%" height="700px" src="http://127.0.0.1:8053" frameborder="0"></iframe>
+						<iframe id ='siab' width="50%" height="700px" src="http://{{ siab }}" frameborder="0"></iframe>
 					</div>
 				</div>
 			</div>
@@ -111,7 +110,7 @@
 								</div>
 								<div class="box-body">
 									<p>{{question.text}}</p>
-									<div class="pull-right" style="width: 300px">
+									<div class="pull-right" style="width: 50%">
 									<form method="post">
 										Your Answer:
 										<input type="text" class="form-control" placeholder="{{answer.answergiven}}" disabled>
@@ -135,7 +134,7 @@
 						</div>
 						<div class="float-right">
 							<div>
-								<iframe width="50%" height="700px" src="http://127.0.0.1:8053" frameborder="0"></iframe>
+								<iframe id ='siab' width="50%" height="700px" src="http://{{ siab }}" frameborder="0"></iframe>
 							</div>
 					</div>
 					</div>
@@ -152,7 +151,7 @@
 								</div>
 								<div class="box-body">
 									<p>{{question.text}}</p>
-									<div class="pull-right" style="width: 300px">
+									<div class="pull-right" style="width: 5%">
 									<form method="post">
 										Your Answer:
 										<input type="text" class="form-control" placeholder="{{answer.answergiven}}" disabled>
@@ -176,7 +175,7 @@
 						</div>
 						<div class="float-right">
 							<div>
-								<iframe width="50%" height="700px" src="http://127.0.0.1:8053" frameborder="0"></iframe>
+								<iframe id ='siab' width="50%" height="700px" src="http://{{ siab }}" frameborder="0"></iframe>
 							</div>
 					</div>
 					</div>

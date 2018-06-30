@@ -1,0 +1,15 @@
+
+{% block content %}
+    <form method="get">
+        <input type="text" name="searchtxt">
+        <button type="submit">Search</button>
+    </form>
+
+    {% for result in results %}
+        <ul>
+            <li>{{ result.Name }}</li>
+            <li>{{ result.Id }}</li>
+            <li>{{ result.Status }}</li>
+        </ul>
+    {% endfor %}
+{% endblock %}

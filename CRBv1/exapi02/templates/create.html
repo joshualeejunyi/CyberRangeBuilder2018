@@ -1,0 +1,16 @@
+{% block content %}
+    <h2>Create Container</h2>
+    <form method="get">
+        Label: <input type="text" name="label"><br>
+        Image: <input type="text" name="image"><br>
+        Exposed Port: <input type="text" name="exposedport"><br>
+        <button type="submit">create</button>
+    </form>
+    {% if data %}
+        {% if test %}
+            <p>Container is created. ID is <strong>{{ data.Id }}</strong></p>
+        {% else %}
+            <p>{{ data.message }}</p>
+        {% endif %}
+    {% endif %}
+{% endblock %}

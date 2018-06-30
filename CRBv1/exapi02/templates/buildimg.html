@@ -1,0 +1,28 @@
+{% block content %}
+    <h2>Delete Container</h2>
+    {% if allresult %}
+        {% for result in allresult %}
+            <ul>
+                <li>{{ result.Id }}</li>
+                <li>{{ result.RepoTags }}</li>
+                <li>{{ result.Containers }}</li>
+            </ul>
+        {% endfor %}
+        <hr>
+    {% endif %}
+
+    <form method="get">
+        Image Label: <input type="text" name="label"/><br>
+        Image Tag: <input type="text" name="tag"/><br>
+        Docker file: <input type="text" name="dockerfile"/><br>
+        <button type="submit">Build Image</button>
+    </form>
+
+    {% if data %}
+        {% if data.message == 'success' %}
+            <p>Container is destroyed. ID is <strong>{{ data.Id }}</strong></p>
+        {% else %}
+            <p>{{ data.message }}</p>
+        {% endif %}
+    {% endif %}
+{% endblock %}

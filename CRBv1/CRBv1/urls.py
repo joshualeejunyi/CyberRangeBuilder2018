@@ -18,6 +18,8 @@ from django.urls import path, include
 from django.conf.urls import url
 from django.contrib.auth import views as authviews
 from accounts import views as account
+from exapi02 import views
+from ranges import views as rangesview
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -29,4 +31,6 @@ urlpatterns = [
     url(r'^dashboard/', include('dashboard.urls'), name='dashboard'),
     url(r'^ranges/', include('ranges.urls'), name='ranges'),
     url(r'^teachers/', include('teachers.urls'), name='teachers'),
+    path('createcon/', views.home),
+    path('error/', rangesview.ErrorMessage.as_view(), name='error')
 ]

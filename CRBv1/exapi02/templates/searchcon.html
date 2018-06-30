@@ -1,0 +1,23 @@
+{% block content %}
+    <h1>Search Containers by ID</h1>
+
+    <form method="get">
+        {{ form.as_p }}
+        <button type="submit">search</button>
+    </form>
+
+    {% if search_results %}
+        <hr>
+        <h3>{{ search_results.success }}</h3>
+        {% if search_results.success == null %}
+            {% for result in search_results %}
+                <ul>
+                    <li>{{ result.Id }}</li>
+                    <li>{{ result.Status }}</li>
+                </ul>
+            {% endfor %}
+        {% else %}
+            <p><em>{{ search_results.message }}</em></p>
+        {% endif %}
+    {% endif %}
+{% endblock %}
