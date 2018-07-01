@@ -50,7 +50,7 @@ CREATE TABLE `Group` (
 
 LOCK TABLES `Group` WRITE;
 /*!40000 ALTER TABLE `Group` DISABLE KEYS */;
-INSERT INTO `Group` VALUES (1,'bestgroup','teacher@email.com','2018-06-28','joshua@gmail.com',0,'teacher@email.com','2018-06-28','17:14:20.013263','17:14:20.013263'),(4,'spacecadets','teacher@email.com','2018-06-30',NULL,0,NULL,NULL,NULL,'22:31:28.864714'),(5,'newgrp','teacher@email.com','2018-06-30',NULL,0,NULL,NULL,NULL,'23:06:47.748867');
+INSERT INTO `Group` VALUES (1,'bestgroup','teacher@email.com','2018-06-28','useraccount@account.com',0,'teacher@email.com','2018-06-28','17:14:20.013263','17:14:20.013263'),(4,'spacecadets','teacher@email.com','2018-06-30',NULL,0,NULL,NULL,NULL,'22:31:28.864714');
 /*!40000 ALTER TABLE `Group` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -155,10 +155,10 @@ CREATE TABLE `Questions` (
   `questiontext` varchar(100) NOT NULL,
   `hint` varchar(100) NOT NULL,
   `marks` int(11) NOT NULL,
-  `categoryid` int(11) DEFAULT NULL,
+  `topicid` int(11) DEFAULT NULL,
   PRIMARY KEY (`questionID`),
-  KEY `Questions_categoryid_1b0fa6b9_fk_QuestionTopic_topicid` (`categoryid`),
-  CONSTRAINT `Questions_categoryid_1b0fa6b9_fk_QuestionTopic_topicid` FOREIGN KEY (`categoryid`) REFERENCES `QuestionTopic` (`topicid`)
+  KEY `Questions_topicid_f463268f_fk_QuestionTopic_topicid` (`topicid`),
+  CONSTRAINT `Questions_topicid_f463268f_fk_QuestionTopic_topicid` FOREIGN KEY (`topicid`) REFERENCES `QuestionTopic` (`topicid`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -292,7 +292,7 @@ CREATE TABLE `StudentGroup` (
   KEY `StudentGroup_studentID_0165a6d1_fk_User_email` (`studentID`),
   CONSTRAINT `StudentGroup_groupID_45126783_fk_Group_groupID` FOREIGN KEY (`groupID`) REFERENCES `Group` (`groupID`),
   CONSTRAINT `StudentGroup_studentID_0165a6d1_fk_User_email` FOREIGN KEY (`studentID`) REFERENCES `User` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -301,7 +301,7 @@ CREATE TABLE `StudentGroup` (
 
 LOCK TABLES `StudentGroup` WRITE;
 /*!40000 ALTER TABLE `StudentGroup` DISABLE KEYS */;
-INSERT INTO `StudentGroup` VALUES (1,1,'joshua@gmail.com');
+INSERT INTO `StudentGroup` VALUES (1,1,'joshua@gmail.com'),(6,4,'joshua@gmail.com'),(7,1,'test@test.com'),(8,1,'useraccount@account.com');
 /*!40000 ALTER TABLE `StudentGroup` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -362,6 +362,7 @@ CREATE TABLE `UnavailablePorts` (
 
 LOCK TABLES `UnavailablePorts` WRITE;
 /*!40000 ALTER TABLE `UnavailablePorts` DISABLE KEYS */;
+INSERT INTO `UnavailablePorts` VALUES (8052,'joshua@gmail.com');
 /*!40000 ALTER TABLE `UnavailablePorts` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -401,7 +402,7 @@ CREATE TABLE `User` (
 
 LOCK TABLES `User` WRITE;
 /*!40000 ALTER TABLE `User` DISABLE KEYS */;
-INSERT INTO `User` VALUES ('admin@admin.com','admin','pbkdf2_sha256$100000$xeZtvFVWjx8h$/syBeE1Kyhv/rOSDKkMxP30RLCksrYi/uoNY6l7iQ1Q=','',NULL,NULL,NULL,1,NULL,NULL,1,'Public',NULL),('joshua@gmail.com','joshualee','pbkdf2_sha256$100000$f9m76xdKzonO$cNhOjyU8BW6C4tNDFvngLQjbcDO8hlUc54v3lLFdr+E=','Joshua Lee','2018-06-27','2018-06-27','2018-06-30 16:53:48.302248',0,'teacher@email.com','teacher@email.com',0,'DISM/FT/2B/22','17:14:20.013263'),('teacher@email.com','teacher','pbkdf2_sha256$100000$R5cofRozx4JS$qnC9InHt16YMEUgm6e0c9oVx+HYJe3uHHwk5RuMF/Ys=','teacher','2018-06-27',NULL,'2018-06-30 16:49:56.054570',1,NULL,NULL,0,'',NULL),('useraccount@account.com','useraccount','pbkdf2_sha256$100000$yqzyywlNmwg2$CbiBPXFIbmDUrJHMhgA/bJR3GYCrW1DbY+s2DYI+ZuQ=','useraccount','2018-06-29','2018-06-30','2018-06-30 16:52:28.134881',0,'teacher@email.com','teacher@email.com',0,'DISM/FT/1B/21','19:06:35.678328');
+INSERT INTO `User` VALUES ('admin@admin.com','admin','pbkdf2_sha256$100000$xeZtvFVWjx8h$/syBeE1Kyhv/rOSDKkMxP30RLCksrYi/uoNY6l7iQ1Q=','',NULL,NULL,NULL,1,NULL,NULL,1,'Public',NULL),('joshua@gmail.com','joshualee','pbkdf2_sha256$100000$f9m76xdKzonO$cNhOjyU8BW6C4tNDFvngLQjbcDO8hlUc54v3lLFdr+E=','Joshua Lee','2018-06-27','2018-06-27','2018-07-01 13:47:54.867339',0,'teacher@email.com','teacher@email.com',0,'DISM/FT/2B/22','17:14:20.013263'),('teacher@email.com','teacher','pbkdf2_sha256$100000$R5cofRozx4JS$qnC9InHt16YMEUgm6e0c9oVx+HYJe3uHHwk5RuMF/Ys=','teacher','2018-06-27',NULL,'2018-07-01 14:26:47.421330',1,NULL,NULL,0,'',NULL),('test@test.com','test','pbkdf2_sha256$100000$yqzyywlNmwg2$CbiBPXFIbmDUrJHMhgA/bJR3GYCrW1DbY+s2DYI+ZuQ=','test','2018-07-01','2018-07-01','2018-06-30 16:52:28.134881',0,'teacher@email.com','teacher@email.com',0,'DISM/FT/1B/21','18:22:58.792222'),('useraccount@account.com','useraccount','pbkdf2_sha256$100000$yqzyywlNmwg2$CbiBPXFIbmDUrJHMhgA/bJR3GYCrW1DbY+s2DYI+ZuQ=','useraccount','2018-06-29','2018-07-01','2018-06-30 16:52:28.134881',0,'teacher@email.com','teacher@email.com',0,'DISM/FT/1B/21','18:22:58.792222');
 /*!40000 ALTER TABLE `User` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -637,7 +638,7 @@ CREATE TABLE `django_migrations` (
   `name` varchar(255) NOT NULL,
   `applied` datetime(6) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -646,7 +647,7 @@ CREATE TABLE `django_migrations` (
 
 LOCK TABLES `django_migrations` WRITE;
 /*!40000 ALTER TABLE `django_migrations` DISABLE KEYS */;
-INSERT INTO `django_migrations` VALUES (1,'contenttypes','0001_initial','2018-06-26 06:41:26.272743'),(2,'contenttypes','0002_remove_content_type_name','2018-06-26 06:41:26.351242'),(3,'auth','0001_initial','2018-06-26 06:41:26.532061'),(4,'auth','0002_alter_permission_name_max_length','2018-06-26 06:41:26.550658'),(5,'auth','0003_alter_user_email_max_length','2018-06-26 06:41:26.564077'),(6,'auth','0004_alter_user_username_opts','2018-06-26 06:41:26.583176'),(7,'auth','0005_alter_user_last_login_null','2018-06-26 06:41:26.598737'),(8,'auth','0006_require_contenttypes_0002','2018-06-26 06:41:26.609914'),(9,'auth','0007_alter_validators_add_error_messages','2018-06-26 06:41:26.624355'),(10,'auth','0008_alter_user_username_max_length','2018-06-26 06:41:26.645624'),(11,'auth','0009_alter_user_last_name_max_length','2018-06-26 06:41:26.659039'),(12,'accounts','0001_initial','2018-06-26 06:41:26.777059'),(13,'accounts','0002_auto_20180626_0640','2018-06-26 06:41:27.140527'),(14,'admin','0001_initial','2018-06-26 06:41:27.239556'),(15,'admin','0002_logentry_remove_auto_add','2018-06-26 06:41:27.260260'),(16,'ranges','0001_initial','2018-06-26 06:41:27.289395'),(17,'ranges','0002_auto_20180626_0640','2018-06-26 06:41:28.255808'),(18,'sessions','0001_initial','2018-06-26 06:41:28.285238'),(19,'accounts','0003_auto_20180626_1400','2018-06-26 14:00:46.338401'),(20,'accounts','0004_auto_20180626_1516','2018-06-26 15:16:35.115431'),(21,'accounts','0005_auto_20180627_0301','2018-06-27 03:01:42.654916'),(22,'accounts','0006_auto_20180627_0547','2018-06-27 05:47:37.012610'),(23,'accounts','0007_user_lastmodifiedtime','2018-06-27 08:37:16.543775'),(24,'accounts','0008_group_grouprange_studentgroup','2018-06-27 16:29:44.189283'),(25,'accounts','0009_auto_20180628_0043','2018-06-27 16:43:35.465692'),(26,'ranges','0003_unavailableports','2018-06-28 09:42:44.132268'),(27,'ranges','0004_auto_20180629_1534','2018-06-29 07:34:10.717254'),(28,'ranges','0005_rangequestions_lastaccess','2018-06-29 07:42:39.689750'),(29,'ranges','0006_auto_20180629_1543','2018-06-29 07:43:52.118209'),(30,'ranges','0007_auto_20180629_2135','2018-06-29 13:35:34.608924');
+INSERT INTO `django_migrations` VALUES (1,'contenttypes','0001_initial','2018-06-26 06:41:26.272743'),(2,'contenttypes','0002_remove_content_type_name','2018-06-26 06:41:26.351242'),(3,'auth','0001_initial','2018-06-26 06:41:26.532061'),(4,'auth','0002_alter_permission_name_max_length','2018-06-26 06:41:26.550658'),(5,'auth','0003_alter_user_email_max_length','2018-06-26 06:41:26.564077'),(6,'auth','0004_alter_user_username_opts','2018-06-26 06:41:26.583176'),(7,'auth','0005_alter_user_last_login_null','2018-06-26 06:41:26.598737'),(8,'auth','0006_require_contenttypes_0002','2018-06-26 06:41:26.609914'),(9,'auth','0007_alter_validators_add_error_messages','2018-06-26 06:41:26.624355'),(10,'auth','0008_alter_user_username_max_length','2018-06-26 06:41:26.645624'),(11,'auth','0009_alter_user_last_name_max_length','2018-06-26 06:41:26.659039'),(12,'accounts','0001_initial','2018-06-26 06:41:26.777059'),(13,'accounts','0002_auto_20180626_0640','2018-06-26 06:41:27.140527'),(14,'admin','0001_initial','2018-06-26 06:41:27.239556'),(15,'admin','0002_logentry_remove_auto_add','2018-06-26 06:41:27.260260'),(16,'ranges','0001_initial','2018-06-26 06:41:27.289395'),(17,'ranges','0002_auto_20180626_0640','2018-06-26 06:41:28.255808'),(18,'sessions','0001_initial','2018-06-26 06:41:28.285238'),(19,'accounts','0003_auto_20180626_1400','2018-06-26 14:00:46.338401'),(20,'accounts','0004_auto_20180626_1516','2018-06-26 15:16:35.115431'),(21,'accounts','0005_auto_20180627_0301','2018-06-27 03:01:42.654916'),(22,'accounts','0006_auto_20180627_0547','2018-06-27 05:47:37.012610'),(23,'accounts','0007_user_lastmodifiedtime','2018-06-27 08:37:16.543775'),(24,'accounts','0008_group_grouprange_studentgroup','2018-06-27 16:29:44.189283'),(25,'accounts','0009_auto_20180628_0043','2018-06-27 16:43:35.465692'),(26,'ranges','0003_unavailableports','2018-06-28 09:42:44.132268'),(27,'ranges','0004_auto_20180629_1534','2018-06-29 07:34:10.717254'),(28,'ranges','0005_rangequestions_lastaccess','2018-06-29 07:42:39.689750'),(29,'ranges','0006_auto_20180629_1543','2018-06-29 07:43:52.118209'),(30,'ranges','0007_auto_20180629_2135','2018-06-29 13:35:34.608924'),(31,'ranges','0008_auto_20180701_2144','2018-07-01 13:44:50.930852');
 /*!40000 ALTER TABLE `django_migrations` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -672,7 +673,7 @@ CREATE TABLE `django_session` (
 
 LOCK TABLES `django_session` WRITE;
 /*!40000 ALTER TABLE `django_session` DISABLE KEYS */;
-INSERT INTO `django_session` VALUES ('0gw6zluf70mij9xpb68ev7bp4j67ions','MDgyNDBiMTNhOWUyN2I2MjljMjQ2OTgxODA3ZjE3YTRmOTBhZDhiMTp7fQ==','2018-07-10 14:01:12.483905'),('7jqh69d5xohti53rhfe7jmspxi2k1r9w','MDgyNDBiMTNhOWUyN2I2MjljMjQ2OTgxODA3ZjE3YTRmOTBhZDhiMTp7fQ==','2018-07-10 14:07:09.773926');
+INSERT INTO `django_session` VALUES ('0gw6zluf70mij9xpb68ev7bp4j67ions','MDgyNDBiMTNhOWUyN2I2MjljMjQ2OTgxODA3ZjE3YTRmOTBhZDhiMTp7fQ==','2018-07-10 14:01:12.483905'),('6bzslmd4z1kt54ew34r57yrw6nytyp8k','OWFjY2NmZGUzNzkxYmQyMDdmMTM0NDk1YzEwZGE1MTQ2MzJjMWE1Njp7Il9hdXRoX3VzZXJfYmFja2VuZCI6ImRqYW5nby5jb250cmliLmF1dGguYmFja2VuZHMuTW9kZWxCYWNrZW5kIiwiX2F1dGhfdXNlcl9oYXNoIjoiNzE2NWU3ZTk0MDI0YWRmZWI2YjFlZjYxZDlkZTNiM2I1ZTlkNTFhMiIsIl9hdXRoX3VzZXJfaWQiOiJ0ZWFjaGVyQGVtYWlsLmNvbSJ9','2018-07-15 14:26:47.430905'),('7jqh69d5xohti53rhfe7jmspxi2k1r9w','MDgyNDBiMTNhOWUyN2I2MjljMjQ2OTgxODA3ZjE3YTRmOTBhZDhiMTp7fQ==','2018-07-10 14:07:09.773926');
 /*!40000 ALTER TABLE `django_session` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -685,4 +686,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-07-01  0:58:32
+-- Dump completed on 2018-07-02  0:03:39
