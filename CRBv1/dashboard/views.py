@@ -41,7 +41,7 @@ class DashboardView(generic.ListView):
             total_score = RangeStudents.objects.filter(studentID=user).values_list('points').latest('datecompleted')
             context['total_score'] = total_score[0]
 
-            top_points = RangeStudents.objects.filter(rangeID=2).order_by('-points').values_list('points', flat=True)
+            top_points = RangeStudents.objects.filter(rangeID=latestrange[0]).exclude(datecompleted=None).order_by('-points').values_list('points', flat=True)
             rankings = list(top_points)[:5]
             context['rankings'] = list(rankings)
 

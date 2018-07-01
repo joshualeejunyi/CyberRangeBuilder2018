@@ -67,7 +67,7 @@ class Questions(models.Model):
     text = models.CharField(db_column='questiontext', max_length=100)
     hint = models.CharField(db_column='hint', max_length=100)
     marks = models.IntegerField(db_column='marks')
-    topicid = models.ForeignKey(QuestionTopic, models.DO_NOTHING, db_column='categoryid', unique=False, related_name='catid', null=True)
+    topicid = models.ForeignKey(QuestionTopic, models.DO_NOTHING, db_column='topicid', unique=False, related_name='catid', null=True)
 
     class Meta:
         db_table = 'Questions'

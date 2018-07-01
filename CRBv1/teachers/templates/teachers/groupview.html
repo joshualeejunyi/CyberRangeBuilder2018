@@ -18,16 +18,67 @@
                 
             <div class="box">
                 <div class="box-header with-border">
-                        <h3 class="box-title">Users in {{ groupname }} </h3>
+                        <h3 class="box-title">{{ groupname }} </h3>
                         <div class="box-tools pull-right">
                             <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
                         </div>
                 </div>
                 <div class="box-body">
-                        <a class="btn btn-app" href="{{groupname}}/adduser" style="width: 300px;">
+                        
+                        <table id="grouptable" class="table table-bordered table-hover dataTable" role="grid">
+                            <thead>
+                                <tr role="row">
+                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                        Group Name
+                                    </th>
+                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                        Group Leader
+                                    </th>
+                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                        Created By
+                                    </th>
+                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                        Date Created
+                                    </th>
+                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                        Time Created
+                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                        Last Modified Date
+                                    </th>
+                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                        Last Modified Time
+                                    </th>
+                                    </th>
+                                        <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                        Last Modified By
+                                    </th>
+                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                        Group Points
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for group in groupobjects %}
+                                <tr role="row">
+                                    <td>{{ group.groupname }}</td>
+                                    <td>{{ group.groupleader }}</td>
+                                    <td>{{ group.createdby }}</td>
+                                    <td>{{ group.datecreated }}</td>
+                                    <td>{{ group.timecreated }}</td>
+                                    <td>{{ group.lastmodifieddate }}</td>
+                                    <td>{{ group.lastmodifiedtime }}</td>
+                                    <td>{{ group.lastmodifiedby }}</td>
+                                    <td>{{ group.grouppoints }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                        <div style="margin-bottom: 1%; margin-top: 1%;">
+                            <a class="btn btn-app" href="addusers" style="width: 300px;">
                                 <i class="fa fa-plus"></i>
                                 <b>Add Student in {{ groupname }}</b>
                         </a>
+                        </div>
                     <table id="studentstable" class="table table-bordered table-hover dataTable" role="grid">
                         <thead>
                             <tr role="row">
@@ -56,8 +107,8 @@
                                 <td>{{ user.username }}</td>
                                 <td>{{ user.userclass }}</td>
                                 <td>
-                                    <a class="btn btn-block btn-primary" href="makeleader/{{ user.username }}" style="width: 50%">Make Group Leader</a>
-                                    <a class="btn btn-block btn-primary" href="remove/{{ user.username }}" style="width: 50%">Remove from Group</a>
+                                    <a class="btn btn-block btn-primary" href="makeleader/{{ user.username }}" style="width: 60%">Make Group Leader</a>
+                                    <a class="btn btn-block btn-primary" href="remove/{{ user.username }}" style="width: 60%">Remove from Group</a>
                                 </td>
                             </tr>
                         {% endfor %}

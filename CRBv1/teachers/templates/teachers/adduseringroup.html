@@ -5,8 +5,8 @@
 {% block content_header%}
 	<section class="content-header">
 		<h1>
-			{% block page_name %}User Management{% endblock %}
-			<small>{% block page_description %}manage all users{% endblock %}</small>
+			{% block page_name %}{% endblock %}
+			<small>{% block page_description %}{% endblock %}</small>
 		</h1>
 		{% block breadcrumbs %}
         {% endblock %}
@@ -15,19 +15,27 @@
 
 {% block content %}
     <section class="content">
-        <div class="row">
-                <a class="btn btn-app" href="adduser" style="width: 150px;">
-                        <i class="fa fa-plus"></i>
-                        <b>Add New User</b>
-                </a>
+        <div class="row" style="width: 50%; margin: 0 auto" >
+                
             <div class="box">
                 <div class="box-header with-border">
-                        <h3 class="box-title">Users</h3>
+                        <h3 class="box-title">Add Students to {{ groupname }}</h3>
                         <div class="box-tools pull-right">
                             <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
                         </div>
                 </div>
                 <div class="box-body">
+                    {% if cart %}
+                    <div class="alert alert-success alert-dismissible">
+                        <h4><i class="icon fa fa-success"></i>You Are Adding:</h4>
+                        <ul>
+                        {% for users in cart %}
+                            <li><h4>{{users}}</h4></li>
+                        {% endfor %}
+                        </ul>
+                        <a href="commit" class="btn btn-primary btn-block btn-flat" style="width: 100px; margin-top: 0.2%;">Submit</a>
+                    </div>
+                    {% endif %}
                         <form method="get">
                                 <div class="well">
                                   <h4 style="margin-top: 0">Filter</h4>
@@ -67,7 +75,7 @@
                                   <button type="submit" class="btn btn-primary btn-flat">
                                     <span class="glyphicon glyphicon-search"></span> Search
                                   </button>
-                                  <a href="." class="btn btn-primary btn-block btn-flat" style="width: 100px; margin-top: 0.2%;">Reset Filters</a>
+                                  <a href="./addusers" class="btn btn-primary btn-block btn-flat" style="width: 100px; margin-top: 0.2%;">Reset Filters</a>
                                 </div>
                               </form>
                     <table id="studentstable" class="table table-bordered table-hover dataTable" role="grid">
@@ -86,21 +94,6 @@
                                 Class
                             </th>
                             <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                Date Joined
-                            </th>
-                            <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                Accepted By
-                            </th>
-                            <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                Last Modified By
-                            </th>
-                            <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                Last Modified Date
-                            </th>
-                            <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                    Last Modified Time
-                            </th>
-                            <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
                                 Actions
                             </th>
                         </tr>
@@ -112,14 +105,12 @@
                             <td>{{ user.email }}</td>
                             <td>{{ user.username }}</td>
                             <td>{{ user.userclass }}</td>
-                            <td>{{ user.datejoined }}</td>
-                            <td>{{ user.acceptedby }}</td>
-                            <td>{{ user.lastmodifiedby }}</td>
-                            <td>{{ user.lastmodifieddate }}</td>
-                            <td>{{ user.lastmodifiedtime }}</td>
                             <td>
-                                <a class="btn btn-block btn-primary" href="modifyuser/{{ user.username }}">Edit</a>
-                                <a class="btn btn-block btn-primary" href="deleteuser/{{ user.username }}">Delete</a>
+                                {% if user.name in cart %}
+                                <a class="btn btn-block btn-primary" href="removeusers/{{ user.username }}">Remove</a>
+                                {% else %}
+                                <a class="btn btn-block btn-primary" href="addusers/{{ user.username }}">Add</a>
+                                {% endif %}
                             </td>
                         </tr>
                     {% endfor %}
@@ -158,4 +149,4 @@
     $(function () {
        $("#studentstable").DataTable();
     });
-</script>
+</script>   
