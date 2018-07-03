@@ -1,0 +1,117 @@
+{% extends 'teachers/teacherbase.html' %}
+    <script src="../../plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="../../plugins/datatables/dataTables.bootstrap.min.js"></script>
+{% load widget_tweaks %}
+{% block content_header%}
+	<section class="content-header">
+		<h1>
+			{% block page_name %}Range Management{% endblock %}
+			<small>{% block page_description %}manage all ranges{% endblock %}</small>
+		</h1>
+		{% block breadcrumbs %}
+        {% endblock %}
+    </section>
+{% endblock%}
+
+{% block content %}
+    <section class="content">
+        <div class="row">
+            <a class="btn btn-app" href="createrange" style="width: 150px;">
+                    <i class="fa fa-plus"></i>
+                    <b>Add New Range</b>
+            </a>
+            
+            <div class="box">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Ranges</h3>
+                    <div class="box-tools pull-right">
+                        <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                    </div>
+                </div>
+                
+                <div class="box-body">
+                    <form method="get">
+                        <div class="well">
+                            <h4 style="margin-top: 0">Filter</h4>
+                            <div class="row">
+                                <div class="form-group col-sm-4 col-md-3">
+                                    <label for="rangename">Range Name:</label>
+                                    {% render_field filter.form.rangename class="form-control" %}
+                                </div>
+                                <div class="form-group col-sm-4 col-md-3">
+                                    <label for="datecreated">Date Created:</label>
+                                    {% render_field filter.form.datecreated class="form-control" %}
+                                </div>
+                                <div class="form-group col-sm-4 col-md-3">
+                                    <label for="datestarted">Date Started:</label>
+                                    {% render_field filter.form.datestart class="form-control" %}
+                                </div>
+                                <div class="form-group col-sm-4 col-md-3">
+                                    <label for="timestarted">Time Started:</label>
+                                    {% render_field filter.form.timestart class="form-control" %}
+                                </div>
+                                <div class="form-group col-sm-4 col-md-3">
+                                    <label for="maxscore">Max Score:</label>
+                                    {% render_field filter.form.maxscore class="form-control" %}
+                                </div>
+                                <div class="form-group col-sm-4 col-md-3">
+                                    <label for="rangecode">Range Code:</label>
+                                    {% render_field filter.form.rangecode class="form-control" %}
+                                </div>
+                            </div>
+                            <div>
+                                    <button type="submit" class="btn btn-primary btn-flat" style="width: 200px; display: inline-block">
+                                        <span class="glyphicon glyphicon-search"></span> Search
+                                    </button>
+                                    <a href="." class="btn btn-primary btn-block btn-flat" style="width: 200px;  display: inline-block;" >Reset Filters</a>
+                            </div>
+                        </div>
+                    </form>
+    <table class="table table-bordered table-hover dataTable">
+        <thead>
+            <tr role="row">
+                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                    Range Name
+                </th>
+                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                    Date Created
+                </th>
+                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                    Start Date
+                </th>
+                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                    End Date
+                </th>
+                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                    Max Score
+                </th>
+                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                    Last Modified Date
+                </th>
+                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                    Range Code
+                </th>
+                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                    Actions
+                </th>
+            </tr>
+        </thead>
+        {% for e in ranges %}
+            <tr role="row">
+                <td> {{e.rangename }}</td>
+                <td> {{e.datecreated }}</td>
+                <td> {{e.datestart }}</td>
+                <td> {{e.dateend }}</td>
+                <td> {{e.maxscore }}</td>
+                <td> {{e.lastmodifiedby }}</td>
+                <td> {{e.rangecode }}</td>
+                <td style="text-align: center">
+                    <a style="width: 100px;" class="btn btn-block btn-primary" href="{{ e.rangename }}">View Range</a>
+                    <a style="width: 100px;" class="btn btn-block btn-primary" href="deleterange/{{ e.rangeid }}">Archive</a>
+                </td>
+            </tr>
+
+        {% endfor %}
+    </table>
+
+{% endblock %}

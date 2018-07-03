@@ -2,19 +2,22 @@ from django.db import models
 # Create your models here.
 
 class Range(models.Model):
-    rangeid = models.AutoField(db_column='rangeID', primary_key=True)  # Field name made lowercase.
-    rangename = models.CharField(db_column='rangeName', max_length=45)  # Field name made lowercase.
+    rangeid = models.AutoField(db_column='rangeID', primary_key=True)
+    rangename = models.CharField(db_column='rangeName', max_length=45)
     rangeactive = models.BooleanField(db_column='rangeActive', default=False)
-    datetimecreated = models.DateTimeField(db_column='dateTimeCreated', blank=True, null=True)  # Field name made lowercase.
-    datetimestart = models.DateTimeField(db_column='dateTimeStart', blank=True, null=True)  # Field name made lowercase.
-    datetimeend = models.DateTimeField(db_column='dateTimeEnd', blank=True, null=True)  # Field name made lowercase.
-    maxscore = models.IntegerField(db_column='maxScore', blank=True, null=True)  # Field name made lowercase.
-    lastmodifieddate = models.DateField(db_column='lastModifiedDate', blank=True, null=True)  # Field name made lowercase.
-    rangecode = models.IntegerField(db_column='rangeCode', blank=True, null=True, unique=True)  # Field name made lowercase.
-    username = models.ForeignKey('accounts.User', models.DO_NOTHING, db_column='lastModifiedBy', blank=True, null=True, related_name='LMBR')  # Field name made lowercase.
-    username = models.ForeignKey('accounts.User', models.DO_NOTHING, db_column='createdby', related_name='CBR', default='super')  # Field name made lowercase.
+    datecreated = models.DateField(db_column='dateCreated', blank=True, null=True)
+    datestart = models.DateField(db_column='dateStart', blank=True, null=True)
+    timestart = models.TimeField(db_column='timeStart', blank=True, null=True)
+    dateend = models.DateTimeField(db_column='dateEnd', blank=True, null=True)
+    timeend = models.TimeField(db_column='timeEnd', blank=True, null=True)
+    maxscore = models.IntegerField(db_column='maxScore', blank=True, null=True)
+    lastmodifieddate = models.DateField(db_column='lastModifiedDate', blank=True, null=True)
+    rangecode = models.IntegerField(db_column='rangeCode', blank=True, null=True, unique=True)
+    lastmodifiedby = models.ForeignKey('accounts.User', models.DO_NOTHING, db_column='lastModifiedBy', blank=True, null=True, related_name='LMBR')
+    createdbyusername = models.ForeignKey('accounts.User', models.DO_NOTHING, db_column='createdby', related_name='CBR', default='super')
     rangeurl = models.CharField(db_column='rangeURL', max_length=50, null=True)
     studentsinrange = models.IntegerField(db_column='studentsInRange', null=True)
+    isdisabled = models.BooleanField(db_column='isDisabled', default=False)
 
     class Meta:
         db_table = 'Range'
@@ -26,8 +29,8 @@ class RangeStudents(models.Model):
     teamID = models.CharField(db_column='teamID', max_length=45, null=True)
     teamName = models.CharField(db_column='teamName', max_length=45, null=True)
     points = models.IntegerField(db_column='points', default=0)
-    rangeID = models.ForeignKey(Range, models.DO_NOTHING, db_column='rangeID',unique=False)  # Field name made lowercase.
-    studentID = models.ForeignKey('accounts.User', models.DO_NOTHING, db_column='email', unique=False)  # Field name made lowercase.
+    rangeID = models.ForeignKey(Range, models.DO_NOTHING, db_column='rangeID',unique=False)
+    studentID = models.ForeignKey('accounts.User', models.DO_NOTHING, db_column='email', unique=False)
     datecompleted = models.DateField(db_column='dateCompleted', null=True)
     timecompleted = models.TimeField(db_column='timeCompleted', null=True)
     lastaccess = models.DateTimeField(db_column='lastaccess', null=True)
@@ -86,7 +89,6 @@ class MCQOptions(models.Model):
 
 class RangeQuestions(models.Model):
     rangequestionsid = models.AutoField(db_column='id', primary_key=True)
-    #questionorder = models.IntegerField(db_column='order', primary_key=False)
     rangeid = models.ForeignKey(Range, models.DO_NOTHING, db_column='rangeID', unique=False)
     questionid = models.ForeignKey(Questions, models.DO_NOTHING, db_column='questionID', unique=False)
     answer = models.CharField(db_column='answer', max_length=100, null=True)

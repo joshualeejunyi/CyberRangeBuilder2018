@@ -1,5 +1,4 @@
 {% extends 'adminlte/base.html' %}
-
 {% block title_outer %}
 	<title>
 		{%block title %}
@@ -10,4 +9,8 @@
 
 {% block nav_sidebar %}
     {% include 'teachers/teachersidebar.html' %}
+{% endblock %}
+
+{% block nav_header %}
+    {% include 'teachers/teachersheader.html' %}
 {% endblock %}

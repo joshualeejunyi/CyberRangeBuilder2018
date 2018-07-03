@@ -1,4 +1,5 @@
 from accounts.models import *
+from ranges.models import *
 import django_filters
 
 class StudentFilter(django_filters.FilterSet):
@@ -14,3 +15,14 @@ class GroupFilter(django_filters.FilterSet):
     class Meta:
         model = Group
         fields = ['groupname']
+
+class RangeFilter(django_filters.FilterSet):
+
+    class Meta:
+        model = Range
+        fields = ['rangename', 'datecreated', 'datestart', 'timestart', 'dateend', 'timeend', 'maxscore', 'rangecode']
+
+class QuestionFilter(django_filters.FilterSet):
+    class Meta:
+        model = Questions
+        fields = ['title', 'questiontype', 'topicid__topicname']

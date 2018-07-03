@@ -1,0 +1,96 @@
+{% extends 'teachers/teacherbase.html' %}
+{% block content %}
+</script>
+<div class="row">
+    <div class="col-md-10 col-md-offset-1">
+        <div class="col-md-6 col-md-offset-3">
+            <div class="register-box-body">
+                    <p class="login-box-msg" style="font-size: 18px;">
+                            Create Question Number {{ questionnumber }} For Range : {{ rangename }}
+                            <br>
+                            Current Score for Range is : {{ currentmarks }} points
+                    </p>
+<form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="done" value = "done">
+    <input type="hidden" name="rangeid" value= {{ rangeid }} >
+    <input type="hidden" name="currentmarks" value = {{ currentmarks }}>
+    <div style="margin: 0 auto">
+        <button type="submit" class="btn btn-success btn-block btn-flat" style="margin: 0 auto; font-size: 18px;">Complete Range Creation</button>
+    </div>
+</form>
+<br><br>
+<form method="post">
+    {% csrf_token %}
+    <div class="form-group has-feedback">
+        <label for="questiontype">Question Type:</label>
+        <select name="questiontype" class="form-control" value="">
+            <option value="" disabled selected hidden>Choose A Question Type...</option>
+            {% for x in questiontypechoices %}	
+                <option value='{{ x.0 }}'>{{ x.1 }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-group has-feedback">
+        <label for="topicname">Topic of Question:</label>
+        <select name="topicname" id = "ourtopic" class="form-control" value="">
+            <option value="" disabled selected hidden>Choose A Topic...</option>
+            {% for e in questiontopic %}	
+                <option value='{{ e.0 }}'>{{ e.0 }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-group has-feedback">
+            <label for="title">Title:</label>
+            <input type="text" name="title" class="form-control">
+    </div>
+
+    <div class="form-group has-feedback">
+        <label for="text">Question Text:</label>
+        <input type="text" name="text" class="form-control">
+    </div>
+
+    <div class="form-group has-feedback">
+        <label for="hint">Hint:</label>
+        <input type="text" name="hint" class="form-control">
+    </div>
+ 
+    <div class="form-group has-feedback">
+        <label for="marks">Marks:</label>
+        <input type="number" name="marks" class="form-control">
+    </div>    
+
+    <div class="form-group has-feedback">
+        <label for="answer">Answer:</label>
+        <input type="text" name="answer" class="form-control">
+    </div>    
+
+    <input type="hidden" name="rangename" value = {{ rangename }} >
+    <input type="hidden" name="questionnumber" value = {{ questionnumber }} >
+    <input type="hidden" name="rangeid" value = {{ rangeid }} >
+    <input type="hidden" name="currentmarks" value = {{ currentmarks }}>
+    <button type="submit" class="btn btn-primary btn-block btn-flat pull-right" style="width: 100px">Submit</button>
+</form>
+
+<br><br><br>
+<form method = "post">
+    {% csrf_token %}
+    <div class="well">
+    <div class="form-group has-feedback">
+        <label for="newtopicname">New Topic:</label>
+        <input type="text" name="newtopicname" class="form-control">
+        <input type="hidden" name="rangename" value = {{ rangename }} >
+        <input type="hidden" name="questionnumber" value = {{ questionnumber }} >
+        <input type="hidden" name="rangeid" value= {{ rangeid }} >
+        <input type="hidden" name="currentmarks" value = {{ currentmarks }}>
+        <div>
+            <button type="submit" class="btn btn-primary btn-block btn-flat pull-right" style="width: 100px; margin-top: 2%;">New Topic</button>
+        </div>
+    </div>
+    </div>
+</form>
+<br><br><br>
+{% endblock %}
+

@@ -1,0 +1,27 @@
+<!--purpose of this page is to allow Teachers to view all the questions in the range and if they wan edit they need press the button at the side.-->
+<!--If they wan to edit the range then the displayed attributes of the range should be in a form template referencing to RangeForm-->
+
+{% extends 'teachers/teacherbase.html' %}
+
+{% block content %}
+<table>
+    <th> Question Title </th>
+    <th> Question Text </th>
+    <th> Answer </th>
+    <th> Hint </th>
+    <th> Marks </th>
+    <th> Actions </th>
+    {% for question in questions %}
+    <tr role="row">
+        <form action="" method="post">
+            <td>{{ question.questiontitle }}</td>
+            <td>{{ question.questiontext }}</td>
+            <td>{{ question.answer }}</td>
+            <td>{{ question.hint }}</td>
+            <td>{{ question.marks }}</td>
+            <td><button type="submit" class="btn btn-primary btn-block btn-flat pull-right" style="width: 100px">Modify</button></td>
+        </form>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

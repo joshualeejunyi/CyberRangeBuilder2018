@@ -1,0 +1,164 @@
+{% extends 'teachers/teacherbase.html' %}
+{% load widget_tweaks %}
+{% block content %}
+    <section class="content">
+        <div class="row" style="width: 70%; margin: 0 auto" >
+                
+            <div class="box">
+                <div class="box-header with-border">
+                        <h3 class="box-title">{{ rangename }} </h3>
+                        <div class="box-tools pull-right">
+                            <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                        </div>
+                </div>
+                
+                <div class="box-body">
+                    <div class="box">
+                        <table class="table table-bordered table-hover dataTable">
+                            <thead>
+                                <tr role="row">
+                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                        Range Name
+                                    </th>
+                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                        Date Created
+                                    </th>
+                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                        Start Date
+                                    </th>
+                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                        End Date
+                                    </th>
+                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                        Max Score
+                                    </th>
+                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                        Last Modified Date
+                                    </th>
+                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                        Range Code
+                                    </th>
+                                </tr>
+                            </thead>
+                            {% for e in range %}
+                                <tr role="row">
+                                    <td> {{e.rangename }}</td>
+                                    <td> {{e.datecreated }}</td>
+                                    <td> {{e.datestart }}</td>
+                                    <td> {{e.dateend }}</td>
+                                    <td> {{e.maxscore }}</td>
+                                    <td> {{e.lastmodifiedby }}</td>
+                                    <td> {{e.rangecode }}</td>
+                                </tr>
+                    
+                            {% endfor %}
+                        </table>
+                    </div>
+                    <div style="margin-bottom: 1%; margin-top: 1%; text-align: center;">
+                        <a class="btn btn-app" href="addusers" style="width: 200px; height: 70px; font-size: 1em;">
+                            <i class="fa fa-plus"></i>
+                            <b>Add Questions in {{ rangename }}</b>
+                        </a>
+                        <a class="btn btn-app" href="edit" style="width: 200px; height: 70px; font-size: 1em;">
+                            <i class="fa fa-plus"></i>
+                            <b>Edit {{ rangename }}</b>
+                        </a>
+                        <a class="btn btn-app" href="disable" style="width: 200px; height: 70px; font-size: 1em;">
+                            <i class="fa fa-plus"></i>
+                            <b>Make {{ rangename }} inactive</b>
+                        </a>
+                    </div>
+
+                    <form method="get">
+                        <div class="well">
+                            <h4 style="margin-top: 0">Filter</h4>
+                            <div class="row">
+                                <div class="form-group col-sm-4 col-md-3">
+                                    <label for="title">Question Title:</label>
+                                    {% render_field filter.form.title class="form-control" %}
+                                </div>
+                                <div class="form-group col-sm-4 col-md-3">
+                                    <label for="questiontype">Question Type:</label>
+                                    {% render_field filter.form.questiontype class="form-control" %}
+                                </div>
+                                <div class="form-group col-sm-4 col-md-3">
+                                    <label for="topicid">Topic:</label>
+                                    {% render_field filter.form.topicid__topicname class="form-control" %}
+                                </div>
+                                    <button type="submit" class="btn btn-primary btn-flat" style="width: 200px; display: inline-block">
+                                        <span class="glyphicon glyphicon-search"></span> Search
+                                    </button>
+                                    <a href="{{ rangename }}" class="btn btn-primary btn-block btn-flat" style="width: 200px;  display: inline-block;" >Reset Filters</a>
+                            </div>
+                        </div>
+                    </form>
+                    <table class="table table-bordered table-hover dataTable">
+                        <thead>
+                            <tr role="row">
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Question Type
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Question Topic
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Question Title
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Question Text
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Question Hint
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Answer
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Question Marks
+                                </th>
+                        </thead>
+                        {% for x in result %}
+                            <tr role="row">
+                                <td> 
+                                    {% if x.questiontype == 'FL' %}
+                                        Flag
+                                    {% elif x.questiontype == 'MCQ' %}
+                                        MCQ
+                                    {% elif x.questiontype == 'SA' %}
+                                        Short Answer
+                                    {% elif x.questiontype == 'OE' %}
+                                        Open Ended
+                                    {% elif x.questiontype == 'TF' %}
+                                        True/False
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% for m in topics %}
+                                        {% if m.topicname == x.topicid.topicname %}
+                                        {{ m.topicname }}
+                                        {% endif %}
+                                    {% endfor %}
+                                </td>
+                                <td> {{x.title }} </td>
+                                <td> {{x.text }} </td>
+                                <td> {{x.hint }} </td>
+                                <td>
+                                    {% for y in answer %}   
+                                        {% if y.questionid.questionid == x.questionid %}
+                                            {{ y.answer }}
+                                        {% endif %}
+                                    {% endfor %}
+                                </td>
+                                <td> {{x.marks }} </td>
+                                <td style="text-align: center">
+                                    <a style="width: 100px;" class="btn btn-block btn-primary" href="{{ rangename }}/edit/{{ x.questionid }}">Edit</a>
+                                    <a style="width: 100px;" class="btn btn-block btn-primary" href="{{ rangename }}/delete/{{ x.questionid }}">Delete</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

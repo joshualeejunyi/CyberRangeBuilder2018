@@ -18,7 +18,6 @@ from django.urls import path, include
 from django.conf.urls import url
 from django.contrib.auth import views as authviews
 from accounts import views as account
-from exapi02 import views
 from ranges import views as rangesview
 
 urlpatterns = [
@@ -27,10 +26,9 @@ urlpatterns = [
     url(r'^$', authviews.login, {'template_name': 'accounts/login.html'}, name='login'),
     url(r'loginsuccess/$', account.LoginRedirect.loginsuccess, name='loginredirect'),
     url(r'^logout/$', authviews.logout, {'next_page': '/login'}, name='logout'),
+    url(r'register/$', account.RegisterView.as_view(), name='register'),
     url(r'^register/success/$', account.RegistrationSucess.as_view(), name='registrationsuccess'),
     url(r'^dashboard/', include('dashboard.urls'), name='dashboard'),
     url(r'^ranges/', include('ranges.urls'), name='ranges'),
     url(r'^teachers/', include('teachers.urls'), name='teachers'),
-    path('createcon/', views.home),
-    path('error/', rangesview.ErrorMessage.as_view(), name='error')
 ]

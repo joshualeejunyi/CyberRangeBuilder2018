@@ -1,0 +1,20 @@
+{% extends 'adminlte/lib/_main_header.html' %}
+{% block logo %}
+<a href="{% block logo_href %}/teachers{% endblock %}" class="logo">
+	<span class="logo-mini"><b>CR</b></span>
+	<clan class="logo-lg">cyber<b>RANGE</b></clan>
+</a>
+{% endblock %}
+
+{% block menu_footer %}
+<li class="user-footer">
+	<div class="pull-left">
+		<a href="{%block change_password_url %}/changepassword{% endblock %}" class="btn btn-default btn-flat">Change Password</a>
+	</div>
+
+	<div class="pull-right">
+		<a href="{%block logout_url %}/logout{% endblock %}" class="btn btn-default btn-flat">Sign out</a>
+	</div>
+</li>
+{% endblock %}
+
