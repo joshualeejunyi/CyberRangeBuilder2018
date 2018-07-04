@@ -31,16 +31,19 @@
 										Range Name
 									</th>
 									<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-										Date/Time Start
+										Date Start
+									</th>
+									<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">	
+										Time Start
 									</th>
 									<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-										Date/Time End
+										Date End
+									</th>
+									<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+										Time End
 									</th>
 									<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
 										Current Score
-									</th>
-									<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-										Ranking
 									</th>
 									<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
 										Actions
@@ -54,10 +57,11 @@
 										{% if user.rangeID.rangeid is range.rangeid %}
 											<tr role="row">
 												<td>{{ range.rangename }}</td>
-												<td>{{ range.datetimestart }}</td>
-												<td>{{ range.datetimeend  }}</td>
+												<td>{{ range.datestart }}</td>
+												<td>{{ range.timestart }}</td>
+												<td>{{ range.dateend }}</td>
+												<td>{{ range.timeend  }}</td>
 												<td>{{ user.points }}</td>
-												<td>RANK/RANK</td>
 												<td><a style="width: 100px;" class="btn btn-block btn-primary" href="{{ range.rangeurl }}/play">Play Range</a></td>
 											</tr>
 										{% endif %}
@@ -92,16 +96,19 @@
 										Range Name
 									</th>
 									<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-										Date/Time Start
+										Date Start
+									</th>
+									<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">	
+										Time Start
 									</th>
 									<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-										Date/Time End
+										Date End
+									</th>
+									<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+										Time End
 									</th>
 									<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
 										Final Score
-									</th>
-									<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-										Final Ranking
 									</th>
 								</tr>
 							</thead>
@@ -112,10 +119,11 @@
 										{% if user.rangeID.rangeid is range.rangeid %}
 											<tr role="row">
 												<td>{{ range.rangename }}</td>
-												<td>{{ range.datetimestart }}</td>
-												<td>{{ range.datetimeend  }}</td>
+												<td>{{ range.datestart }}</td>
+												<td>{{ range.timestart }}</td>
+												<td>{{ range.dateend }}</td>
+												<td>{{ range.timeend  }}</td>
 												<td>{{ user.points }}</td>
-												<td>RANK/RANK</td>
 											</tr>
 										{% endif %}
 									{% endif %}

@@ -8,7 +8,7 @@ class Range(models.Model):
     datecreated = models.DateField(db_column='dateCreated', blank=True, null=True)
     datestart = models.DateField(db_column='dateStart', blank=True, null=True)
     timestart = models.TimeField(db_column='timeStart', blank=True, null=True)
-    dateend = models.DateTimeField(db_column='dateEnd', blank=True, null=True)
+    dateend = models.DateField(db_column='dateEnd', blank=True, null=True)
     timeend = models.TimeField(db_column='timeEnd', blank=True, null=True)
     maxscore = models.IntegerField(db_column='maxScore', blank=True, null=True)
     lastmodifieddate = models.DateField(db_column='lastModifiedDate', blank=True, null=True)
@@ -66,9 +66,9 @@ class Questions(models.Model):
             (TRUEFALSE, 'True/False')
         )
     questiontype = models.CharField(db_column='questiontype', choices = QUESTION_TYPE_CHOICES, default='FL', max_length=100)
-    title = models.CharField(db_column='questiontitle', max_length=100, null=True)
-    text = models.CharField(db_column='questiontext', max_length=100)
-    hint = models.CharField(db_column='hint', max_length=100)
+    title = models.CharField(db_column='questiontitle', max_length=255, null=True)
+    text = models.TextField(db_column='questiontext')
+    hint = models.TextField(db_column='hint')
     marks = models.IntegerField(db_column='marks')
     topicid = models.ForeignKey(QuestionTopic, models.DO_NOTHING, db_column='topicid', unique=False, related_name='catid', null=True)
 
@@ -91,7 +91,7 @@ class RangeQuestions(models.Model):
     rangequestionsid = models.AutoField(db_column='id', primary_key=True)
     rangeid = models.ForeignKey(Range, models.DO_NOTHING, db_column='rangeID', unique=False)
     questionid = models.ForeignKey(Questions, models.DO_NOTHING, db_column='questionID', unique=False)
-    answer = models.CharField(db_column='answer', max_length=100, null=True)
+    answer = models.CharField(db_column='answer', max_length=255, null=True)
 
     class Meta:
         db_table = 'RangeQuestions'
@@ -112,6 +112,8 @@ class StudentQuestions(models.Model):
 class UnavailablePorts(models.Model):
     portnumber = models.IntegerField(db_column='portNumber', primary_key=True)
     studentid = models.ForeignKey('accounts.User', models.DO_NOTHING, db_column='studentid')
+    containername = models.TextField(db_column='containerName', null=True)
+    datetimecreated = models.DateTimeField(db_column='dateTimeCreated', null=True)
 
     class Meta:
         db_table = 'UnavailablePorts'

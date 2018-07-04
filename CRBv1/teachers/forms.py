@@ -40,13 +40,6 @@ class RangeForm(ModelForm):
         self.request = kwargs.pop("request")
         super(RangeForm, self).__init__(*args, **kwargs)
 
-    # rangename = forms.CharField(label = "Range Name", required = True, widget=forms.TextInput(attrs={'required':'true'}))
-    # rangeurl = forms.CharField(label = "Range URL", required = True)
-    # datestart = forms.DateField(label = "Date Start", required=False, widget=forms.SelectDateWidget)
-    # timestart = forms.TimeField(label = "Time Start", required=False)
-    # dateend = forms.DateField(label = "Date End", required=False, widget=forms.SelectDateWidget)
-    # timeend = forms.TimeField(label = "Time End", required=False)
-
     def save(self, commit=True):
         createdrange = super().save(commit=False)
         createdrange.datecreated = datetime.date.today()

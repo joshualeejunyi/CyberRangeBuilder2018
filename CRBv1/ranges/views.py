@@ -29,15 +29,15 @@ class AttemptQuestionView(ListView, ModelFormMixin):
             # check if the database has any values
             for x in range(0, size):
                 # if the port belongs to databaseserver, append to database list
-                if database[x][0] <= 8050:
+                if database[x][0] <= 9050:
                     webserver.append(database[x])
                 # if the port belongs to dockerserver, append to dockerserver list
-                elif database[x][0] >=8052:
+                elif database[x][0] >=9052:
                     dockerserver.append(database[x])
         
         else:
             #return first available port for docker server
-            return 8052 
+            return 9052 
 
         #print('FIRST --->')
         #print(dockerserver, webserver)
@@ -48,7 +48,7 @@ class AttemptQuestionView(ListView, ModelFormMixin):
         #print(webserversize, dockerserversize)
         
         if dockerserversize < 50:
-            if int(dockerserver[dockerserversize - 1][0]) == 8100:
+            if int(dockerserver[dockerserversize - 1][0]) == 9100:
                 for x in range(0, 48):
                     if int(dockerserver[x + 1][0]) - int(dockerserver[x][0]) != 1:
                         result = int(dockerserver[x][0]) + 1
@@ -57,7 +57,7 @@ class AttemptQuestionView(ListView, ModelFormMixin):
                 result = int(dockerserver[dockerserversize - 1][0]) + 1
                 return result
         elif webserversize < 50:
-            if int(webserver[webserversize - 1][0]) == 8100:
+            if int(webserver[webserversize - 1][0]) == 9050:
                 for x in range(0, 48):
                     if int(webserver[x + 1][0]) - int(webserver[x][0]) != 1:
                         result = int(webserver[x][0]) + 1
@@ -72,22 +72,19 @@ class AttemptQuestionView(ListView, ModelFormMixin):
         # okay so before we start a new docker container
         # we need to check if there are any open containers
         # we have stored it in the session
-        #print('HI ITS HERE')
-        if 'containeropen' in self.request.session:
-            containercheck = self.request.session['containeropen']
-        
-            if containercheck is True:
-                #print("HERES THE CONTAINERNAME")
-                oldcontainername = self.request.session['containername']
-                #print(oldcontainername)
-                endpoint = 'http://localhost:3125/containers/{conid}?force=True'
-                url = endpoint.format(conid=oldcontainername)
-                response = requests.delete(url)
-                #print(response.status_code)
+        previousport = UnavailablePorts.objects.filter(studentid = self.request.user).values_list('containername')
+        if previousport:
+            containername = previousport[0][0]
+            endpoint = 'http://192.168.100.42:8051/containers/{conid}?force=True'
+            url = endpoint.format(conid=containername)
+            response = requests.delete(url)
+            endpoint = 'http://192.168.100.43:8051/containers/{conid}?force=True'
+            url = endpoint.format(conid=containername)
+            response = requests.delete(url)
+            # need to delete from db
+            deleteportsdb = UnavailablePorts.objects.filter(studentid = self.request.user)
+            deleteportsdb.delete()
 
-                # need to delete from db
-                deleteportsdb = UnavailablePorts.objects.filter(studentid = self.request.user)
-                deleteportsdb.delete()
 
         data = {}
         port = self.checkPorts()
@@ -95,11 +92,10 @@ class AttemptQuestionView(ListView, ModelFormMixin):
         if port == -1:
             return HttpResponse('SERVER BUSY. PLEASE TRY AGAIN LATER.')
         # port 8051 is reserved for API
-        elif port >= 8052:
-            serverip = '192.168.100.42' #give dockerserver ip
-        elif port <= 8050:
+        elif port >= 9051:
+            serverip = '192.168.100.42'
+        elif port <= 9050:
             serverip = '192.168.100.43'
-        #print(serverip)
         port = str(port)
         rangename = self.kwargs['rangeurl']
         questionnumber = self.kwargs['questionid']
@@ -116,7 +112,7 @@ class AttemptQuestionView(ListView, ModelFormMixin):
                 ]}
             }
         }
-        url = 'http://localhost:3125/containers/create'
+        url = 'http://' + serverip + ':8051/containers/create'
         response = requests.post(url, json=payload)
         #print('HI IM HERE')
         #print(response.status_code)
@@ -124,15 +120,12 @@ class AttemptQuestionView(ListView, ModelFormMixin):
             test = True
             data = response.json()
             containerid = data['Id']
-            self.request.session['containeropen'] = True
-            self.request.session['containername'] = containerid
-            starturl = 'http://localhost:3125/containers/%s/start' % containerid
+            starturl = 'http://' + serverip + ':8051/containers/%s/start' % containerid
             response = requests.post(starturl)
 
-            portsdb = UnavailablePorts(portnumber = int(port), studentid = self.request.user)
+            portsdb = UnavailablePorts(portnumber = int(port), studentid = self.request.user, containername = containerid, datetimecreated = timezone.now())
             portsdb.save()
             # for testing
-            serverip = 'localhost'
             finalsiaburl = serverip+':'+port
             #print(finalsiaburl)
             return finalsiaburl
@@ -177,10 +170,6 @@ class AttemptQuestionView(ListView, ModelFormMixin):
         return ListView.get(self, request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        if request.session.get('containeropen', True):
-            containerid = request.session.get('containername', {})
-            #print("CONTAINER")
-            #print(containerid)
         self.object = None
         self.form = self.get_form(self.form_class)
 
@@ -428,7 +417,7 @@ class QuestionsView(ListView):
         for x in range(0, len(questionidsinrange)):
             if questionidsinrange[x][0] not in attemptedlist:
                 unattemptedlist.append(questionidsinrange[x][0])
-                print(unattemptedlist)
+                #print(unattemptedlist)
 
         #print("ORHOR DIDN'T DO ----->>>>>" + str(unattemptedlist[0]))
 
@@ -455,22 +444,38 @@ class QuestionsView(ListView):
     def get_queryset(self):
         self.rangeurl = get_object_or_404(Range, rangeurl=self.kwargs['rangeurl'], rangeactive=1)
 
-        if 'containeropen' in self.request.session:
-            containercheck = self.request.session['containeropen']
-        
-            if containercheck is True:
-                #print("HERES THE CONTAINERNAME")
-                oldcontainername = self.request.session['containername']
-                #print(oldcontainername)
-                endpoint = 'http://localhost:3125/containers/{conid}?force=True'
-                url = endpoint.format(conid=oldcontainername)
-                response = requests.delete(url)
-                #print(response.status_code)
+        previousport = UnavailablePorts.objects.filter(studentid = self.request.user).values_list('containername')
+        if previousport:
+            containername = previousport[0][0]
+            endpoint = 'http://192.168.100.42:8051/containers/{conid}?force=True'
+            url = endpoint.format(conid=containername)
+            response = requests.delete(url)
+            endpoint = 'http://192.168.100.43:8051/containers/{conid}?force=True'
+            url = endpoint.format(conid=containername)
+            response = requests.delete(url)
+            # need to delete from db
+            deleteportsdb = UnavailablePorts.objects.filter(studentid = self.request.user)
+            deleteportsdb.delete()
 
-                # need to delete from db
-                deleteportsdb = UnavailablePorts.objects.filter(studentid = self.request.user)
-                deleteportsdb.delete()
+        # timeout for ports
+        allentriesinportsdb = UnavailablePorts.objects.all()
+        if allentriesinportsdb != 0:
+            for entry in allentriesinportsdb:
+                timediff = timezone.now() - entry.datetimecreated 
+                print(timediff)
+                if timediff > datetime.timedelta(hours = 3):
+                    print("more than 2 minutes")
+                    containername = entry.containername
+                    endpoint = 'http://192.168.100.42:8051/containers/{conid}?force=True'
+                    url = endpoint.format(conid=containername)
+                    response = requests.delete(url)
 
+                    endpoint = 'http://192.168.100.43:8051/containers/{conid}?force=True'
+                    url = endpoint.format(conid=containername)
+                    response = requests.delete(url)
+                    # need to delete from db
+                    deleteportsdb = UnavailablePorts.objects.filter(studentid = self.request.user)
+                    deleteportsdb.delete()
         #print('RANGE -->' + str(self.kwargs['rangeurl']))
 
         # get the range id
@@ -504,17 +509,21 @@ class RangesView(ListView):
         #print(ranges)
 
         for x in ranges:
-            rangesqueryset = Range.objects.filter(rangeid = x[0]).values_list("datetimeend")[0][0]
-            if rangesqueryset != None:
-                expirycheck = timezone.now() > rangesqueryset
-                checkifalreadyinactive = Range.objects.filter(rangeid = x[0]).values_list("rangeactive")[0][0]
-
-                if expirycheck and checkifalreadyinactive == 1:
-                    rangeobject = Range.objects.get(rangeid = x[0])
-                    rangeobject.rangeactive = 0
-                    rangeobject.save()
-                    #print("ERM WHAT IS FALSE AGAIN" + str(rangeobject))
-
+            dateend = Range.objects.filter(rangeid = x[0]).values_list("dateend")[0][0]
+            timeend = Range.objects.filter(rangeid = x[0]).values_list("timeend")[0][0]
+            if dateend != None:
+                #print('test')
+                #print(datetime.date.today())
+                #print(dateend)
+                datecheck = datetime.date.today() > dateend
+                if datecheck:
+                    timecheck = datetime.time.now() > timeend
+                    if timecheck:
+                        checkifalreadyinactive = Range.objects.filter(rangeid = x[0]).values_list("rangeactive")[0][0]
+                        if checkifalreadyinactive == 1:
+                            rangeobject = Range.objects.get(rangeid = x[0])
+                            rangeobject.rangeactive = 0
+                            rangeobject.save()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -542,22 +551,40 @@ class RangesView(ListView):
         return context
 
     def get_queryset(self):
+        # delete old port if existing
+        previousport = UnavailablePorts.objects.filter(studentid = self.request.user).values_list('containername')
+        if previousport:
+            containername = previousport[0][0]
+            endpoint = 'http://192.168.100.42:8051/containers/{conid}?force=True'
+            url = endpoint.format(conid=containername)
+            response = requests.delete(url)
+            endpoint = 'http://192.168.100.42:8051/containers/{conid}?force=True'
+            url = endpoint.format(conid=containername)
+            response = requests.delete(url)
+            # need to delete from db
+            deleteportsdb = UnavailablePorts.objects.filter(studentid = self.request.user)
+            deleteportsdb.delete()
 
-        if 'containeropen' in self.request.session:
-            containercheck = self.request.session['containeropen']
+        # timeout for ports
+        allentriesinportsdb = UnavailablePorts.objects.all()
+        if allentriesinportsdb != 0:
+            for entry in allentriesinportsdb:
+                timediff = timezone.now() - entry.datetimecreated 
+                print(timediff)
+                if timediff > datetime.timedelta(hours = 3):
+                    print("more than 2 minutes")
+                    containername = entry.containername
+                    endpoint = 'http://192.168.100.42:8051/containers/{conid}?force=True'
+                    url = endpoint.format(conid=containername)
+                    response = requests.delete(url)
+                    endpoint = 'http://192.168.100.43:8051/containers/{conid}?force=True'
+                    url = endpoint.format(conid=containername)
+                    response = requests.delete(url)
+                    # need to delete from db
+                    deleteportsdb = UnavailablePorts.objects.filter(studentid = self.request.user)
+                    deleteportsdb.delete()
+
         
-            if containercheck is True:
-                #print("HERES THE CONTAINERNAME")
-                oldcontainername = self.request.session['containername']
-                #print(oldcontainername)
-                endpoint = 'http://localhost:3125/containers/{conid}?force=True'
-                url = endpoint.format(conid=oldcontainername)
-                response = requests.delete(url)
-                #print(response.status_code)
-
-                # need to delete from db
-                deleteportsdb = UnavailablePorts.objects.filter(studentid = self.request.user)
-                deleteportsdb.delete()
 
         # get the email address of current user
         user = self.request.user

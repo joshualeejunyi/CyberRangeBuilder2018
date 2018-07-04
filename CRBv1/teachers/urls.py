@@ -30,7 +30,7 @@ urlpatterns = [
     path('rangemanagement/', views.RangeManagement.as_view(), name='rangemanagement'),
     path('rangemanagement/createrange/', views.CreateRange.as_view(), name="createrange"),
     path('rangemanagement/createrange/createquestion/', views.CreateQuestion.as_view(), name="createquestion"),
-    path('rangemanagement/<rangename>', views.RangeView.as_view(), name="rangeview"),
+    path('rangemanagement/<rangename>/view', views.RangeView.as_view(), name="rangeview"),
     path('rangemanagement/deleterange/<rangeid>', views.DeleteRange.as_view(), name="deleterange"),
     path('rangemanagement/viewquestion/<rangeid>/<questionid>', views.EditQuestion.as_view(), name="editquestion"),    
 ]  

@@ -322,6 +322,8 @@ class RangeView(FilterView, ListView):
     filterset_class = QuestionFilter
 
     def get_queryset(self):
+        print("OMG")
+        print(self.kwargs['rangename'])
         selectedrange = Range.objects.get(rangename= self.kwargs['rangename'])
         selectedrangeid = selectedrange.rangeid
         print(selectedrangeid)
@@ -600,4 +602,4 @@ class CreateQuestion(CreateView):
 
         else:
             print(self.form.errors)
-            return render(request, 'teachers/base.html')
+            return render(request, 'teachers/teacherbase.html')
