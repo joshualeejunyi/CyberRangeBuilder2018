@@ -13,22 +13,58 @@
                             <input type="email" name="email" class="form-control" value="{{ user.email }}" disabled>
                         </div>
                         <div class="form-group has-feedback">
-                            <label for="name">Full Name:</label>
-                            <input type="text" name="name" class="form-control" value="{{ user.name }}">
+                                <label for="name">Full Name:</label>
+                            {% if form.name.errors %}
+                                <input type="text" name="name" class="form-control" value="{{ user.name }}" required style="border-color: #dd4b39;">
+                                <span class="glyphicon glyphicon-user form-control-feedback"></span>
+                                <ul style="color: #dd4b39">
+                                    {% for error in form.name.errors %}
+                                    <li><strong>{{ error|escape }}</strong></li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <input type="text" name="name" class="form-control" value="{{ user.name }}" required>
+                                <span class="glyphicon glyphicon-user form-control-feedback"></span>
+                            {% endif %}
                         </div>
                         <div class="form-group has-feedback">
                             <label for="username">Username:</label>
-                            <input type="text" name="username" class="form-control" value="{{ user.username }}">
+                            {% if form.username.errors %}
+                                <input type="text" name="username" class="form-control" value="{{ user.username }}" required style="border-color: #dd4b39;">
+                                <span class="glyphicon glyphicon-user form-control-feedback"></span>
+                                <ul style="color: #dd4b39">
+                                    {% for error in form.username.errors %}
+                                    <li><strong>{{ error|escape }}</strong></li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <input type="text" name="username" class="form-control" value="{{ user.username }}" required>
+                                <span class="glyphicon glyphicon-user form-control-feedback"></span>
+                            {% endif %}
                         </div>
                         <div class="form-group has-feedback">
                             <label for="userclass">Class:</label>
-                            <select name="userclass" class="form-control" value="{{ user.userclass }}">
-                                <option value='{{ user.userclass }}' selected hidden>{{ user.userclass }}</option>
-                                {% for class in classesobject %}	
+                            {% if form.userclass.errors %}
+                                <select name="userclass" class="form-control" placeholder="Class" required>
+                                    <option value="{{ user.userclass }}" selected disabled hidden>{{ user.userclass}}</option>
+                                    {% for class in classesobject %}	
                                     <option value='{{ class.0 }}'>{{ class.0 }}</option>
-                                {% endfor %}
-                            </select>
-                        </div class="form-group has-feedback">
+                                    {% endfor %}
+                                </select>
+                                <ul style="color: #dd4b39">
+                                    {% for error in form.userclass.errors %}
+                                    <li><strong>{{ error|escape }}</strong></li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <select name="userclass" class="form-control" placeholder="Class" required required>
+                                    <option value="{{ user.userclass }}" selected hidden>{{ user.userclass}}</option>
+                                    {% for class in classesobject %}	
+                                    <option value='{{ class.0 }}'>{{ class.0 }}</option>
+                                    {% endfor %}
+                                </select>
+                            {% endif %}
+                        </div>
                         <div style="padding-bottom: 3%">
                             <a href="{{ user.username }}/resetpassword" class="btn btn-danger btn-block btn-flat">Reset User Password</a>
                         </div>

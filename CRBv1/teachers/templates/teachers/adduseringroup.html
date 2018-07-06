@@ -106,7 +106,7 @@
                             <td>{{ user.username }}</td>
                             <td>{{ user.userclass }}</td>
                             <td>
-                                {% if user.name in cart %}
+                                {% if user.email in cart %}
                                 <a class="btn btn-block btn-primary" href="removeusers/{{ user.username }}">Remove</a>
                                 {% else %}
                                 <a class="btn btn-block btn-primary" href="addusers/{{ user.username }}">Add</a>

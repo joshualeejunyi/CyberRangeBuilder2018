@@ -25,6 +25,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     last_login = models.DateTimeField(db_column='lastlogin', blank=True, null=True)
     is_superuser = models.BooleanField(db_column='admin', default=False)
     is_staff = models.BooleanField(db_column='teacher', default=False)
+    isdisabled = models.BooleanField(db_column='isdisabled', default=False)
+    isaccepted = models.BooleanField(db_column='isaccepted', default=False)
     
     EMAIL_FIELD = 'email'
     USERNAME_FIELD = 'username'
@@ -40,14 +42,14 @@ class User(AbstractBaseUser, PermissionsMixin):
 class Group(models.Model):
     groupid = models.AutoField(db_column='groupID', primary_key=True)
     groupname = models.CharField(db_column='groupName', max_length=45, unique=True)
-    groupleader = models.ForeignKey("User", models.DO_NOTHING, db_column='groupLeader', null=True, related_name="groupleader")
+    groupleader = models.ForeignKey("User", on_delete=models.DO_NOTHING, db_column='groupLeader', null=True, related_name="groupleader")
     datecreated = models.DateField(db_column='dateCreated', null=True)
     timecreated = models.TimeField(db_column='timeCreated', null=True)
     grouppoints = models.IntegerField(db_column='groupPoints', null=True, default=0)
-    createdby = models.ForeignKey('accounts.User', models.DO_NOTHING, db_column='createdBy', related_name="groupcreatedby", null=True)
+    createdby = models.ForeignKey('accounts.User', on_delete=models.DO_NOTHING, db_column='createdBy', related_name="groupcreatedby", null=True)
     lastmodifieddate = models.DateField(db_column='lastModifiedDate', blank=True, null=True)
     lastmodifiedtime = models.TimeField(db_column='lastModifiedTime', null=True)
-    lastmodifiedby = models.ForeignKey('accounts.User', models.DO_NOTHING, db_column='lastModifiedBy', blank=True, null=True, related_name="GLMB")
+    lastmodifiedby = models.ForeignKey('accounts.User', on_delete=models.DO_NOTHING, db_column='lastModifiedBy', blank=True, null=True, related_name="GLMB")
     
     class Meta:
         db_table = 'Group'
@@ -55,12 +57,22 @@ class Group(models.Model):
 
 class StudentGroup(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True)
-    studentid = models.ForeignKey("User", models.DO_NOTHING, db_column='studentID')
-    groupid = models.ForeignKey("Group", models.DO_NOTHING, db_column='groupID')
+    studentid = models.ForeignKey("User", on_delete=models.CASCADE, db_column='studentID')
+    groupid = models.ForeignKey("Group", on_delete=models.DO_NOTHING, db_column='groupID')
 
     class Meta:
         db_table = 'StudentGroup'
         verbose_name_plural = 'StudentGroups'
+
+class FakeStudentGroup(models.Model):
+    id = models.AutoField(db_column='ID', primary_key=True)
+    studentid = models.ForeignKey("User", models.DO_NOTHING, db_column='studentID')
+    groupid = models.ForeignKey("Group", models.DO_NOTHING, db_column='groupID')
+
+    class Meta:
+        app_label = StudentGroup._meta.app_label
+        db_table = StudentGroup._meta.db_table
+        managed = False
 
 class GroupRange(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True)

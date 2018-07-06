@@ -35,6 +35,7 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'dmit2.bulletplus.com']
 # Application definition
 
 INSTALLED_APPS = [
+    'progress',
     'teachers',
     'accounts',
     'dashboard',
@@ -48,7 +49,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'widget_tweaks',
-    'sslserver',
 ]
 
 MIDDLEWARE = [
@@ -101,7 +101,7 @@ DATABASES = {
 # https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators
 
 AUTH_USER_MODEL = 'accounts.User'
-
+AUTHENTICATION_BACKENDS = ['accounts.forms.EmailBackend']
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',

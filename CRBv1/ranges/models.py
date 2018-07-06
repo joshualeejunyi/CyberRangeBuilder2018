@@ -19,13 +19,14 @@ class Range(models.Model):
     studentsinrange = models.IntegerField(db_column='studentsInRange', null=True)
     isdisabled = models.BooleanField(db_column='isDisabled', default=False)
 
+
     class Meta:
         db_table = 'Range'
         verbose_name_plural = 'Ranges'
 
 class RangeStudents(models.Model):
     dateJoined = models.DateTimeField(db_column='dateJoined', max_length=45, blank=True, null=True)
-    progress = models.CharField(db_column='progress', max_length=45, null=True)
+    progress = models.IntegerField(db_column='progress', null=True)
     teamID = models.CharField(db_column='teamID', max_length=45, null=True)
     teamName = models.CharField(db_column='teamName', max_length=45, null=True)
     points = models.IntegerField(db_column='points', default=0)

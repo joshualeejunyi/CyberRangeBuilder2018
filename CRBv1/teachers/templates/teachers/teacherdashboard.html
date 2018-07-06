@@ -1,10 +1,10 @@
 {% extends 'teachers/teacherbase.html' %}
-
+{% load widget_tweaks %}
 {% block content_header%}
 	<section class="content-header">
 		<h1>
             {% block page_name %}
-                Teacher's Portal
+                Teacher's Dashboard
             {% endblock %}
 		    <small>
                 {% block page_description %}
@@ -19,8 +19,109 @@
 {% endblock%}
 
 {% block content %}
-    <h3>Pending Approvals:</h3>
-    <section>
-        <a href="usermanagement">Manage Users</a>
+    
+    <section class="content">
+        <div class="row">
+            <div class="box">
+                <div class="box-header with-border">
+                        <h2 class="box-title" style="font-size: 16pt;">Pending Approvals:</h2>
+                        <div class="box-tools pull-right">
+                            <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                        </div>
+                </div>
+                <div class="box-body">
+                    <table id="studentstable" class="table table-bordered table-hover dataTable" role="grid">
+                    {% if usersobject.all %}
+                    <thead>
+                        <tr role="row">
+                            <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                Name
+                            </th>
+                            <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                Email
+                            </th>
+                            <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                Username
+                            </th>
+                            <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                Class
+                            </th>
+                            <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                Date Joined
+                            </th>
+                            <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                Accepted
+                            </th>
+                            <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                Accepted By
+                            </th>
+                            <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                Last Modified By
+                            </th>
+                            <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                Last Modified Date
+                            </th>
+                            <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Last Modified Time
+                            </th>
+                            <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for user in usersobject %}
+                        <tr role="row">
+                            <td>{{ user.name }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.userclass }}</td>
+                            <td>{{ user.datejoined }}</td>
+                            <td>{{ user.isaccepted }}</td>
+                            <td>{{ user.acceptedby }}</td>
+                            <td>{{ user.lastmodifiedby }}</td>
+                            <td>{{ user.lastmodifieddate }}</td>
+                            <td>{{ user.lastmodifiedtime }}</td>
+                            <td>
+                                <a class="btn btn-block btn-success" href="usermanagement/acceptuser/{{ user.username }}">Accept User</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    {% else %}
+                    <thead>
+                        <th>
+                            <h4>No Pending Approvals</h4>
+                        </th>
+                    </thead>
+
+                    {% endif %}
+                    </tbody>
+                </table>
+
+                {% if is_paginated %}
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                        <li><a href="?page={{ page_obj.previous_page_number }}">&laquo;</a></li>
+                    {% else %}
+                        <li class="disabled"><span>&laquo;</span></li>
+                    {% endif %}
+                        
+                    {% for i in paginator.page_range %}
+                        {% if page_obj.number == i %}
+                            <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+                        {% else %}
+                            <li><a href="?page={{ i }}">{{ i }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                        <li><a href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>
+                    {% else %}
+                        <li class="disabled"><span>&raquo;</span></li>
+                    {% endif %}
+                </ul>
+                {% endif %}
+            </div>
+        </div>
     </section>
 {% endblock %}

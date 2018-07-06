@@ -19,10 +19,11 @@ from django.conf.urls import url
 from django.contrib.auth import views as authviews
 from accounts import views as account
 from ranges import views as rangesview
+from django.contrib.auth.decorators import login_required
+from accounts.forms import *
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('login/', authviews.login, {'template_name': 'accounts/login.html'}, name='login'),
+    path('login/', authviews.LoginView.as_view(template_name='accounts/login.html', authentication_form=CheckUserDisabled), name='login'), 
     url(r'^$', authviews.login, {'template_name': 'accounts/login.html'}, name='login'),
     url(r'loginsuccess/$', account.LoginRedirect.loginsuccess, name='loginredirect'),
     url(r'^logout/$', authviews.logout, {'next_page': '/login'}, name='logout'),
@@ -31,4 +32,5 @@ urlpatterns = [
     url(r'^dashboard/', include('dashboard.urls'), name='dashboard'),
     url(r'^ranges/', include('ranges.urls'), name='ranges'),
     url(r'^teachers/', include('teachers.urls'), name='teachers'),
+    url(r'^progress/', include('progress.urls'), name='progress'),
 ]

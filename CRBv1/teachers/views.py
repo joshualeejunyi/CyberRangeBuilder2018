@@ -15,11 +15,23 @@ from django.contrib import messages
 from django.views.generic import RedirectView
 from functools import reduce
 from django.db.models.functions import Lower
-
 # Create your views here.
 
-class TeacherDashboard(generic.TemplateView):
+class TeacherDashboard(ListView):
     template_name = 'teachers/teacherdashboard.html'
+    context_object_name = 'usersobject'
+    paginate_by = 10
+    filterset_class = StudentFilter
+
+    def get_queryset(self):
+        unacceptedstudents = User.objects.filter(is_superuser = False, is_staff = False, isdisabled=False, isaccepted=False).order_by('-lastmodifieddate', '-lastmodifiedtime')
+        print(unacceptedstudents)
+        return unacceptedstudents
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['classesobject'] = UserClass.objects.values_list('userclass')
+        return context
 
 
 class UserManagement(FilterView, ListView):
@@ -29,7 +41,23 @@ class UserManagement(FilterView, ListView):
     filterset_class = StudentFilter
 
     def get_queryset(self):
-        allstudents = User.objects.filter(is_superuser = False, is_staff = False).order_by('-lastmodifieddate')
+        allstudents = User.objects.filter(is_superuser = False, is_staff = False, isdisabled=False).order_by('-lastmodifieddate', '-lastmodifiedtime')
+        return allstudents
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['classesobject'] = UserClass.objects.values_list('userclass')
+        return context
+
+class DisabledUserManagement(FilterView, ListView):
+    template_name = 'teachers/disabledusermanagement.html'
+    context_object_name = 'usersobject'
+    paginate_by = 10
+    filterset_class = StudentFilter
+
+    def get_queryset(self):
+        allstudents = User.objects.filter(is_superuser = False, is_staff = False, isdisabled=True).order_by('-lastmodifieddate')
+        print(allstudents)
         return allstudents
     
     def get_context_data(self, **kwargs):
@@ -53,8 +81,12 @@ class AddUser(ListView, ModelFormMixin):
         self.form = self.get_form(self.form_class)
 
         if self.form.is_valid():
+            print("HI")
             self.form.save()
             return redirect('addusersuccess')
+        else:
+            print("BYE")
+            return ListView.get(self, request, *args, **kwargs)
     
     def get_queryset(self):
         classes =  UserClass.objects.values_list('userclass')
@@ -103,6 +135,35 @@ class ResetPasswordView(UpdateView):
         kwargs.update({'request': self.request})
         return kwargs
 
+class DisableUser(View):
+    def get(self, request, username):
+        selecteduser = User.objects.get(username = username)
+        selecteduser.isdisabled = True
+        selecteduser.save()
+
+        return redirect('/teachers/usermanagement')
+
+class AcceptUser(View):
+    def get(self, request, username):
+        selecteduser = User.objects.get(username = username)
+        selecteduser.isaccepted = True
+        selecteduser.lastmodifieddate = datetime.date.today()
+        selecteduser.lastmodifiedtime = datetime.datetime.now().time()
+        admin = self.request.user
+        selecteduser.lastmodifiedby = User.objects.get(username = admin)
+        selecteduser.acceptedby = User.objects.get(username = admin)
+        selecteduser.save()
+
+        return redirect('/teachers/usermanagement/')
+
+class EnableUser(View):
+    def get(self, request, username):
+        selecteduser = User.objects.get(username = username)
+        selecteduser.isdisabled = False
+        selecteduser.save()
+
+        return redirect('/teachers/usermanagement/disabled')
+
 class DeleteUser(DeleteView):
     template_name = 'teachers/confirmdelete.html'
     success_url = '/teachers/usermanagement'
@@ -136,6 +197,8 @@ class AddGroup(ListView, ModelFormMixin):
         if self.form.is_valid():
             self.form.save()
             return redirect('addgroupsuccess')
+        else:
+            return ListView.get(self, request, *args, **kwargs)
     
     def get_queryset(self):
         classes =  UserClass.objects.values_list('userclass')
@@ -202,12 +265,13 @@ class AddUserInGroup(FilterView, ListView):
 class AddUserToCart(View):
     def get(self, request, groupname, username):
         get_object_or_404(User, username = username)
+        useremail = User.objects.filter(username = username).values_list('email')[0][0]
         userslist = []
         if 'usercart' in request.session:
             userslist = request.session['usercart']
-        userobject = username
+        print(userslist)
         if username not in userslist:
-            userslist.append(userobject)
+            userslist.append(useremail)
         request.session['usercart'] = userslist
 
         url = "/teachers/groupmanagement/" + groupname + "/addusers"
@@ -216,12 +280,13 @@ class AddUserToCart(View):
 class RemoveUserFromCart(View):
     def get(self, request, groupname, username):
         get_object_or_404(User, username = username)
+        useremail = User.objects.filter(username = username).values_list('email')[0][0]
         userslist = []
         if 'usercart' in request.session:
             userslist = request.session['usercart']
-        userobject = username
-        if username in userslist:
-            userslist.remove(userobject)
+        print(userslist)
+        if username not in userslist:
+            userslist.remove(useremail)
         request.session['usercart'] = userslist
 
         url = "/teachers/groupmanagement/" + groupname + "/addusers"
@@ -234,7 +299,7 @@ class UserGroupCommit(View):
 
         for student in userslist:
             #print(student)
-            studentid = User.objects.get(username = student)
+            studentid = User.objects.get(email = student)
             print(studentid)
             groupid = Group.objects.get(groupname = groupname)
             # print(groupid)
@@ -247,7 +312,7 @@ class UserGroupCommit(View):
 
 class RemoveStudentFromGroup(DeleteView):
     template_name = 'teachers/confirmdeletestudentfromgroup.html'
-    success_url = '/teachers/groupmanagement/'
+    success_url = '../'
     def get_object(self, queryset = None):
         studentid = User.objects.get(username = self.kwargs['username'])
         groupname = self.kwargs['groupname']
@@ -255,14 +320,18 @@ class RemoveStudentFromGroup(DeleteView):
         selecteduser = StudentGroup.objects.get(studentid = studentid, groupid = groupid)
         return selecteduser
 
-class DeleteGroup(DeleteView):
+class DeleteGroup(View):
     template_name = 'teachers/confirmdeletegroup.html'
-    success_url = '/teachers/groupmanagement/'
+    #success_url = '/teachers/groupmanagement/'
 
-    def get_object(self, queryset = None):
-        groupname = self.kwargs['groupname']
-        groupid = Group.objects.get(groupname = groupname)
-        return groupid
+    def get(self, request, groupname):
+        print(groupname)
+        groupobj = Group.objects.get(groupname = groupname)
+        groupid = Group.objects.filter(groupname = groupname).values_list('groupid')[0][0]
+        fakegroupobj = FakeStudentGroup.objects.filter(groupid = groupid)
+        fakegroupobj.delete()
+        groupobj.delete()
+        return redirect('/teachers/groupmanagement')
 
 class MakeLeader(View):
     def get(self, request, groupname, username):
@@ -322,9 +391,7 @@ class RangeView(FilterView, ListView):
     filterset_class = QuestionFilter
 
     def get_queryset(self):
-        print("OMG")
-        print(self.kwargs['rangename'])
-        selectedrange = Range.objects.get(rangename= self.kwargs['rangename'])
+        selectedrange = Range.objects.get(rangeurl= self.kwargs['rangeurl'])
         selectedrangeid = selectedrange.rangeid
         print(selectedrangeid)
         # use range id to get the questionids in the current range
@@ -347,7 +414,7 @@ class RangeView(FilterView, ListView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        selectedrange = Range.objects.get(rangename= self.kwargs['rangename'])
+        selectedrange = Range.objects.get(rangeurl= self.kwargs['rangeurl'])
         selectedrangeid = selectedrange.rangeid
         # use range id to get the questionids in the current range
         questions = RangeQuestions.objects.filter(rangeid = selectedrangeid).values_list('questionid')
@@ -366,8 +433,9 @@ class RangeView(FilterView, ListView):
             result = None
         
         context['answer'] = result
-        context['rangename'] = self.kwargs['rangename']
-        context['range'] = Range.objects.filter(rangename = self.kwargs['rangename'])
+        context['rangename'] = Range.objects.filter(rangeurl= self.kwargs['rangeurl']).values_list('rangename')[0][0]
+        context['range'] = Range.objects.filter(rangeurl = self.kwargs['rangeurl'])
+        context['rangeurl'] = self.kwargs['rangeurl']
         context['topics'] = QuestionTopic.objects.all()
         return context
 

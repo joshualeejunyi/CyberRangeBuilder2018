@@ -29,20 +29,20 @@
                 </div>
                 <div class="box-body">
                         <form method="get">
-                                <div class="well">
-                                  <h4 style="margin-top: 0">Filter</h4>
-                                  <div class="row">
+                            <div class="well">
+                                <h4 style="margin-top: 0">Filter</h4>
+                                <div class="row">
                                     <div class="form-group col-sm-4 col-md-3">
-                                        <label for="username">Username:</label>
-                                      {% render_field filter.form.username class="form-control" %}
-                                    </div>
-                                    <div class="form-group col-sm-4 col-md-3">
-                                            <label for="name">Full Name:</label>
-                                      {% render_field filter.form.name class="form-control" %}
+                                        <label for="name">Name:</label>
+                                        {% render_field filter.form.name class="form-control" %}
                                     </div>
                                     <div class="form-group col-sm-4 col-md-3">
                                         <label for="email">Email:</label>
-                                      {% render_field filter.form.email class="form-control" %}
+                                    {% render_field filter.form.email class="form-control" %}
+                                    </div>
+                                    <div class="form-group col-sm-4 col-md-3">
+                                        <label for="username">Username:</label>
+                                    {% render_field filter.form.username class="form-control" %}
                                     </div>
                                     <div class="form-group col-sm-4 col-md-3">
                                         <label for="userclass">Class:</label>
@@ -53,26 +53,31 @@
                                             {% endfor %}
                                         </select>
                                     </div>
-                                    <div class="form-group col-sm-8 col-md-6">
-                                      {{ filter.form.groups.label_tag }}
-                                      <div>
-                                        {% for choice in filter.form.groups %}
-                                          <label class="checkbox-inline">
-                                            {{ choice.tag }} {{ choice.choice_label }}
-                                          </label>
-                                        {% endfor %}
-                                      </div>
+                                </div>
+                                <div class="row" style="display: flex; justify-content: right;">
+                                    <div class="form-group col-sm-4 col-md-3">
+                                        <label for="isaccepted">Accepted</label>
+                                        <select name="isaccepted" class="form-control" placeholder="Class">
+                                            <option value="True">True</option>
+                                            <option value="False">False</option>
+                                            <option value="">Both</option>
+                                        </select>
                                     </div>
-                                  </div>
-                                  <div>
-                                        <button type="submit" class="btn btn-primary btn-flat" style="width: 200px; display: inline-block">
-                                            <span class="glyphicon glyphicon-search"></span> Search
-                                        </button>
-                                        <a href="." class="btn btn-primary btn-block btn-flat" style="width: 200px;  display: inline-block;" >Reset Filters</a>
+                                    <div class="form-group col-sm-4 col-md-3">
+                                        <label for="userclass">Class (Keyword Search):</label>
+                                        {% render_field filter.form.userclass class="form-control" %}
                                     </div>
                                 </div>
-                              </form>
+                                <div>
+                                    <button type="submit" class="btn btn-primary btn-flat" style="width: 200px; display: inline-block">
+                                        <span class="glyphicon glyphicon-search"></span> Search
+                                    </button>
+                                    <a href="." class="btn btn-primary btn-block btn-flat" style="width: 200px;  display: inline-block;" >Reset Filters</a>
+                                </div>
+                            </div>
+                        </form>
                     <table id="studentstable" class="table table-bordered table-hover dataTable" role="grid">
+                    {% if usersobject.all %}
                     <thead>
                         <tr role="row">
                             <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
@@ -89,6 +94,9 @@
                             </th>
                             <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
                                 Date Joined
+                            </th>
+                            <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                Accepted
                             </th>
                             <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
                                 Accepted By
@@ -115,16 +123,28 @@
                             <td>{{ user.username }}</td>
                             <td>{{ user.userclass }}</td>
                             <td>{{ user.datejoined }}</td>
+                            <td>{{ user.isaccepted }}</td>
                             <td>{{ user.acceptedby }}</td>
                             <td>{{ user.lastmodifiedby }}</td>
                             <td>{{ user.lastmodifieddate }}</td>
                             <td>{{ user.lastmodifiedtime }}</td>
                             <td>
+                                {% if user.isaccepted == False %}
+                                <a class="btn btn-block btn-success" href="acceptuser/{{ user.username }}">Accept User</a>
+                                {% endif %}
                                 <a class="btn btn-block btn-primary" href="modifyuser/{{ user.username }}">Edit</a>
-                                <a class="btn btn-block btn-primary" href="deleteuser/{{ user.username }}">Delete</a>
+                                <a class="btn btn-block btn-danger" href="disableuser/{{ user.username }}">Disable</a>
                             </td>
                         </tr>
                     {% endfor %}
+                    {% else %}
+                    <thead>
+                        <th>
+                            <h4>No Records Found</h4>
+                        </th>
+                    </thead>
+
+                    {% endif %}
                     </tbody>
                 </table>
 
@@ -153,6 +173,7 @@
                 {% endif %}
             </div>
         </div>
+        <a class="btn btn-block btn-danger" style="width: 10%;"href="/teachers/usermanagement/disabled">View Disabled Users</a>
     </section>
 {% endblock %}
 

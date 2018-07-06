@@ -464,7 +464,6 @@ class QuestionsView(ListView):
                 timediff = timezone.now() - entry.datetimecreated 
                 print(timediff)
                 if timediff > datetime.timedelta(hours = 3):
-                    print("more than 2 minutes")
                     containername = entry.containername
                     endpoint = 'http://192.168.100.42:8051/containers/{conid}?force=True'
                     url = endpoint.format(conid=containername)
@@ -476,7 +475,6 @@ class QuestionsView(ListView):
                     # need to delete from db
                     deleteportsdb = UnavailablePorts.objects.filter(studentid = self.request.user)
                     deleteportsdb.delete()
-        #print('RANGE -->' + str(self.kwargs['rangeurl']))
 
         # get the range id
         currentrangeid = Range.objects.filter(rangeurl = self.kwargs['rangeurl']).values_list('rangeid')[0][0]

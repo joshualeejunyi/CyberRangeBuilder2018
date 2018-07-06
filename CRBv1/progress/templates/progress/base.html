@@ -1,0 +1,20 @@
+{% extends 'adminlte/base.html' %}
+
+{% block title_outer %}
+	<title>
+		{%block title %}
+			Cyber Range
+		{% endblock %}
+	</title>
+{% endblock %}
+
+{% block content_header%}
+	<section class="content-header">
+		<h1>
+			{% block page_name %}{% endblock %}
+			<small>{% block page_description %}{% endblock %}</small>
+		</h1>
+		{% block breadcrumbs %}
+
+		{% endblock %}
+{% endblock%}

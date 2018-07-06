@@ -8,21 +8,23 @@ class DashboardView(generic.ListView):
 
     def get_queryset(self):
         user = self.request.user
-        currentranges = RangeStudents.objects.filter(studentID=user, datecompleted=None).values_list('rangeID').order_by('-lastaccess')[:5]
-        emptylist = []
-        for x in range(0, len(currentranges)):
-            emptylist.append(currentranges[x][0])
-        if len(currentranges) != 0:
-            result = Range.objects.filter(rangeid=(currentranges[0][0]))
-            for x in range(1, len(currentranges)):
-                assignedranges= Range.objects.filter(rangeid=(currentranges[x][0]))
-                result = result | assignedranges
-        else:
-            return None
-        finalist = []
-        for x in emptylist:
-            finalist.append(result.get(rangeid=x))
-        return finalist
+        currentranges = RangeStudents.objects.filter(studentID=user, datecompleted=None).values_list('rangeID',flat=True).order_by('-lastaccess')
+
+        activerangesid = Range.objects.filter(rangeactive='1').values_list('rangeid', flat=True)
+        activerangesid = list(activerangesid)
+
+        finalrangelist = []
+        for x in currentranges:
+            if x in activerangesid:
+                finalrangelist.append(x)
+            if len(finalrangelist)==5:
+                break
+
+        assignedranges = Range.objects.none()
+        for x in finalrangelist:
+            rangename = Range.objects.filter(rangeid=x, rangeactive='1')
+            assignedranges = assignedranges | rangename
+        return assignedranges
 
     def get_context_data(self, **kwargs):
         user = self.request.user
@@ -49,36 +51,35 @@ class DashboardView(generic.ListView):
 
             rankingnames = RangeStudents.objects.order_by('-points').filter(rangeID=latestrange[0]).values_list('studentID', flat=True)[:5]
             result = User.objects.filter(email=(rankingnames[0]))
-            print(rankingnames)
             for x in range(len(rankingnames)):
                 rankingusers= User.objects.filter(email=(rankingnames[x]))
                 result = result | rankingusers
 
             for x in rankingnames:
                 userrankings.append(result.get(email=x))
-                print(userrankings)
             context['zipranks'] = zip(rankings, userrankings)
 
-            latest4points = RangeStudents.objects.filter(studentID=user, datecompleted__isnull=False).order_by('datecompleted')[:4].values_list('points', flat=True)
-            latestpoints= list(reversed(latest4points))
+            latest4id = list(reversed(RangeStudents.objects.filter(studentID=user, datecompleted__isnull=False).order_by('datecompleted').values_list('rangeID',flat=True)))
 
-            latest4id = RangeStudents.objects.filter(studentID=user, datecompleted__isnull=False).order_by('datecompleted')[:4].values_list('rangeID')
-            latest4id = list(reversed(latest4id))
-            empty = []
-            for x in range(0, len(latest4id)):
-                empty.append(latest4id[x][0])
-            if len(latest4id) !=0:
-                result = Range.objects.filter(rangeid=(latest4id[0][0]))
-                for x in range(1, len(latest4id)):
-                    latest4Rid = Range.objects.filter(rangeid=(latest4id[x][0]))
-                    result = result | latest4Rid
+            finalpointslist = []
             finalnamelist = []
-            for x in empty:
-                finalnamelist.append(result.filter(rangeid=x).values_list('rangename')[0][0])
-
             finalmaxlist = []
-            for x in empty:
-                finalmaxlist.append(result.filter(rangeid=x).values_list('maxscore')[0][0])
+
+            for x in latest4id:
+                finalpointslist.append(RangeStudents.objects.filter(studentID=user, rangeID=x).order_by('datecompleted').values_list('points')[0][0])
+                if len(finalpointslist) == 4:
+                    break
+
+            for x in latest4id:
+                finalname = Range.objects.filter(rangeid=x).values_list('rangename')[0][0]
+                finalnamelist.append(finalname)
+                if len(finalnamelist) == 4:
+                    break
+
+            for x in latest4id:
+                finalmaxlist.append(Range.objects.filter(rangeid=x).values_list('maxscore')[0][0])
+                if len(finalmaxlist) == 4:
+                    break
 
             listofrangelength = range(1, (len(finalnamelist)+1))
 
@@ -92,7 +93,10 @@ class DashboardView(generic.ListView):
             else:
                 context['userintop5'] = True
 
-            context['zip4ranges'] = zip(finalnamelist, latestpoints, finalmaxlist, listofrangelength)
+            print(finalnamelist)
+            print(finalpointslist)
+            print(finalmaxlist)
+            context['zip4ranges'] = zip(finalnamelist, finalpointslist, finalmaxlist, listofrangelength)
             context['lengthofranges'] = len(finalnamelist)
 
 

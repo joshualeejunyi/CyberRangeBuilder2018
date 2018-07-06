@@ -5,6 +5,7 @@ from django.views.generic.list import ListView
 from django.views.generic.edit import ModelFormMixin
 from django.views import generic 
 from accounts.models import *
+from django.views.generic import View
 # Create your views here.
 
 class LoginRedirect():
@@ -34,6 +35,8 @@ class RegisterView(ListView, ModelFormMixin):
         if self.form.is_valid():
             self.form.save()
             return redirect('/register/success/')
+        else:
+            return ListView.get(self, request, *args, **kwargs)
     
     def get_queryset(self):
         classes =  UserClass.objects.values_list('userclass')
