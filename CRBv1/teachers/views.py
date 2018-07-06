@@ -15,9 +15,11 @@ from django.contrib import messages
 from django.views.generic import RedirectView
 from functools import reduce
 from django.db.models.functions import Lower
+from django.contrib.auth.mixins import PermissionRequiredMixin
+import requests
 # Create your views here.
 
-class TeacherDashboard(ListView):
+class TeacherDashboard(ListView, PermissionRequiredMixin):
     template_name = 'teachers/teacherdashboard.html'
     context_object_name = 'usersobject'
     paginate_by = 10
@@ -671,3 +673,27 @@ class CreateQuestion(CreateView):
         else:
             print(self.form.errors)
             return render(request, 'teachers/teacherbase.html')
+
+class DockerManagement(ListView):
+    template_name = 'teachers/dockermanagement.html'
+    context_object_name = 'dockerobjects'
+    paginate_by = 10
+
+    def get_queryset(self):
+        dockers = UnavailablePorts.objects.all()
+        return dockers
+
+class AdminDockerKill(View):
+    def get(self, request, containername):
+        # delete old port if existing
+        endpoint = 'http://localhost:3125/containers/{conid}?force=True'
+        url = endpoint.format(conid=containername)
+        response = requests.delete(url)
+        endpoint = 'http://localhost:3125/containers/{conid}?force=True'
+        url = endpoint.format(conid=containername)
+        response = requests.delete(url)
+        # need to delete from containernamed
+        deleteportsdb = UnavailablePorts.objects.filter(containername = containername)
+        deleteportsdb.delete()
+
+        return redirect('/teachers/dockermanagement/')

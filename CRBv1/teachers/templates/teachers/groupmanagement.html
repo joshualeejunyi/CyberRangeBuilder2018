@@ -47,6 +47,7 @@
                             </div>
                         </form>
                     <table id="studentstable" class="table table-bordered table-hover dataTable" role="grid">
+                    {% if groupobjects.all %}
                     <thead>
                         <tr role="row">
                             <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
@@ -100,6 +101,13 @@
                         </tr>
                     {% endfor %}
                     </tbody>
+                    {% else %}
+                    <thead>
+                        <th>
+                            <h4>No Groups Found</h4>
+                        </th>
+                    </thead>
+                    {% endif %}
                 </table>
             </div>
         </div>

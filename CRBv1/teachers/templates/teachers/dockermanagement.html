@@ -1,0 +1,101 @@
+{% extends 'teachers/teacherbase.html' %}
+    <script src="../../plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="../../plugins/datatables/dataTables.bootstrap.min.js"></script>
+{% load widget_tweaks %}
+{% block content_header%}
+	<section class="content-header">
+		<h1>
+			{% block page_name %}Docker Management{% endblock %}
+			<small>{% block page_description %}manage all groups{% endblock %}</small>
+		</h1>
+		{% block breadcrumbs %}
+        {% endblock %}
+    </section>
+{% endblock%}
+
+{% block content %}
+    <section class="content">
+        <div class="row">
+            <div class="box">
+                <div class="box-header with-border">
+                        <h3 class="box-title">Docker Containers</h3>
+                        <div class="box-tools pull-right">
+                            <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                        </div>
+                </div>
+                <div class="box-body">
+                    <table id="studentstable" class="table table-bordered table-hover dataTable" role="grid">
+                    {% if dockerobjects.all %}
+                    <thead>
+                        <tr role="row">
+                            <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                Student Username
+                            </th>
+                            <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                Container ID
+                            </th>
+                            <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                Port In Use
+                            </th>
+                            <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                Date/Time Created
+                            </th>
+                            <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="2" colspan="1" aria-sort="asceding">
+                                Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for docker in dockerobjects %}
+                        <tr role="row">
+                            <td>{{ docker.studentid }}</td>
+                            <td>{{ docker.containername }}</td>
+                            <td>{{ docker.portnumber }}</td>
+                            <td>{{ docker.datetimecreated }}</td>
+                            <td style="text-align: center">
+                                <a style="width: 100px;" class="btn btn-block btn-danger" href="kill/{{ docker.containername }}">Kill Container</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                    {% else %}
+                    <thead>
+                        <th>
+                            <h4>No Dockers Opened</h4>
+                        </th>
+                    </thead>
+                    {% endif %}
+                </table>
+                {% if is_paginated %}
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                        <li><a href="?page={{ page_obj.previous_page_number }}">&laquo;</a></li>
+                    {% else %}
+                        <li class="disabled"><span>&laquo;</span></li>
+                    {% endif %}
+                        
+                    {% for i in paginator.page_range %}
+                        {% if page_obj.number == i %}
+                            <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+                        {% else %}
+                            <li><a href="?page={{ i }}">{{ i }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                        <li><a href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>
+                    {% else %}
+                        <li class="disabled"><span>&raquo;</span></li>
+                    {% endif %}
+                </ul>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+<script>
+    $(function () {
+       $("#studentstable").DataTable();
+    });
+</script>

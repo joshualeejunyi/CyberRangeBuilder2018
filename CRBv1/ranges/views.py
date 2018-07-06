@@ -9,7 +9,51 @@ import datetime
 from django.utils import timezone
 from django.urls import reverse
 import requests
+from django.views.generic import View
 
+class DockerKill(View):
+    def get(self, request):
+        print("JUST PASSING THROUGH")
+        # delete old port if existing
+        previousport = UnavailablePorts.objects.filter(studentid = self.request.user).values_list('portnumber')
+        if previousport:
+            print("HI")
+            port = previousport[0][0]
+            containername = UnavailablePorts.objects.filter(studentid = self.request.user).values_list('containername')[0][0]
+            if int(port) >= 9051:
+                serverip = '192.168.100.42'
+            elif int(port) <= 9050:
+                serverip = '192.168.100.43'
+            serverip = 'localhost'
+            endpoint = 'http://' + serverip + ':3125/containers/{conid}?force=True'
+            url = endpoint.format(conid=containername)
+            print(url)
+            response = requests.delete(url)
+            # need to delete from db
+            deleteportsdb = UnavailablePorts.objects.filter(studentid = self.request.user)
+            deleteportsdb.delete()
+            
+        # timeout for ports
+        allentriesinportsdb = UnavailablePorts.objects.all()
+        if allentriesinportsdb != 0:
+            for entry in allentriesinportsdb:
+                timediff = timezone.now() - entry.datetimecreated 
+                print(timediff)
+                if timediff > datetime.timedelta(hours = 3):
+                    containername = entry.containername
+                    port = entry.portnumber
+                    if int(port) >= 9051:
+                        serverip = '192.168.100.42'
+                    elif int(port) <= 9050:
+                        serverip = '192.168.100.43'
+                    serverip = 'localhost'
+                    endpoint = 'http://' + serverip + ':3125/containers/{conid}?force=True'
+                    url = endpoint.format(conid=containername)
+                    response = requests.delete(url)
+                    
+                    # need to delete from db
+                    deleteportsdb = UnavailablePorts.objects.filter(studentid = self.request.user)
+                    deleteportsdb.delete()
 
 class AttemptQuestionView(ListView, ModelFormMixin):
     template_name = 'ranges/attemptquestion.html'
@@ -37,7 +81,7 @@ class AttemptQuestionView(ListView, ModelFormMixin):
         
         else:
             #return first available port for docker server
-            return 9052 
+            return 9051 
 
         #print('FIRST --->')
         #print(dockerserver, webserver)
@@ -72,20 +116,6 @@ class AttemptQuestionView(ListView, ModelFormMixin):
         # okay so before we start a new docker container
         # we need to check if there are any open containers
         # we have stored it in the session
-        previousport = UnavailablePorts.objects.filter(studentid = self.request.user).values_list('containername')
-        if previousport:
-            containername = previousport[0][0]
-            endpoint = 'http://192.168.100.42:8051/containers/{conid}?force=True'
-            url = endpoint.format(conid=containername)
-            response = requests.delete(url)
-            endpoint = 'http://192.168.100.43:8051/containers/{conid}?force=True'
-            url = endpoint.format(conid=containername)
-            response = requests.delete(url)
-            # need to delete from db
-            deleteportsdb = UnavailablePorts.objects.filter(studentid = self.request.user)
-            deleteportsdb.delete()
-
-
         data = {}
         port = self.checkPorts()
         serverip = ''
@@ -112,7 +142,8 @@ class AttemptQuestionView(ListView, ModelFormMixin):
                 ]}
             }
         }
-        url = 'http://' + serverip + ':8051/containers/create'
+        serverip = 'localhost'
+        url = 'http://' + serverip + ':3125/containers/create'
         response = requests.post(url, json=payload)
         #print('HI IM HERE')
         #print(response.status_code)
@@ -120,7 +151,7 @@ class AttemptQuestionView(ListView, ModelFormMixin):
             test = True
             data = response.json()
             containerid = data['Id']
-            starturl = 'http://' + serverip + ':8051/containers/%s/start' % containerid
+            starturl = 'http://' + serverip + ':3125/containers/%s/start' % containerid
             response = requests.post(starturl)
 
             portsdb = UnavailablePorts(portnumber = int(port), studentid = self.request.user, containername = containerid, datetimecreated = timezone.now())
@@ -184,6 +215,7 @@ class AttemptQuestionView(ListView, ModelFormMixin):
             return ListView.get(self, request, *args, **kwargs)
 
     def get_queryset(self):
+        DockerKill.get(self, self.request)
         self.questionid = get_object_or_404(Questions, questionid=self.kwargs['questionid'])
         self.rangeid = get_object_or_404(Range, rangeurl=self.kwargs['rangeurl'], rangeactive=1)
         #print("1 --> " + str(self.kwargs['questionid']))
@@ -279,6 +311,7 @@ class AttemptMCQQuestionView(ListView, ModelFormMixin):
             return None
 
     def get_queryset(self):
+        DockerKill.get(self, self.request)
         self.questionid = get_object_or_404(Questions, questionid=self.kwargs['questionid'])
         self.rangeid = get_object_or_404(Range, rangeurl=self.kwargs['rangeurl'], rangeactive=1)
         #print("1 --> " + str(self.kwargs['questionid']))
@@ -439,43 +472,22 @@ class QuestionsView(ListView):
             context['unattemptedquestions'] = None
 
         context['rangename'] = Range.objects.filter(rangeurl = rangeurl).values_list('rangename')[0][0]
+
+        # okay i need the score that the user has in this range
+        # also need the total score
+
+        userscored = RangeStudents.objects.filter(rangeID = currentrangeid, studentID = user).values_list('points')[0][0]
+        maxscore = Range.objects.filter(rangeurl = rangeurl).values_list('maxscore')[0][0]
+        percent = int(userscored ) / int(maxscore) * 100
+        context['userscored'] = userscored
+        context['maxscore'] = maxscore
+        context['percent'] = percent
+        print(context)
         return context
 
     def get_queryset(self):
         self.rangeurl = get_object_or_404(Range, rangeurl=self.kwargs['rangeurl'], rangeactive=1)
-
-        previousport = UnavailablePorts.objects.filter(studentid = self.request.user).values_list('containername')
-        if previousport:
-            containername = previousport[0][0]
-            endpoint = 'http://192.168.100.42:8051/containers/{conid}?force=True'
-            url = endpoint.format(conid=containername)
-            response = requests.delete(url)
-            endpoint = 'http://192.168.100.43:8051/containers/{conid}?force=True'
-            url = endpoint.format(conid=containername)
-            response = requests.delete(url)
-            # need to delete from db
-            deleteportsdb = UnavailablePorts.objects.filter(studentid = self.request.user)
-            deleteportsdb.delete()
-
-        # timeout for ports
-        allentriesinportsdb = UnavailablePorts.objects.all()
-        if allentriesinportsdb != 0:
-            for entry in allentriesinportsdb:
-                timediff = timezone.now() - entry.datetimecreated 
-                print(timediff)
-                if timediff > datetime.timedelta(hours = 3):
-                    containername = entry.containername
-                    endpoint = 'http://192.168.100.42:8051/containers/{conid}?force=True'
-                    url = endpoint.format(conid=containername)
-                    response = requests.delete(url)
-
-                    endpoint = 'http://192.168.100.43:8051/containers/{conid}?force=True'
-                    url = endpoint.format(conid=containername)
-                    response = requests.delete(url)
-                    # need to delete from db
-                    deleteportsdb = UnavailablePorts.objects.filter(studentid = self.request.user)
-                    deleteportsdb.delete()
-
+        DockerKill.get(self, self.request)
         # get the range id
         currentrangeid = Range.objects.filter(rangeurl = self.kwargs['rangeurl']).values_list('rangeid')[0][0]
         #print(currentrangeid)
@@ -549,41 +561,7 @@ class RangesView(ListView):
         return context
 
     def get_queryset(self):
-        # delete old port if existing
-        previousport = UnavailablePorts.objects.filter(studentid = self.request.user).values_list('containername')
-        if previousport:
-            containername = previousport[0][0]
-            endpoint = 'http://192.168.100.42:8051/containers/{conid}?force=True'
-            url = endpoint.format(conid=containername)
-            response = requests.delete(url)
-            endpoint = 'http://192.168.100.42:8051/containers/{conid}?force=True'
-            url = endpoint.format(conid=containername)
-            response = requests.delete(url)
-            # need to delete from db
-            deleteportsdb = UnavailablePorts.objects.filter(studentid = self.request.user)
-            deleteportsdb.delete()
-
-        # timeout for ports
-        allentriesinportsdb = UnavailablePorts.objects.all()
-        if allentriesinportsdb != 0:
-            for entry in allentriesinportsdb:
-                timediff = timezone.now() - entry.datetimecreated 
-                print(timediff)
-                if timediff > datetime.timedelta(hours = 3):
-                    print("more than 2 minutes")
-                    containername = entry.containername
-                    endpoint = 'http://192.168.100.42:8051/containers/{conid}?force=True'
-                    url = endpoint.format(conid=containername)
-                    response = requests.delete(url)
-                    endpoint = 'http://192.168.100.43:8051/containers/{conid}?force=True'
-                    url = endpoint.format(conid=containername)
-                    response = requests.delete(url)
-                    # need to delete from db
-                    deleteportsdb = UnavailablePorts.objects.filter(studentid = self.request.user)
-                    deleteportsdb.delete()
-
-        
-
+        DockerKill.get(self, self.request)
         # get the email address of current user
         user = self.request.user
         # get the rangeIDs that are assigned to current user (in a queryset)

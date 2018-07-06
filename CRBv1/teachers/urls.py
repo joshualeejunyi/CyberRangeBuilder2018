@@ -38,4 +38,9 @@ urlpatterns = [
     path('rangemanagement/view/<rangeurl>', login_required(views.RangeView.as_view()), name="rangeview"),
     path('rangemanagement/deleterange/<rangeid>', login_required(views.DeleteRange.as_view()), name="deleterange"),
     path('rangemanagement/viewquestion/<rangeid>/edit/<questionid>', login_required(views.EditQuestion.as_view()), name="editquestion"),
+
+
+    path('dockermanagement/', login_required(views.DockerManagement.as_view()), name='dockermanagemenet'),
+    path('dockermanagement/kill/<containername>', login_required(views.AdminDockerKill.as_view()), name='killdocker'),
+
 ]  

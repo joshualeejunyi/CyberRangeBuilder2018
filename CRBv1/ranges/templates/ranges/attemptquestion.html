@@ -93,6 +93,46 @@
 					</div>
 				</div>
 			</div>
+			{% elif question.questiontype == 'TF' %}
+				<div class="row justify-content-md-center">
+					<div class="col-md-5">
+						<div class="box box-solid box-primary">
+							<div class="box-header with-border">
+							<h3 class="box-title">{{ question.title}}</h3>
+							<div class="box-tools pull-right">
+								<button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+							</div>
+						</div>
+
+						<div class="box-body">
+							<p>{{question.text}}</p>
+							<div class="form-group">
+								<form method="post">
+									{% csrf_token %}
+									<div class="pull-right" style="width: 300px">
+									{{ form }}
+									</div>
+								<br>
+							</div>
+						</div>
+						
+						<div class="box-footer">
+							<button type="submit" class="btn btn-primary">Submit</button>
+							</form>
+							<p class="pull-right">{{ question.marks }} points</p>
+						</div>
+					</div>
+					<div style="width: 100px">
+						<a href="../../ play" class="btn btn-block btn-primary">Back</a>
+					</div>
+				</div>
+
+				<div class="float-right">
+					<div>
+						<iframe id ='siab' width="50%" height="700px" src="https://{{ siab }}" frameborder="0"></iframe>
+					</div>
+				</div>
+			</div>
 			{% endif %}
 		{% endfor %}
 	{% else %}

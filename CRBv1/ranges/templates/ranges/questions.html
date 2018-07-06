@@ -4,7 +4,7 @@
 	<section class="content-header">
 		<h1>
             {% block page_name %}
-                Questions
+                {{ rangename }} Questions
             {% endblock %}
 		    <small>
                 {% block page_description %}
@@ -19,6 +19,19 @@
 {% endblock%}
 
 {% block content %}
+	<section class="content">
+		<div class="row" style=" margin: 0 auto;">
+			<h4>
+				<strong>Range Completion</strong>
+				<span class="progress-number" style="font-size: 18px;">({{ userscored }}/{{ maxscore}} points):</span>
+			</h4>
+			<div class="progress-group">
+				
+				<div class="progress lg">
+				<div class="progress-bar progress-bar-green" style="width: {{ percent }}%"></div>
+				</div>
+			</div>
+		</div>
 	{% for topic in topics %}
 	<div class="box box-solid box-primary" style="box-shadow: 1px 2px 5px grey;">
         <div class="box-header with-border">
@@ -107,4 +120,5 @@
    	<div style="width: 100px; box-shadow: 1px 2px 5px grey;">
 		<a href="../../" class="btn btn-block btn-primary">Back</a>
 	</div>
+	</section>
 {% endblock %}
