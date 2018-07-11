@@ -26,13 +26,13 @@
                             <i class="fa fa-clipboard"></i>
                             <b>Import Questions from Database</b>
                         </a>
-                        <a class="btn btn-app" href="import" style="height: 70px; font-size: 1em; min-width: 15%;">
+                        <a class="btn btn-app" href="importcsv" style="height: 70px; font-size: 1em; min-width: 15%;">
                             <i class="fa fa-files-o"></i>
                             <b>Import Questions from CSV File</b>
                         </a>
                         </div>
                         <div style="margin-bottom: 1%; margin-top: 1%; text-align: center;">
-                        <a class="btn btn-app" href="export" style="height: 70px; font-size: 1em; min-width: 15%;">
+                        <a class="btn btn-app" href="exportcsv" style="height: 70px; font-size: 1em; min-width: 15%;">
                             <i class="fa fa-floppy-o"></i>
                             <b>Export Current Questions</b>
                         </a>
@@ -64,13 +64,22 @@
                                     Range Name
                                 </th>
                                 <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Range URL
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
                                     Date Created
                                 </th>
                                 <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
                                     Start Date
                                 </th>
                                 <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Start Time
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
                                     End Date
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    End Time
                                 </th>
                                 <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
                                     Max Score
@@ -89,18 +98,45 @@
                         {% for e in range %}
                             <tr role="row">
                                 <td> {{e.rangename }}</td>
+                                <td> {{e.rangeurl }}</td>
                                 <td> {{e.datecreated }}</td>
-                                <td> {{e.datestart }}</td>
-                                <td> {{e.dateend }}</td>
+                                <td> 
+                                    {% if e.datestart is None %}
+                                        <i>Unspecified</i>
+                                    {% else %}    
+                                        {{e.datestart }}
+                                    {% endif %}
+                                </td>
+                                <td> 
+                                    {% if e.timestart is None %}
+                                        <i>Unspecified</i>
+                                    {% else %}
+                                        {{ e.timestart }}
+                                    {% endif %}
+                                </td>
+                                <td> 
+                                    {% if e.dateend is None %}
+                                        <i>Unspecified</i>
+                                    {% else %}    
+                                        {{e.dateend }}
+                                    {% endif %}
+                                </td>
+                                <td> 
+                                    {% if e.timeend is None %}
+                                        <i>Unspecified</i>
+                                    {% else %}
+                                        {{e.timeend }}
+                                    {% endif %}
+                                </td>
                                 <td> 
                                     {% if e.maxscore is None %}
                                         0
                                     {% else %}
                                         {{e.maxscore }}
-                                    {% endif %}
-                                    </td>
+                                    {% endif %}    
+                                </td>
                                 <td> {{e.lastmodifiedby }}</td>
-                                <td> {{e.lastmodifieddate}}</td>
+                                <td> {{e.lastmodifieddate }}</td>
                                 <td> {{e.rangecode }}</td>
                             </tr>
                         {% endfor %}

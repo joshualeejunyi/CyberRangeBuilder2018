@@ -13,7 +13,6 @@ from django.views.generic import View
 
 class DockerKill(View):
     def get(self, request):
-        print("JUST PASSING THROUGH")
         # delete old port if existing
         previousport = UnavailablePorts.objects.filter(studentid = self.request.user).values_list('portnumber')
         if previousport:
@@ -225,8 +224,13 @@ class AttemptQuestionView(ListView, ModelFormMixin):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        siab = self.dockerContainerStart()
-        context['siab'] = siab
+        questionid = self.kwargs['questionid']
+        usedocker = Questions.objects.filter(questionid = questionid).values_list('usedocker')[0][0]
+        if usedocker is True:
+            siab = self.dockerContainerStart()
+            context['siab'] = siab
+        else:
+            context['siab'] = False
         context['attempted'] = self.checkattempted()
         context['result'] = self.result()
         #print('ATTEMPTED ----->>>>> ' + str(context['attempted']))
@@ -243,6 +247,9 @@ class AttemptQuestionView(ListView, ModelFormMixin):
             #print("HERE ARE THE OPTIONS" + str(options))
             context['mcqoptions'] = options
 
+        points = RangeQuestions.objects.filter(rangeid = self.rangeid, questionid = self.kwargs['questionid']).values_list('points')[0][0]
+        context['questionpoints'] = points
+
         return context
 
 
@@ -251,6 +258,114 @@ class AttemptMCQQuestionView(ListView, ModelFormMixin):
     context_object_name = 'question'
     model = StudentQuestions
     form_class = AnswerMCQForm
+
+    def checkPorts(self):
+        database = UnavailablePorts.objects.all().values_list('portnumber')
+        size = len(database)
+        #print(size)
+
+        dockerserver = []
+        webserver = []
+
+        if size > 0:
+            # check if the database has any values
+            for x in range(0, size):
+                # if the port belongs to databaseserver, append to database list
+                if database[x][0] <= 9050:
+                    webserver.append(database[x])
+                # if the port belongs to dockerserver, append to dockerserver list
+                elif database[x][0] >=9052:
+                    dockerserver.append(database[x])
+        
+        else:
+            #return first available port for docker server
+            return 9051 
+
+        #print('FIRST --->')
+        #print(dockerserver, webserver)
+
+        webserversize = len(webserver)
+        dockerserversize = len(dockerserver)
+        #print('SECOND --->')
+        #print(webserversize, dockerserversize)
+        
+        if dockerserversize < 50:
+            if int(dockerserver[dockerserversize - 1][0]) == 9100:
+                for x in range(0, 48):
+                    if int(dockerserver[x + 1][0]) - int(dockerserver[x][0]) != 1:
+                        result = int(dockerserver[x][0]) + 1
+                        return result
+            else:
+                result = int(dockerserver[dockerserversize - 1][0]) + 1
+                return result
+        elif webserversize < 50:
+            if int(webserver[webserversize - 1][0]) == 9050:
+                for x in range(0, 48):
+                    if int(webserver[x + 1][0]) - int(webserver[x][0]) != 1:
+                        result = int(webserver[x][0]) + 1
+                        return result
+            else:
+                result = int(webserver[webserversize - 1][0]) + 1
+                return result
+        else:
+            return -1
+
+    def dockerContainerStart(self):
+        # okay so before we start a new docker container
+        # we need to check if there are any open containers
+        # we have stored it in the session
+        data = {}
+        port = self.checkPorts()
+        serverip = ''
+        if port == -1:
+            return HttpResponse('SERVER BUSY. PLEASE TRY AGAIN LATER.')
+        # port 8051 is reserved for API
+        elif port >= 9051:
+            serverip = '192.168.100.42'
+        elif port <= 9050:
+            serverip = '192.168.100.43'
+        port = str(port)
+        rangename = self.kwargs['rangeurl']
+        questionnumber = self.kwargs['questionid']
+        imagename = str(rangename + '.' + questionnumber)
+        image = 'siab_server'
+        payload = {
+            'Image':image,
+            'HostConfig': {
+                "PortBindings": {
+                "4200/tcp": [{
+                    "HostIp": "",
+                    "HostPort": port
+                    }
+                ]}
+            }
+        }
+        serverip = 'localhost'
+        url = 'http://' + serverip + ':3125/containers/create'
+        response = requests.post(url, json=payload)
+        #print('HI IM HERE')
+        #print(response.status_code)
+        if response.status_code == 201:
+            test = True
+            data = response.json()
+            containerid = data['Id']
+            starturl = 'http://' + serverip + ':3125/containers/%s/start' % containerid
+            response = requests.post(starturl)
+
+            portsdb = UnavailablePorts(portnumber = int(port), studentid = self.request.user, containername = containerid, datetimecreated = timezone.now())
+            portsdb.save()
+            # for testing
+            finalsiaburl = serverip+':'+port
+            #print(finalsiaburl)
+            return finalsiaburl
+
+        elif response.status_code == 400:
+            return redirect('/error')
+        elif response.status_code == 409:
+            return redirect('/error')
+        else:
+            return redirect('/error')
+
 
     def get_form_kwargs(self):
         kwargs = super(AttemptMCQQuestionView, self).get_form_kwargs()
@@ -337,7 +452,14 @@ class AttemptMCQQuestionView(ListView, ModelFormMixin):
             #print("HERE ARE THE OPTIONS" + str(options))
             context['mcqoptions'] = options
 
-
+        points = RangeQuestions.objects.filter(rangeid = self.rangeid, questionid = self.kwargs['questionid']).values_list('points')[0][0]
+        context['questionpoints'] = points
+        usedocker = Questions.objects.filter(questionid = self.kwargs['questionid']).values_list('usedocker')[0][0]
+        if usedocker is True:
+            siab = self.dockerContainerStart()
+            context['siab'] = siab
+        else:
+            context['siab'] = False
         return context
 
 class QuestionsView(ListView):
@@ -482,7 +604,8 @@ class QuestionsView(ListView):
         context['userscored'] = userscored
         context['maxscore'] = maxscore
         context['percent'] = percent
-        print(context)
+        points = RangeQuestions.objects.filter(rangeid = currentrangeid)
+        context['questionpoints'] = points
         return context
 
     def get_queryset(self):

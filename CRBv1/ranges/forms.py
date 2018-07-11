@@ -11,28 +11,44 @@ class AnswerForm(forms.ModelForm):
     #         self.fields['custom_%s' % i] = forms.CharField(label=question)
 
     def checkAnswer(self, user, answergiven, questioninstance, rangeinstance, questionid):
-        marks = Questions.objects.filter(questionid = questionid).values_list('marks')[0][0]
+        points = RangeQuestions.objects.filter(questionid = questionid).values_list('points')[0][0]
         #print("MARKKKKKK ->>>>>>>" + str(marks))
         correctanswer = RangeQuestions.objects.filter(questionid = questionid).values_list('answer')[0][0]
+        isthisashortanswer = Questions.objects.filter(questionid = questionid).values_list('questiontype')[0][0]
 
         repeatedcheck = StudentQuestions.objects.filter(questionid = questionid, studentid = user, rangeid = rangeinstance)
         if len(repeatedcheck) == 0:
             check = False
-            if answergiven.lower() == correctanswer.lower():
-                check = True
+            if isthisashortanswer == 'SA':
+                saanswer = correctanswer.lower().split()
+                givenanswer = answergiven.lower().split()
+                print(saanswer)
+                keywords = len(saanswer)
+                keycheck = 0
+                for x in saanswer:
+                    for y in givenanswer:
+                        if y in x:
+                            keycheck += 1
+                            if keycheck == keywords:
+                                check = True
 
+            else:
+                if answergiven.lower() == correctanswer.lower():
+                    check = True
+
+            print(check)
             studentobject = StudentQuestions()
             studentobject.studentid = user
             studentobject.rangeid = rangeinstance
             studentobject.questionid = questioninstance
             studentobject.answergiven = answergiven
             studentobject.answercorrect = check
-            studentobject.marksawarded = marks
+            studentobject.marksawarded = points
             studentobject.save()
 
             if check is True:
                 pointsobject = RangeStudents.objects.get(rangeID = rangeinstance, studentID = user)
-                pointsobject.points += marks
+                pointsobject.points += points
                 pointsobject.save()
             
                 return True
@@ -54,9 +70,9 @@ class AnswerMCQForm(forms.ModelForm):
         self.fields['answergiven'].choices = self.choices
 
     def checkAnswer(self, user, answergiven, questioninstance, rangeinstance, questionid):
-        marks = Questions.objects.filter(questionid = questionid).values_list('marks')[0][0]
+        points = RangeQuestions.objects.filter(questionid = questionid).values_list('points')[0][0]
         #print("MARKKKKKK ->>>>>>>" + str(marks))
-        correctanswer = Questions.objects.filter(questionid = questionid).values_list('answer')[0][0]
+        correctanswer = RangeQuestions.objects.filter(questionid = questionid).values_list('answer')[0][0]
 
         repeatedcheck = StudentQuestions.objects.filter(questionid = questionid, studentid = user, rangeid = rangeinstance)
         if len(repeatedcheck) == 0:
@@ -72,12 +88,12 @@ class AnswerMCQForm(forms.ModelForm):
             studentobject.questionid = questioninstance
             studentobject.answergiven = answergiven
             studentobject.answercorrect = check
-            studentobject.marksawarded = marks
+            studentobject.marksawarded = points
             studentobject.save()
 
             if check is True:
                 pointsobject = RangeStudents.objects.get(rangeID = rangeinstance, studentID = user)
-                pointsobject.points += marks
+                pointsobject.points += points
                 pointsobject.save()
             
                 return True

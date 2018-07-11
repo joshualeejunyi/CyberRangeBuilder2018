@@ -54,7 +54,13 @@
 						        			<span class="info-box-icon bg-green"><span class="glyphicon glyphicon-question-sign"></span></span>
 						        				<div class="info-box-content">
 						          					<span class="info-box-text">{{ question.title }}</span>
-						          					<span class="info-box-number">{{ question.marks }} points</span>
+						          					<span class="info-box-number">
+														{% for x in questionpoints %}
+															{% if x.questionid.questionid == question.questionid %}
+																{{x.points}} points
+															{% endif %}
+														{% endfor %}
+													</span>
 							        			</div>
 					      				</div>
 				    				</div>
@@ -66,7 +72,13 @@
 						        			<span class="info-box-icon bg-green"><span class="glyphicon glyphicon-question-sign"></span></span>
 						        				<div class="info-box-content">
 						          					<span class="info-box-text">{{ question.title }}</span>
-						          					<span class="info-box-number">{{ question.marks }} points</span>
+						          					<span class="info-box-number">
+														{% for x in questionpoints %}
+															{% if x.questionid.questionid == question.questionid %}
+																{{x.points}} points
+															{% endif %}
+														{% endfor %}
+													</span>
 							        			</div>
 					      				</div>
 				    				</div>
@@ -84,7 +96,13 @@
 						        			<span class="info-box-icon bg-red"><span class="glyphicon glyphicon-question-sign"></span></span>
 						        				<div class="info-box-content">
 						          					<span class="info-box-text">{{ question.title }}</span>
-						          					<span class="info-box-number">{{ question.marks }} points</span>
+						          					<span class="info-box-number">
+														{% for x in questionpoints %}
+															{% if x.questionid.questionid == question.questionid %}
+																{{x.points}} points
+															{% endif %}
+														{% endfor %}
+													</span>
 							        			</div>
 					      				</div>
 				    				</div>
@@ -96,7 +114,13 @@
 						        			<span class="info-box-icon bg-red"><span class="glyphicon glyphicon-question-sign"></span></span>
 						        				<div class="info-box-content">
 						          					<span class="info-box-text">{{ question.title }}</span>
-						          					<span class="info-box-number">{{ question.marks }} points</span>
+						          					<span class="info-box-number">
+														{% for x in questionpoints %}
+															{% if x.questionid.questionid == question.questionid %}
+																{{x.points}} points
+															{% endif %}
+														{% endfor %}
+													</span>
 							        			</div>
 					      				</div>
 				    				</div>
