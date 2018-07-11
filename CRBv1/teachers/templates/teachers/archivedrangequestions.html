@@ -1,0 +1,163 @@
+{% extends 'teachers/teacherbase.html' %}
+{% load widget_tweaks %}
+{% block content %}
+    <section class="content">
+        <div class="row" style="width: 70%; margin: 0 auto" >
+                
+            <div class="box">
+                <div class="box-header with-border">
+                        <h3 class="box-title">{{ rangename }} </h3>
+                        <div class="box-tools pull-right">
+                            <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                        </div>
+                </div>
+                
+                <div class="box-body">
+                    <table class="table table-bordered table-hover dataTable">
+                        
+                        <thead>
+                            <tr role="row">
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Range Name
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Date Created
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Start Date
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    End Date
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Max Score
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Last Modified By
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Last Modified Date
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Range Code
+                                </th>
+                            </tr>
+                        </thead>
+                        {% for e in range %}
+                            <tr role="row">
+                                <td> {{e.rangename }}</td>
+                                <td> {{e.datecreated }}</td>
+                                <td> {{e.datestart }}</td>
+                                <td> {{e.dateend }}</td>
+                                <td> 
+                                    {% if e.maxscore is None %}
+                                        0
+                                    {% else %}
+                                        {{e.maxscore }}
+                                    {% endif %}
+                                    </td>
+                                <td> {{e.lastmodifiedby }}</td>
+                                <td> {{e.lastmodifieddate}}</td>
+                                <td> {{e.rangecode }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+
+            <div class="box">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Archived Questions in {{ rangename }}</h3>
+                    <div class="box-tools pull-right">
+                        <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                    </div>
+                </div>
+                <div class="box-body">
+                    <table class="table table-bordered table-hover dataTable">
+                        {% if result is not None%}
+                        <thead>
+                            <tr role="row">
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Question Type
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Question Topic
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Question Title
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Question Text
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Question Hint
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Answer
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Question Marks
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Actions
+                                </th>
+                        </thead>
+                            {% for x in result %}
+                                <tr role="row">
+                                    <td> 
+                                        {% if x.questiontype == 'FL' %}
+                                            Flag
+                                        {% elif x.questiontype == 'MCQ' %}
+                                            MCQ
+                                        {% elif x.questiontype == 'SA' %}
+                                            Short Answer
+                                        {% elif x.questiontype == 'OE' %}
+                                            Open Ended
+                                        {% elif x.questiontype == 'TF' %}
+                                            True/False
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% for m in topics %}
+                                            {% if m.topicname == x.topicid.topicname %}
+                                            {{ m.topicname }}
+                                            {% endif %}
+                                        {% endfor %}
+                                    </td>
+                                    <td> {{x.title }} </td>
+                                    <td> {{x.text }} </td>
+                                    <td> {{x.hint }} </td>
+                                    <td>
+                                        {% for y in answer %}
+                                            {% if y.questionid.questionid == x.questionid %}
+                                                {{ y.answer }}
+                                            {% endif %}
+                                        {% endfor %}
+                                    </td>
+                                    <td> 
+                                        {% for a in marks %}
+                                            {% if a.questionid.questionid == x.questionid %}
+                                                {{ a.points }}
+                                            {% endif %}
+                                        {% endfor %}
+                                    </td>
+                                    <td style="text-align: center">
+                                        <a class="btn btn-block btn-success" href="unarchive/{{ x.questionid }}">Unarchive</a>
+                                        <a class="btn btn-block btn-danger" href="delete/{{ x.questionid }}">Permanently Delete</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                        <thead>
+                            <th>
+                                <h4>No Archived Questions Found in {{ rangename }}</h4>
+                            </th>
+                        </thead>
+                        {% endif %}
+                        
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

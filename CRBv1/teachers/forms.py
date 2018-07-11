@@ -160,3 +160,30 @@ class QuestionForm(ModelForm):
     class Meta:
         model = Questions
         fields = ('questiontype', 'title', 'text', 'hint', 'usedocker')
+
+class ModifyQuestionForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop("request")
+        super(ModifyQuestionForm, self).__init__(*args, **kwargs)
+    
+    def clean(self):
+        cleaned_data = super(ModifyQuestionForm, self).clean()
+        usedocker = cleaned_data.get("usedocker")
+        registryid = self.request.POST.get('registryid','')
+
+        if usedocker == "Yes" and registryid == "":
+            msg = u"Please enter the Registry ID!"
+            self._errors["registryid"] = self.error_class([msg])
+
+    def save(self, commit=True):
+        question = super().save(commit=False)
+        topicname = self.request.POST.get('topicname',' ')
+        topicid = QuestionTopic.objects.get(topicname = topicname)
+        question.topicid = topicid
+        if commit:
+            question.save()
+        return question
+
+    class Meta:
+        model = Questions
+        fields = ('title', 'text', 'hint',)

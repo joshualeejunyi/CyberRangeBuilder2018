@@ -141,6 +141,9 @@
                                 <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
                                     Question Marks
                                 </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Actions
+                                </th>
                         </thead>
                             {% for x in result %}
                                 <tr role="row">
@@ -195,9 +198,56 @@
                         </thead>
                         {% endif %}
                     </table>
+                    <br>
+                    <a class="btn btn-block btn-danger" style="width: 15%" href="archived">View Archived Questions</a>
                 </div>
             </div>
-
+            <div class="box">
+                <div class="box-header with-border">
+                        <h3 class="box-title">Groups in {{ rangename }} </h3>
+                        <div class="box-tools pull-right">
+                            <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                        </div>
+                </div>
+                <div class="box-body">
+                    <table id="studentstable" class="table table-bordered table-hover dataTable" role="grid">
+                        {% if groups is not None %}
+                        <thead>
+                            <tr role="row">
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Group Name
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Group Leader
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Date Joined
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for group in groups %}
+                            <tr role="row">
+                                <td>{{ group.groupname }}</td>
+                                <td>{{ group.groupleader }}</td>
+                                <td>{{ group.datejoined }}</td>
+                                <td>
+                                    <a class="btn btn-block btn-danger" href="remove/{{ user.username }}">Remove</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                        {% else %}
+                        <thead>
+                            <th><h4>No Groups Found</h4></th>
+                        </thead>
+                        {% endif %}
+                    </table>
+            </div>
+            </div>
             <div class="box">
                 <div class="box-header with-border">
                         <h3 class="box-title">Students in {{ rangename }} </h3>
@@ -206,65 +256,55 @@
                         </div>
                 </div>
                 <div class="box-body">
-                        <table id="studentstable" class="table table-bordered table-hover dataTable" role="grid">
-                                <thead>
-                                    <tr role="row">
-                                        <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                            Name
-                                        </th>
-                                        <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                            Email
-                                        </th>
-                                        <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                            Username
-                                        </th>
-                                        <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                            Class
-                                        </th>
-                                        <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                            Date Joined
-                                        </th>
-                                        <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                            Accepted
-                                        </th>
-                                        <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                            Accepted By
-                                        </th>
-                                        <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                            Last Modified By
-                                        </th>
-                                        <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                            Last Modified Date
-                                        </th>
-                                        <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                                Last Modified Time
-                                        </th>
-                                        <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                            Actions
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                {% for user in students %}
-                                    <tr role="row">
-                                        <td>{{ user.name }}</td>
-                                        <td>{{ user.email }}</td>
-                                        <td>{{ user.username }}</td>
-                                        <td>{{ user.userclass }}</td>
-                                        <td>{{ user.datejoined }}</td>
-                                        <td>{{ user.isaccepted }}</td>
-                                        <td>{{ user.acceptedby }}</td>
-                                        <td>{{ user.lastmodifiedby }}</td>
-                                        <td>{{ user.lastmodifieddate }}</td>
-                                        <td>{{ user.lastmodifiedtime }}</td>
-                                        <td>
-                                            <a class="btn btn-block btn-danger" href="remove/{{ user.username }}">Remove</a>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                                </tbody>
-                            </table>
+                    <table id="studentstable" class="table table-bordered table-hover dataTable" role="grid">
+                        {% if students is not None %}
+                        <thead>
+                            <tr role="row">
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Name
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Email
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Username
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Class
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Group
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for user in students %}
+                            <tr role="row">
+                                <td>{{ user.name }}</td>
+                                <td>{{ user.email }}</td>
+                                <td>{{ user.username }}</td>
+                                <td>{{ user.userclass }}</td>
+                                <td>
+
+                                </td>
+                                <td>
+                                    <a class="btn btn-block btn-danger" href="remove/{{ user.username }}">Remove</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                        {% else %}
+                        <thead>
+                            <th><h4>No Users Found</h4></th>
+                        </thead>
+                        {% endif %}
+                    </table>
                 </div>
+            </div>
+            
         </div>
     </section>
 {% endblock %}

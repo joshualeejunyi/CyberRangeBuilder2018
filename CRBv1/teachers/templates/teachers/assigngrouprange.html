@@ -1,0 +1,150 @@
+{% extends 'teachers/teacherbase.html' %}
+    <script src="../../plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="../../plugins/datatables/dataTables.bootstrap.min.js"></script>
+{% load widget_tweaks %}
+{% block content_header%}
+	<section class="content-header">
+		<h1>
+			{% block page_name %}{% endblock %}
+			<small>{% block page_description %}{% endblock %}</small>
+		</h1>
+		{% block breadcrumbs %}
+        {% endblock %}
+    </section>
+{% endblock%}
+
+{% block content %}
+    <section class="content">
+        <div class="row" style="width: 50%; margin: 0 auto" >
+                
+            <div class="box">
+                <div class="box-header with-border">
+                        <h3 class="box-title">Add Groups to {{ groupname }}</h3>
+                        <div class="box-tools pull-right">
+                            <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                        </div>
+                </div>
+                <div class="box-body">
+                    {% if cart %}
+                    <div class="alert alert-success alert-dismissible">
+                        <h4><i class="icon fa fa-success"></i>You Are Adding:</h4>
+                        <ul>
+                        {% for users in cart %}
+                            <li><h4>{{users}}</h4></li>
+                        {% endfor %}
+                        </ul>
+                        <a href="assigngroups/commit" class="btn btn-primary btn-block btn-flat" style="width: 100px; margin-top: 0.2%;">Submit</a>
+                    </div>
+                    {% endif %}
+                        <form method="get">
+                                <div class="well">
+                                  <h4 style="margin-top: 0">Filter</h4>
+                                  <div class="row">
+                                    <div class="form-group col-sm-4 col-md-3">
+                                        <label for="username">Username:</label>
+                                      {% render_field filter.form.username class="form-control" %}
+                                    </div>
+                                    <div class="form-group col-sm-4 col-md-3">
+                                            <label for="name">Full Name:</label>
+                                      {% render_field filter.form.name class="form-control" %}
+                                    </div>
+                                    <div class="form-group col-sm-4 col-md-3">
+                                        <label for="email">Email:</label>
+                                      {% render_field filter.form.email class="form-control" %}
+                                    </div>
+                                    <div class="form-group col-sm-4 col-md-3">
+                                        <label for="userclass">Class:</label>
+                                        <select name="userclass" class="form-control" placeholder="Class">
+                                            <option value="" selected></option>
+                                            {% for class in classesobject %}	
+                                            <option value='{{ class.0 }}'>{{ class.0 }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-sm-8 col-md-6">
+                                      {{ filter.form.groups.label_tag }}
+                                      <div>
+                                        {% for choice in filter.form.groups %}
+                                          <label class="checkbox-inline">
+                                            {{ choice.tag }} {{ choice.choice_label }}
+                                          </label>
+                                        {% endfor %}
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <button type="submit" class="btn btn-primary btn-flat">
+                                    <span class="glyphicon glyphicon-search"></span> Search
+                                  </button>
+                                  <a href="./addusers" class="btn btn-primary btn-block btn-flat" style="width: 100px; margin-top: 0.2%;">Reset Filters</a>
+                                </div>
+                              </form>
+                    <table id="studentstable" class="table table-bordered table-hover dataTable" role="grid">
+                    <thead>
+                        <tr role="row">
+                            <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                Group Name
+                            </th>
+                            <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                Group Leader
+                            </th>
+                            <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for group in groupobject %}
+                        <tr role="row">
+                            <td>{{ group.groupname }}</td>
+                            <td>
+                                {% if group.groupleader is None %}
+                                    <i>No Group Leader Assigned</i>
+                                {% else %}
+                                    {{ group.groupleader }}
+                                {% endif %}
+                                </td>
+                            <td>
+                                {% if group.groupname in cart %}
+                                <a class="btn btn-block btn-primary" href="assigngroups/remove/{{ group.groupname }}">Remove</a>
+                                {% else %}
+                                <a class="btn btn-block btn-primary" href="assigngroups/add/{{ group.groupname }}">Add</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+
+                {% if is_paginated %}
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                        <li><a href="?page={{ page_obj.previous_page_number }}">&laquo;</a></li>
+                    {% else %}
+                        <li class="disabled"><span>&laquo;</span></li>
+                    {% endif %}
+                        
+                    {% for i in paginator.page_range %}
+                        {% if page_obj.number == i %}
+                            <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+                        {% else %}
+                            <li><a href="?page={{ i }}">{{ i }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                        <li><a href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>
+                    {% else %}
+                        <li class="disabled"><span>&raquo;</span></li>
+                    {% endif %}
+                </ul>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+<script>
+    $(function () {
+       $("#studentstable").DataTable();
+    });
+</script>   

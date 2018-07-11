@@ -58,7 +58,7 @@ class RangeStudents(models.Model):
     datecompleted = models.DateField(db_column='dateCompleted', null=True)
     timecompleted = models.TimeField(db_column='timeCompleted', null=True)
     lastaccess = models.DateTimeField(db_column='lastaccess', null=True)
-    groupname = models.ForeignKey('accounts.Group', on_delete=models.CASCADE, db_column="groupname")
+    groupid = models.ForeignKey('accounts.Group', on_delete=models.CASCADE, db_column="groupid", null=True, blank=True)
 
     REQUIRED_FIELDS = ['rangeID', 'studentID']
 
@@ -136,3 +136,4 @@ class UnavailablePorts(models.Model):
     class Meta:
         db_table = 'UnavailablePorts'
         verbose_name_plural = 'UnavailablePorts'
+        ordering = ['-portnumber']
