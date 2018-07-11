@@ -1,0 +1,23 @@
+{% extends 'teachers/teacherbase.html' %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+            <div class="col-md-6 col-md-offset-3">
+                <div class="register-box-body">
+                        <p class="login-box-msg"> Input Anwswer for {{ questiontitle }}</p>
+                        <form method="post">
+                            {% csrf_token %}	
+                            <div class="form-group has-feedback">
+                                <label for="answer">Answer:</label>
+                                <input type="text" name="answer" class="form-control" placeholder="Answer" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block btn-flat pull-right" style="width: 100px">Submit</button>
+                            <a href="./" class="btn btn-primary btn-block btn-flat" style="width: 100px">Back</a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+   
+{% endblock %}

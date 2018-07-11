@@ -7,6 +7,8 @@ from django.contrib.auth.decorators import login_required
 
 urlpatterns = [
     url(r'^$', login_required(views.TeacherDashboard.as_view()), name="teacherdashboard"),
+
+    # USER MANAGEMENT
     path('usermanagement/', login_required(views.UserManagement.as_view()), name="usermanagement"),
     path('usermanagement/search', login_required(FilterView.as_view(filterset_class=StudentFilter, template_name='teachers/usersearch.html')), name='search'),
     path('usermanagement/adduser', login_required(views.AddUser.as_view()), name="adduser"),
@@ -18,6 +20,8 @@ urlpatterns = [
     path('usermanagement/enableuser/<username>', login_required(views.EnableUser.as_view()), name="enableuser"),
     path('usermanagement/disabled', login_required(views.DisabledUserManagement.as_view()), name="disabledusersmanagement"),
     path('usermanagement/deleteuser/<username>', login_required(views.DeleteUser.as_view()), name="deleteuser"),
+
+    # GROUP MANAGEMENT
     path('groupmanagement/', login_required(views.GroupManagement.as_view()), name="groupmanagement"),
     path('groupmanagement/deletegroup/<groupname>', login_required(views.DeleteGroup.as_view()), name="deletegroup"),
     path('groupmanagement/addgroup', login_required(views.AddGroup.as_view()), name="addgroup"),
@@ -31,16 +35,31 @@ urlpatterns = [
     path('groupmanagement/<groupname>/commit', login_required(views.UserGroupCommit.as_view()), name="usergroupcommit"),
     path('groupmanagement/deletegroup/', login_required(views.UserGroupCommit.as_view()), name="usergroupcommit"),
 
-    # hi
+    # RANGE MANAGEMENT
     path('rangemanagement/', login_required(views.RangeManagement.as_view()), name='rangemanagement'),
     path('rangemanagement/createrange/', login_required(views.CreateRange.as_view()), name="createrange"),
-    path('rangemanagement/createrange/createquestion/', login_required(views.CreateQuestion.as_view()), name="createquestion"),
-    path('rangemanagement/view/<rangeurl>', login_required(views.RangeView.as_view()), name="rangeview"),
-    path('rangemanagement/deleterange/<rangeid>', login_required(views.DeleteRange.as_view()), name="deleterange"),
-    path('rangemanagement/viewquestion/<rangeid>/edit/<questionid>', login_required(views.EditQuestion.as_view()), name="editquestion"),
+    path('rangemanagement/createrange/<rangeurl>/createquestion/', login_required(views.CreateQuestion.as_view()), name="createquestion"),
+    path('rangemanagement/view/<rangeurl>/createquestion/', login_required(views.CreateQuestion.as_view()), name="createquestion"),
+    path('rangemanagement/view/<rangeurl>/', login_required(views.RangeView.as_view()), name="rangeview"),
+    path('rangemanagement/view/<rangeurl>/assignusers', login_required(views.AssignUser.as_view()), name="assignuser"),
+    path('rangemanagement/view/<rangeurl>/assignusers/commit', login_required(views.UserRangeCommit.as_view()), name="userrangecommit"),
+    path('rangemanagement/view/<rangeurl>/assignusers/<username>', login_required(views.AddUserRangeCart.as_view()), name="assignuser"),
+    path('rangemanagement/view/<rangeurl>/remove/<username>', login_required(views.RemoveUserRangeCart.as_view()), name="removeusercart"),
+    path('rangemanagement/view/<rangeurl>/edit/', login_required(views.ModifyRange.as_view()), name="modifyrange"),
+    path('rangemanagement/view/<rangeurl>/activate', login_required(views.ActivateRange.as_view()), name="activaterange"),
+    path('rangemanagement/view/<rangeurl>/deactivate', login_required(views.DeactivateRange.as_view()), name="deactivaterange"),
+    path('rangemanagement/view/<rangeurl>/archive/<questionid>/', login_required(views.ArchiveQuestion.as_view()), name="archivequestion"),
+    path('rangemanagement/view/<rangeurl>/import/', login_required(views.AddQuestioninRange.as_view()), name ='addquestionsinrange'),
+    path('rangemanagement/view/<rangeurl>/import/<questionid>/', login_required(views.AddQuestionAnswer.as_view()), name ='addquestionanswer'),
+    path('rangemanagement/archive/<rangeurl>/', login_required(views.ArchiveRange.as_view()), name="archiverange"),
+    path('rangemanagement/archived/', login_required(views.ArchivedRangeManagement.as_view()), name='archivedrangemanagement'),
+    path('rangemanagement/archived/unarchive/<rangeurl>/', login_required(views.UnarchiveRange.as_view()), name='unarchiverange'),
+    path('rangemanagement/archived/delete/<rangeurl>/', login_required(views.DeleteRange.as_view()), name='deleterange'),
+    path('rangemanagement/view/<rangeid>/edit/<questionid>/', login_required(views.EditQuestion.as_view()), name="editquestion"),
 
+    path('questionmanagement/', login_required(views.QuestionManagement.as_view()), name='questionmanagement'),
 
-    path('dockermanagement/', login_required(views.DockerManagement.as_view()), name='dockermanagemenet'),
+    path('dockermanagement/', login_required(views.DockerManagement.as_view()), name='dockermanagement'),
     path('dockermanagement/kill/<containername>', login_required(views.AdminDockerKill.as_view()), name='killdocker'),
 
 ]  

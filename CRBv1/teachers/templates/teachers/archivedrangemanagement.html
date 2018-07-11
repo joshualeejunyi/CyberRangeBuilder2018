@@ -1,13 +1,12 @@
 {% extends 'teachers/teacherbase.html' %}
     <script src="../../plugins/datatables/jquery.dataTables.min.js"></script>
     <script src="../../plugins/datatables/dataTables.bootstrap.min.js"></script>
-    
 {% load widget_tweaks %}
 {% block content_header%}
 	<section class="content-header">
 		<h1>
-			{% block page_name %}Range Management{% endblock %}
-			<small>{% block page_description %}manage all ranges{% endblock %}</small>
+			{% block page_name %}Archived Ranges{% endblock %}
+			<small>{% block page_description %}manage all archived ranges{% endblock %}</small>
 		</h1>
 		{% block breadcrumbs %}
         {% endblock %}
@@ -17,11 +16,6 @@
 {% block content %}
     <section class="content">
         <div class="row">
-            <a class="btn btn-app" href="createrange" style="width: 150px;">
-                    <i class="fa fa-plus"></i>
-                    <b>Add New Range</b>
-            </a>
-            
             <div class="box">
                 <div class="box-header with-border">
                     <h3 class="box-title">Ranges</h3>
@@ -40,22 +34,16 @@
                                     {% render_field filter.form.rangename class="form-control" %}
                                 </div>
                                 <div class="form-group col-sm-4 col-md-3">
-                                    <label for="rangeurl">Range URL:</label>
-                                    {% render_field filter.form.rangeurl class="form-control" %}
-                                </div>
-                                <div class="form-group col-sm-4 col-md-3">
                                     <label for="datecreated">Date Created:</label>
-                                    <input type="date" name="datecreated" class="form-control">
+                                    {% render_field filter.form.datecreated class="form-control" %}
                                 </div>
-                            </div>
-                            <div class="row">
                                 <div class="form-group col-sm-4 col-md-3">
                                     <label for="datestarted">Date Started:</label>
-                                    <input type="date" name="datestart" class="form-control">
+                                    {% render_field filter.form.datestart class="form-control" %}
                                 </div>
                                 <div class="form-group col-sm-4 col-md-3">
                                     <label for="timestarted">Date End:</label>
-                                    <input type="date" name="dateend" class="form-control">
+                                    {% render_field filter.form.dateend class="form-control" %}
                                 </div>
                             </div>
                             <div>
@@ -113,13 +101,7 @@
                 <td> {{e.rangename }}</td>
                 <td> {{e.rangeurl }}</td>
                 <td> {{e.datecreated }}</td>
-                <td> 
-                    {% if e.datestart is None %}
-                        <i>Unspecified</i>
-                    {% else %}    
-                        {{e.datestart }}
-                    {% endif %}
-                </td>
+                <td> {{e.datestart }}</td>
                 <td> 
                     {% if e.timestart is None %}
                         <i>Unspecified</i>
@@ -127,13 +109,7 @@
                         {{ e.timestart }}
                     {% endif %}
                 </td>
-                <td> 
-                    {% if e.dateend is None %}
-                        <i>Unspecified</i>
-                    {% else %}    
-                        {{e.dateend }}
-                    {% endif %}
-                </td>
+                <td> {{e.dateend }}</td>
                 <td> 
                     {% if e.timeend is None %}
                         <i>Unspecified</i>
@@ -141,19 +117,13 @@
                         {{e.timeend }}
                     {% endif %}
                 </td>
-                <td> 
-                    {% if e.maxscore is None %}
-                        0
-                    {% else %}
-                        {{e.maxscore }}
-                    {% endif %}    
-                </td>
+                <td> {{e.maxscore }}</td>
                 <td> {{e.lastmodifiedby }}</td>
                 <td> {{e.lastmodifieddate }}</td>
                 <td> {{e.rangecode }}</td>
                 <td style="text-align: center">
-                    <a class="btn btn-block btn-primary" href="view/{{ e.rangeurl }}">View Range</a>
-                    <a class="btn btn-block btn-danger" href="archive/{{ e.rangeurl }}">Archive</a>
+                    <a class="btn btn-block btn-success" href="unarchive/{{ e.rangeurl }}">Unarchive</a>
+                    <a class="btn btn-block btn-danger" href="delete/{{ e.rangeurl }}">Permanently Delete</a>
                 </td>
             </tr>
 
@@ -192,7 +162,7 @@
                 {% endif %}
             </div>
         </div>
-        <a class="btn btn-block btn-danger" style="width: 10%;"href="/teachers/rangemanagement/archived">View Archived Ranges</a>
+        <a class="btn btn-block btn-primary" style="width: 10%;"href="/teachers/rangemanagement/">Back</a>
     </section>
 
 {% endblock %}

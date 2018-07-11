@@ -5,8 +5,8 @@
 {% block content_header%}
 	<section class="content-header">
 		<h1>
-			{% block page_name %}Disabled User Management{% endblock %}
-			<small>{% block page_description %}manage disabled users{% endblock %}</small>
+			{% block page_name %}{% endblock %}
+			<small>{% block page_description %}{% endblock %}</small>
 		</h1>
 		{% block breadcrumbs %}
         {% endblock %}
@@ -15,32 +15,44 @@
 
 {% block content %}
     <section class="content">
-        <div class="row">
+        <div class="row" style="width: 50%; margin: 0 auto" >
+                
             <div class="box">
                 <div class="box-header with-border">
-                        <h3 class="box-title">Users</h3>
+                        <h3 class="box-title">Add Students to {{ groupname }}</h3>
                         <div class="box-tools pull-right">
                             <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
                         </div>
                 </div>
                 <div class="box-body">
+                    {% if cart %}
+                    <div class="alert alert-success alert-dismissible">
+                        <h4><i class="icon fa fa-success"></i>You Are Adding:</h4>
+                        <ul>
+                        {% for users in cart %}
+                            <li><h4>{{users}}</h4></li>
+                        {% endfor %}
+                        </ul>
+                        <a href="assignusers/commit" class="btn btn-primary btn-block btn-flat" style="width: 100px; margin-top: 0.2%;">Submit</a>
+                    </div>
+                    {% endif %}
                         <form method="get">
                                 <div class="well">
                                   <h4 style="margin-top: 0">Filter</h4>
-                                    <div class="row">
+                                  <div class="row">
                                     <div class="form-group col-sm-4 col-md-3">
-                                        <label for="name">Name:</label>
-                                        {% render_field filter.form.name class="form-control" %}
+                                        <label for="username">Username:</label>
+                                      {% render_field filter.form.username class="form-control" %}
+                                    </div>
+                                    <div class="form-group col-sm-4 col-md-3">
+                                            <label for="name">Full Name:</label>
+                                      {% render_field filter.form.name class="form-control" %}
                                     </div>
                                     <div class="form-group col-sm-4 col-md-3">
                                         <label for="email">Email:</label>
                                       {% render_field filter.form.email class="form-control" %}
                                     </div>
                                     <div class="form-group col-sm-4 col-md-3">
-                                        <label for="username">Username:</label>
-                                      {% render_field filter.form.username class="form-control" %}
-                                    </div>
-                                <div class="form-group col-sm-4 col-md-3">
                                         <label for="userclass">Class:</label>
                                         <select name="userclass" class="form-control" placeholder="Class">
                                             <option value="" selected></option>
@@ -60,16 +72,13 @@
                                       </div>
                                     </div>
                                   </div>
-                                  <div>
-                                        <button type="submit" class="btn btn-primary btn-flat" style="width: 200px; display: inline-block">
-                                            <span class="glyphicon glyphicon-search"></span> Search
-                                        </button>
-                                        <a href="." class="btn btn-primary btn-block btn-flat" style="width: 200px;  display: inline-block;" >Reset Filters</a>
-                                    </div>
+                                  <button type="submit" class="btn btn-primary btn-flat">
+                                    <span class="glyphicon glyphicon-search"></span> Search
+                                  </button>
+                                  <a href="./addusers" class="btn btn-primary btn-block btn-flat" style="width: 100px; margin-top: 0.2%;">Reset Filters</a>
                                 </div>
                               </form>
                     <table id="studentstable" class="table table-bordered table-hover dataTable" role="grid">
-                    {% if usersobject.all %}
                     <thead>
                         <tr role="row">
                             <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
@@ -85,52 +94,27 @@
                                 Class
                             </th>
                             <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                Date Joined
-                            </th>
-                            <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                Accepted By
-                            </th>
-                            <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                Last Modified By
-                            </th>
-                            <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                Last Modified Date
-                            </th>
-                            <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                    Last Modified Time
-                            </th>
-                            <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
                                 Actions
                             </th>
                         </tr>
                     </thead>
                     <tbody>
-                    {% for user in filter.qs %}
+                    {% for user in usersobject %}
                         <tr role="row">
                             <td>{{ user.name }}</td>
                             <td>{{ user.email }}</td>
                             <td>{{ user.username }}</td>
                             <td>{{ user.userclass }}</td>
-                            <td>{{ user.datejoined }}</td>
-                            <td>{{ user.acceptedby }}</td>
-                            <td>{{ user.lastmodifiedby }}</td>
-                            <td>{{ user.lastmodifieddate }}</td>
-                            <td>{{ user.lastmodifiedtime }}</td>
                             <td>
-                                <a class="btn btn-block btn-success" href="enableuser/{{ user.username }}">Enable</a>
-                                <a class="btn btn-block btn-danger" href="deleteuser/{{ user.username }}">Permanently Delete</a>
+                                {% if user.email in cart %}
+                                <a class="btn btn-block btn-primary" href="remove/{{ user.username }}">Remove</a>
+                                {% else %}
+                                <a class="btn btn-block btn-primary" href="assignusers/{{ user.username }}">Add</a>
+                                {% endif %}
                             </td>
                         </tr>
                     {% endfor %}
                     </tbody>
-                    {% else %}
-                    <thead>
-                        <th>
-                            <h4>No Disabled Users Found</h4>
-                        </th>
-                    </thead>
-
-                    {% endif %}
                 </table>
 
                 {% if is_paginated %}
@@ -158,7 +142,6 @@
                 {% endif %}
             </div>
         </div>
-        <a class="btn btn-block btn-primary" style="width: 10%;"href="/teachers/usermanagement/">Back</a>
     </section>
 {% endblock %}
 
@@ -166,4 +149,4 @@
     $(function () {
        $("#studentstable").DataTable();
     });
-</script>
+</script>   

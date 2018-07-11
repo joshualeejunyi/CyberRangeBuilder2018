@@ -10,6 +10,7 @@ MCQ = 'MCQ'
 SHORTANS = 'SA'
 OPENENDED = 'OE'
 TRUEFALSE = 'TF'
+
 QUESTION_TYPE_CHOICES = (
     (FLAG, 'Flag'),
     (MCQ, 'Multiple Choice'),

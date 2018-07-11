@@ -17,6 +17,10 @@ from functools import reduce
 from django.db.models.functions import Lower
 from django.contrib.auth.mixins import PermissionRequiredMixin
 import requests
+from .choices import *
+from django.contrib import messages
+import datetime
+
 # Create your views here.
 
 class TeacherDashboard(ListView, PermissionRequiredMixin):
@@ -83,7 +87,6 @@ class AddUser(ListView, ModelFormMixin):
         self.form = self.get_form(self.form_class)
 
         if self.form.is_valid():
-            print("HI")
             self.form.save()
             return redirect('addusersuccess')
         else:
@@ -356,9 +359,19 @@ class RangeManagement(FilterView, ListView):
         ranges = Range.objects.all().filter(isdisabled = False)
         return ranges
 
+class ArchivedRangeManagement(FilterView, ListView):
+    template_name = 'teachers/archivedrangemanagement.html'
+    context_object_name = 'ranges'
+    paginate_by = 10
+    filterset_class = RangeFilter
+
+    def get_queryset(self):
+        ranges = Range.objects.all().filter(isdisabled = True)
+        return ranges
+
 
 class CreateRange(CreateView, RedirectView):
-    template_name = 'teachers/rangemanagement.html'
+    template_name = 'teachers/addrange.html'
     model = Range
     form_class = RangeForm
 
@@ -370,10 +383,7 @@ class CreateRange(CreateView, RedirectView):
     def get(self, request, *args, **kwargs):
         self.object = None
         self.form = self.get_form(self.form_class)
-
-        data = Range.objects.all()
-        args = { 'form' : self.form, 'data' : data}
-        return render(request, 'teachers/addrange.html', args)
+        return CreateView.get(self, request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         self.object = None
@@ -381,13 +391,15 @@ class CreateRange(CreateView, RedirectView):
 
         if self.form.is_valid():
             self.form.save()
-            CreateQuestionForm = QuestionForm()
-            return redirect('./createquestion', permanent=True)
+            rangeurl = self.form.cleaned_data['rangeurl']
+            print(rangeurl)
+            url = '/teachers/rangemanagement/view/' + rangeurl
+            messages.success(request, 'Range Created.')
+            return redirect(url)
+        else:
+            return CreateView.get(self, request, *args, **kwargs)
 
-        return render(request, 'teachers/rangemanagement.html')
-
-
-class RangeView(FilterView, ListView):
+class RangeView(ListView, FilterView):
     template_name = 'teachers/rangeview.html'
     context_object_name = 'result'
     filterset_class = QuestionFilter
@@ -395,43 +407,31 @@ class RangeView(FilterView, ListView):
     def get_queryset(self):
         selectedrange = Range.objects.get(rangeurl= self.kwargs['rangeurl'])
         selectedrangeid = selectedrange.rangeid
-        print(selectedrangeid)
-        # use range id to get the questionids in the current range
-        questions = RangeQuestions.objects.filter(rangeid = selectedrangeid).values_list('questionid')
-        #print("1 --> ORDER" + str(questions))
+        #print(selectedrangeid)
+        questions = RangeQuestions.objects.filter(rangeid = selectedrangeid, isdisabled = False).values_list('questionid')
         if len(questions) != 0:
-            # get the first object of assigned range (because need to declare var before our little concat trick later)
             result = Questions.objects.filter(questionid=(questions[0][0]))
-            #print('2 --> ' + str(result))
             for x in range(1, len(questions)):
-                #this for loop will concat all the assigned ranges together for our template to call
                 currentquestion= Questions.objects.filter(questionid=(questions[x][0]))
+                
                 result = result | currentquestion # if i didn't get the first object just now python will scold me
-                # print('3 --> ' + str(result))
         else:
-            # if there are no questions return None if not rip cause it shouldn't be none
             result = None
-
+        #print("result")
+        #print(result)
         return result
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         selectedrange = Range.objects.get(rangeurl= self.kwargs['rangeurl'])
         selectedrangeid = selectedrange.rangeid
-        # use range id to get the questionids in the current range
-        questions = RangeQuestions.objects.filter(rangeid = selectedrangeid).values_list('questionid')
-        #print("1 --> ORDER" + str(questions))
+        questions = RangeQuestions.objects.filter(rangeid = selectedrangeid, isdisabled = False).values_list('questionid')
         if len(questions) != 0:
-            # get the first object of assigned range (because need to declare var before our little concat trick later)
             result = RangeQuestions.objects.filter(questionid=(questions[0][0]))
-            #print('2 --> ' + str(result))
             for x in range(1, len(questions)):
-                #this for loop will concat all the assigned ranges together for our template to call
                 currentquestion= RangeQuestions.objects.filter(questionid=(questions[x][0]))
                 result = result | currentquestion # if i didn't get the first object just now python will scold me
-                # print('3 --> ' + str(result))
         else:
-            # if there are no questions return None if not rip cause it shouldn't be none
             result = None
         
         context['answer'] = result
@@ -439,7 +439,70 @@ class RangeView(FilterView, ListView):
         context['range'] = Range.objects.filter(rangeurl = self.kwargs['rangeurl'])
         context['rangeurl'] = self.kwargs['rangeurl']
         context['topics'] = QuestionTopic.objects.all()
+        context['marks'] = RangeQuestions.objects.filter(rangeid = selectedrangeid)
+        context['activated'] = Range.objects.filter(rangeurl= self.kwargs['rangeurl']).values_list('rangeactive')[0][0]
+        rangeid = Range.objects.filter(rangeurl = self.kwargs['rangeurl']).values_list('rangeid')[0][0]
+        studentsinrange = RangeStudents.objects.filter(rangeID = rangeid).values_list('studentID')
+        print(studentsinrange)
+        if len(studentsinrange) != 0:
+            result = User.objects.filter(email = (studentsinrange[0][0]))
+            print(result)
+            for x in range(1, len(studentsinrange)):
+                currentuser = User.objects.filter(email = studentsinrange[x][0])
+                print(currentuser)
+                result = result | currentuser # if i didn't get the first object just now python will scold me
+                print(result)
+        else:
+            result = None
+
+        print(result)
+
+        context['students'] = result
         return context
+
+class AddQuestioninRange(ListView, FilterView):
+    template_name = 'teachers/addquestionsinrange.html'
+    context_object_name = 'questions'
+    filterset_class = QuestionFilter
+
+    def get_queryset(self):
+        # first i have to get all the questions in the current range
+        # then i filter that our from the final queryset
+        
+        # get current range id
+        currentrangeid = Range.objects.filter(rangeurl = self.kwargs['rangeurl']).values_list('rangeid')[0][0]
+
+        questionsinrange = RangeQuestions.objects.filter(rangeid = currentrangeid).values_list('questionid')
+
+        unimportedquestions = Questions.objects.exclude(questionid__in=questionsinrange)
+        print(unimportedquestions)
+        if len(unimportedquestions) == 0:
+            return None
+        return unimportedquestions
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['rangename'] = Range.objects.filter(rangeurl= self.kwargs['rangeurl']).values_list('rangename')[0][0]
+        context['topics'] = QuestionTopic.objects.all()
+        return context
+
+class AddQuestionAnswer(View):
+    def get(self, request, rangeurl, questionid):
+        return render(request, template_name = 'teachers/addquestionanswer.html')
+
+    def post(self, request, rangeurl, questionid):
+        rqobject = RangeQuestions()
+        currentrangeid = Range.objects.filter(rangeurl = rangeurl).values_list('rangeid')[0][0]
+        rangeinstance = Range.objects.get(rangeid = currentrangeid)
+        rqobject.rangeid = rangeinstance
+        questioninstance = Questions.objects.get(questionid = questionid)
+        rqobject.questionid = questioninstance
+        rqobject.answer = request.POST.get('answer')
+        print(request.POST.get('answer'))
+        rqobject.isdisabled = False
+        rqobject.save()
+
+        return render(request, template_name = 'teachers/addquestionsuccess.html')
 
 class EditQuestion (UpdateView):
     form_class = QuestionForm
@@ -447,6 +510,11 @@ class EditQuestion (UpdateView):
     template_name = 'teachers/editquestion.html'
     success_url = 'teachers/'
     context_object_name = 'result'
+
+    def get_form_kwargs(self):
+        kwargs = super(EditQuestion, self).get_form_kwargs()
+        kwargs.update({'request': self.request})
+        return kwargs
 
     def get_object(self):
         selectedquestion = Questions.objects.get(questionid = self.kwargs['questionid'])
@@ -481,198 +549,391 @@ class EditQuestion (UpdateView):
 
         return context
 
-class DeleteRange(View):
-    def get(self, request, rangeid):
-        selectedrange = Range.objects.get(rangeid=self.kwargs['rangeid'])
-        selectedrange.isdisabled = True
+    def post(self, request, *args, **kwargs):
+        print('it got into post')
+        rangeid = self.kwargs['rangeid']
+        selectedquestionid = request.POST.get('questionid')
+        form_topicname = request.POST.get('topicname')
+        form_title = request.POST.get('title')
+        form_text = request.POST.get('text')
+        form_hint = request.POST.get('hint')
+        form_marks = request.POST.get('marks')
+        form_answer = request.POST.get('answer')
+
+        print('topic name is ' + str(form_topicname))
+        alltopics = QuestionTopic.objects.all()
+        form_topicid = ''
+        for x in alltopics:
+            if x.topicname == form_topicname:
+                form_topicid = x.topicid
+        
+        topicinstance = QuestionTopic.objects.get(topicname = form_topicname)
+        selectedquestioninstance = Questions.objects.get(questionid = selectedquestionid)
+        selectedrangequestioninstance = RangeQuestions.objects.get(questionid = selectedquestioninstance)
+        affectedrangequestioninstances = RangeQuestions.objects.filter(questionid = selectedquestionid)
+
+        for x in affectedrangequestioninstances:
+            affectedrangeinstance = Range.objects.get(rangeid = x.rangeid.rangeid)
+            
+            currentmaxscore = affectedrangeinstance.maxscore
+            minusquestionmarks = currentmaxscore - selectedquestioninstance.marks
+            plusbackmarks = minusquestionmarks + int(form_marks)
+            affectedrangeinstance.maxscore = plusbackmarks
+            affectedrangeinstance.save()
+
+        selectedquestioninstance.title = form_title
+        selectedquestioninstance.text = form_text
+        selectedquestioninstance.hint = form_hint
+        selectedquestioninstance.marks = form_marks
+        selectedquestioninstance.topicid = topicinstance
+        selectedrangequestioninstance.answer = form_answer
+
+        selectedquestioninstance.save()
+        selectedrangequestioninstance.save()
+
+        return redirect('/teachers/rangemanagement')
+
+class ModifyRange(UpdateView):
+    form_class = ModifyRangeForm
+    model = Range
+    template_name = 'teachers/editrange.html'
+    success_url = '../'
+
+    def get_object(self, queryset = None):
+        selectedrange = Range.objects.get(rangeurl = self.kwargs['rangeurl'])
+        return selectedrange
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        rangeobject = Range.objects.filter(rangeurl = self.kwargs['rangeurl'])
+        context['range'] = rangeobject
+        questiontopic = QuestionTopic.objects.all().values_list('topicname')
+        context['questiontopic'] = questiontopic
+        context['rangeurl'] = self.kwargs['rangeurl']
+
+        startdate = rangeobject.values_list('datestart')[0][0]  
+        startdate = startdate.strftime('%Y-%m-%d')
+        context['startdate'] = startdate
+        enddate = rangeobject.values_list('dateend')[0][0]
+        enddate = enddate.strftime('%Y-%m-%d')
+        context['enddate'] = enddate
+
+        starttime = rangeobject.values_list('timestart')[0][0]
+        if starttime is not None:
+            amorpm = starttime.strftime('%p')
+            minutes = starttime.strftime('%M')
+            hours = starttime.strftime('%H')
+            context['starttime'] = str(hours) + ':' + str(minutes)
+
+        endtime = rangeobject.values_list('timeend')[0][0]
+        if endtime is not None:
+            amorpm = endtime.strftime('%p')
+            minutes = endtime.strftime('%M')
+            print(minutes)
+            hours = endtime.strftime('%H')
+            context['endtime'] = str(hours) + ':' + str(minutes)
+        return context
+
+    def get_form_kwargs(self):
+        kwargs = super(ModifyRange, self).get_form_kwargs()
+        kwargs.update({'request': self.request})
+        return kwargs
+
+
+class ArchiveRange(View):
+    def get(self, request, rangeurl):
+        previousurl = request.META.get('HTTP_REFERER')
+        selectedrange = Range.objects.get(rangeurl=self.kwargs['rangeurl'])
+        selectedrange.isdisabled = 1
         updatedrange = selectedrange
         updatedrange.save()
-        url = "/teachers/rangemanagement/"
+
+        return redirect(previousurl)
+
+class DeleteRange(View):
+    def get(self, request, rangeurl):
+        rangeobj = Range.objects.get(rangeurl = rangeurl)
+        rangeid = Range.objects.filter(rangeurl = rangeurl).values_list('rangeid')[0][0]
+        fakerangeobj = FakeRange.objects.filter(rangeid = rangeid)
+        fakerangeobj.delete()
+        rangeobj.delete()
+        return redirect('../../')
+
+class UnarchiveRange(View):
+    def get(self, request, rangeurl):
+        previousurl = request.META.get('HTTP_REFERER')
+        selectedrange = Range.objects.get(rangeurl=self.kwargs['rangeurl'])
+        selectedrange.isdisabled = 0
+        updatedrange = selectedrange
+        updatedrange.save()
+
+        return redirect(previousurl)
+
+class ArchiveQuestion(View):
+    def get(self, request, rangeurl, questionid):
+        previousurl = request.META.get('HTTP_REFERER')
+        rangeurl = self.kwargs['rangeurl']
+        questionid = self.kwargs['questionid']
+        rangeinstance = Range.objects.get(rangeurl = rangeurl)
+        selectedquestioninstance = Questions.objects.get(questionid = questionid)
+        selectedrangequestion = RangeQuestions.objects.get(rangeid=rangeinstance, questionid=selectedquestioninstance)
+        selectedrangequestion.isdisabled = 1
+        selectedrangequestion.save()
+
+        questionmarks = RangeQuestions.objects.filter(rangeid=rangeinstance, questionid = selectedquestioninstance).values_list('points')[0][0]
+        updatedscore = rangeinstance.maxscore - questionmarks
+        rangeinstance.maxscore = updatedscore
+        rangeinstance.save()
+        return redirect(previousurl)
+
+class AssignUser(ListView, FilterView):
+    template_name = 'teachers/assignuserrange.html'
+    context_object_name = 'usersobject'
+    paginate_by = 10
+    filterset_class = StudentFilter
+
+    def get_queryset(self):
+        rangeid = Range.objects.filter(rangeurl = self.kwargs['rangeurl']).values_list('rangeid')[0][0]
+        studentsinrange = RangeStudents.objects.filter(rangeID = rangeid).values_list('studentID')
+        allstudents = User.objects.filter(is_superuser = False, is_staff = False).exclude(email__in=studentsinrange).order_by('-lastmodifieddate')
+        print(allstudents)
+        return allstudents
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['classesobject'] = UserClass.objects.values_list('userclass')
+
+        if "userrangecart" in self.request.session:
+            cart = self.request.session.get('userrangecart', {})
+            print("HI")
+            print(cart)
+            context['cart'] = cart
+
+        return context
+
+class AddUserRangeCart(View):
+    def get(self, request, rangeurl, username):
+        get_object_or_404(User, username = username)
+        useremail = User.objects.filter(username = username).values_list('email')[0][0]
+        userslist = []
+        if 'userrangecart' in request.session:
+            userslist = request.session['userrangecart']
+        print(userslist)
+        if username not in userslist:
+            userslist.append(useremail)
+        request.session['userrangecart'] = userslist
+        url = "/teachers/rangemanagement/view/" + rangeurl + "/assignusers"
         return redirect(url)
 
-class CreateQuestion(CreateView):
-    template_name = "teachers/addquestion.html"
+class RemoveUserRangeCart(View):
+    def get(self, request, rangeurl, username):
+        get_object_or_404(User, username = username)
+        useremail = User.objects.filter(username = username).values_list('email')[0][0]
+        userslist = []
+        if 'userrangecart' in request.session:
+            userslist = request.session['userrangecart']
+        print(userslist)
+        if username not in userslist:
+            userslist.remove(useremail)
+        request.session['userrangecart'] = userslist
+        url = "/teachers/rangemanagement/view/" + rangeurl + "/assignusers"
+        return redirect(url)
+
+class UserRangeCommit(View):
+    def get(self, request, rangeurl):
+        if 'userrangecart' in request.session:
+            userslist = request.session['userrangecart']
+
+        for student in userslist:
+            #print(student)
+            studentid = User.objects.get(email = student)
+            print(studentid)
+            rangeid = Range.objects.get(rangeurl = rangeurl)
+            # print(groupid)
+            datejoined = datetime.date.today()
+            obj = RangeStudents(studentID = studentid, rangeID = rangeid, dateJoined = datejoined)
+            obj.save()
+
+        url = "/teachers/rangemanagement/view/" + rangeurl
+        del request.session['userrangecart']
+        return redirect(url)
+
+class CreateQuestion(ListView, ModelFormMixin):
+    template_name = 'teachers/addquestion.html'
+    context_object_name = 'currentmarks'
     model = Questions
     form_class = QuestionForm
 
     def get(self, request, *args, **kwargs):
-
-        newest_range = Range.objects.order_by('-rangeid')[0]
-        print(newest_range.rangename)
-        questionnumber = 1
-        CreateQuestionForm = QuestionForm()
-        questiontopic = QuestionTopic.objects.all().values_list('topicname')
-
-        FLAG = 'FL'
-        MCQ = 'MCQ'
-        SHORTANS = 'SA'
-        OPENENDED = 'OE'
-        TRUEFALSE = 'TF'
-        questiontypechoices = (
-            (FLAG, 'Flag'),
-            (MCQ, 'Multiple Choice'),
-            (SHORTANS, 'Short Answer'),
-            (OPENENDED, 'Open Ended'),
-            (TRUEFALSE, 'True/False')
-        )
-        currentmarks = 0
-        args = {'rangename': newest_range.rangename,
-                'questionnumber':questionnumber,
-                'form' : CreateQuestionForm,
-                'rangeid' : newest_range.rangeid,
-                'questiontopic' : questiontopic,
-                'questiontypechoices' : questiontypechoices,
-                'currentmarks' : currentmarks
-                }
-
-        return render(request, 'teachers/addquestion.html', args)
+        self.object = None
+        self.form = self.get_form(self.form_class)
+        return ListView.get(self, request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         self.object = None
         self.form = self.get_form(self.form_class)
 
-        if (request.POST.get('done')):
-            print('user is done')
-            hidden_currentmarks = request.POST.get('currentmarks')
-            hidden_rangeid = request.POST.get('rangeid')
-            currentrange = Range.objects.get(rangeid = hidden_rangeid)
-            currentrange.maxscore = hidden_currentmarks
-            currentrange.save()
-            url = "/teachers/rangemanagement/"
-            return redirect(url)
+        if self.form.is_valid():
+            question, topicname = self.form.save()
+            optionone = request.POST.get('optionone',' ')
+            answer = self.request.POST.get('answer','')
+            points = self.request.POST.get('points','')
+            registryid = self.request.POST.get('registryid','')
+            questionid = question.questionid
+            request.session['questionid'] = questionid
+            questioninstance = Questions.objects.get(questionid = questionid)
+            registryid = self.request.POST.get('registryid','')
+            rangeinstance = Range.objects.get(rangeurl = self.kwargs['rangeurl'])
+            rangequestionobject = RangeQuestions(rangeid = rangeinstance, questionid = questioninstance, answer = answer, points = points, registryid = registryid)
+            rangequestionobject.save()
 
-        if (request.POST.get('newtopicname')):
-            form_newtopicname = request.POST.get('newtopicname')
-            hidden_questionnumber = request.POST.get('questionnumber')
-            hidden_rangename = request.POST.get('rangename')
-            hidden_rangeid = request.POST.get('rangeid')
-            hidden_currentmarks = request.POST.get('currentmarks')
-
-            currenttopicnameavail = QuestionTopic.objects.all().values_list('topicname')
-            topiclist = []
-            for x in range(0, len(currenttopicnameavail)):
-                topiclist.append(Lower(currenttopicnameavail[x][0]))
-
-            lowercase_form_newtopicname = Lower(form_newtopicname)
-
-            if lowercase_form_newtopicname not in topiclist:
-                QuestionTopic_obj = QuestionTopic(topicname = form_newtopicname)
-                QuestionTopic_obj.save()
-                messages.success(request, 'New Question Topic Created ')
-
-            else:
-                messages.error(request, 'Topic Name Already Exists in Database ')
-
-            CreateQuestionForm = QuestionForm()
-            questiontopic = QuestionTopic.objects.all().values_list('topicname')
-            FLAG = 'FL'
-            MCQ = 'MCQ'
-            SHORTANS = 'SA'
-            OPENENDED = 'OE'
-            TRUEFALSE = 'TF'
-            questiontypechoices = (
-                (FLAG, 'Flag'),
-                (MCQ, 'Multiple Choice'),
-                (SHORTANS, 'Short Answer'),
-                (OPENENDED, 'Open Ended'),
-                (TRUEFALSE, 'True/False')
-            )
+            currentrangescore = rangeinstance.maxscore
+            if currentrangescore is None:
+                currentrangescore = 0 + int(points)
+            else: 
+                currentrangescore += int(points)
             
-            args = {'rangename': hidden_rangename,
-                'form': CreateQuestionForm,
-                'questionnumber': hidden_questionnumber,
-                'questiontopic' : questiontopic,
-                'rangeid' : hidden_rangeid,
-                'questiontypechoices' : questiontypechoices,
-                'questiontopic' : questiontopic,
-                'currentmarks' : hidden_currentmarks 
-                }
+            rangeinstance.maxscore = currentrangescore
+            rangeinstance.save()
+            request.session['TF'] = False
 
-            return render(request, 'teachers/addquestion.html', args)
-
-        elif self.form.is_valid():
-            print("form is valid")
-            form_topicname = request.POST.get('topicname','')
-            form_questiontype = request.POST.get('questiontype','')
-            form_title = request.POST.get('title','')
-            form_text = request.POST.get('text','')
-            form_answer = request.POST.get('answer','')
-            form_hint = request.POST.get('hint','')
-            form_marks = request.POST.get('marks','')
-            form_optionone = request.POST.get('optionone','')
-            form_optiontwo = request.POST.get('optiontwo','')
-            form_optionthree = request.POST.get('optionthree','')
-            form_optionfour = request.POST.get('optionfour','')
-            hidden_questionnumber = request.POST.get('questionnumber','')
-            hidden_rangename = request.POST.get('rangename','')
-            hidden_rangeid = request.POST.get('rangeid','')
-
-            print(form_answer)
-            print(form_topicname)
-            topic_object = QuestionTopic.objects.get(topicname = form_topicname)
-            Questions_obj = Questions(questiontype = form_questiontype,
-                                      title = form_title,
-                                      text = form_text,
-                                      hint = form_hint,
-                                      marks = form_marks,
-                                      topicid = topic_object
-                                      )
-            Questions_obj.save()
-
-            newest_questions_id = Questions.objects.order_by('-questionid')[0]
-            newest_question_object = Questions.objects.get(questionid = newest_questions_id.questionid)
-            newest_range_object = Range.objects.get(rangeid = hidden_rangeid)
-            RangeQuestions_obj = RangeQuestions(rangeid = newest_range_object,
-                                                questionid = newest_question_object,
-                                                answer = form_answer)
-
-            RangeQuestions_obj.save()
-
-            if form_questiontype == 'MCQ':
-                MCQ_obj = MCQOptions(questionid = newest_question_object,
-                                     optionone = form_optionone,
-                                     optiontwo = form_optiontwo,
-                                     optionthree = form_optionthree,
-                                     optionfour = form_optionfour)
-
-                MCQ_obj.save()
-
-            questionnumber = int(hidden_questionnumber) + 1
-
-            CreateQuestionForm = QuestionForm()
-
-            FLAG = 'FL'
-            MCQ = 'MCQ'
-            SHORTANS = 'SA'
-            OPENENDED = 'OE'
-            TRUEFALSE = 'TF'
-            questiontypechoices = (
-                (FLAG, 'Flag'),
-                (MCQ, 'Multiple Choice'),
-                (SHORTANS, 'Short Answer'),
-                (OPENENDED, 'Open Ended'),
-                (TRUEFALSE, 'True/False')
-            )
-            questiontopic = QuestionTopic.objects.all().values_list('topicname')
-            
-            hidden_currentmarks = request.POST.get('currentmarks')
-            added_question_marks = Questions.objects.get(questionid = newest_questions_id.questionid)
-            totalmarks = int(hidden_currentmarks) + int(added_question_marks.marks)
-            messages.success(request, 'Question Created Successfully')
-            args = {'rangename': hidden_rangename,
-                    'form': CreateQuestionForm,
-                    'questionnumber': questionnumber,
-                    'questiontopic' : questiontopic,
-                    'rangeid' : hidden_rangeid,
-                    'questiontypechoices' : questiontypechoices,
-                    'questiontopic' : questiontopic,
-                    'currentmarks' : totalmarks 
+            if question.questiontype == 'MCQ' and optionone == ' ':
+                rangename = Range.objects.filter(rangeurl = self.kwargs['rangeurl']).values_list('rangename')[0][0]
+                questionobject = Questions.objects.filter(questionid = question.questionid)
+                currentmarks =  Range.objects.filter(rangeurl = self.kwargs['rangeurl']).values_list('maxscore')[0][0]
+                args = {
+                    'rangename' : rangename,
+                    'question' : questionobject,
+                    'currentmarks' : currentmarks,
+                    'points' : points,
+                    'answer' : answer,
+                    'topicname' : topicname,
                     }
-            return render(request, 'teachers/addquestion.html', args)
+                return render(request, 'teachers/addmcqquestion.html', args)
 
+            if answer != "True" and answer  != "False" and question.questiontype == 'TF':
+                request.session['TF'] = True
+                rangename = Range.objects.filter(rangeurl = self.kwargs['rangeurl']).values_list('rangename')[0][0]
+                questionobject = Questions.objects.filter(questionid = question.questionid)
+                currentmarks =  Range.objects.filter(rangeurl = self.kwargs['rangeurl']).values_list('maxscore')[0][0]
+                args = {
+                    'rangename' : rangename,
+                    'question' : questionobject,
+                    'currentmarks' : currentmarks,
+                    'points' : points,
+                    'answer' : answer,
+                    'topicname' : topicname,
+                    }
+                return render(request, 'teachers/addtfquestion.html', args)
+
+            return ListView.get(self, request, *args, **kwargs)
         else:
-            print(self.form.errors)
-            return render(request, 'teachers/teacherbase.html')
+            ## IF THE USER IS DONE W CREATING QUESTION THEN WILL REDIRECT THEM TO VIEW RANGE ###
+            if (request.POST.get('usedocker') == 'Yes' and request.POST.get('registryid') == ""):
+                print("no registry")
+                return ListView.get(self, request, *args, **kwargs)
+
+            if (request.POST.get('done')):
+                rangeurl = self.kwargs['rangeurl']
+                url = "/teachers/rangemanagement/view/" + rangeurl
+                return redirect(url)
+
+            ### IF THE USER WANTS TO SUBMIT NEW TOPIC NAME THEN REFRESHES THE CREATE QNS FOR THEM###
+            elif (request.POST.get('newtopicname')):
+                form_newtopicname = request.POST.get('newtopicname')
+                currenttopicnameavail = QuestionTopic.objects.all().values_list('topicname')
+                topiclist = []
+                for x in range(0, len(currenttopicnameavail)):
+                    topiclist.append(Lower(currenttopicnameavail[x][0]))
+
+                lowercase_form_newtopicname = Lower(form_newtopicname)
+
+                ### CHECKS IF TOPICNAME IS ALREADY IN DATABASE ###
+                if lowercase_form_newtopicname not in topiclist:
+                    QuestionTopic_obj = QuestionTopic(topicname = form_newtopicname)
+                    QuestionTopic_obj.save()
+                    messages.success(request, 'New Question Topic Created ')
+
+                ### IF TOPICNAME IS ALREADY IN DATABASE, THEN WON'T ADD ###
+                else:
+                    messages.error(request, 'Topic Name Already Exists in Database ')
+
+                return ListView.get(self, request, *args, **kwargs)
+
+           
+
+            elif (request.POST.get('optionone',' ') != ' '):
+                optionone = request.POST.get('optionone', ' ')
+                optiontwo = request.POST.get('optiontwo',' ')
+                optionthree = request.POST.get('optionthree',' ')
+                optionfour = request.POST.get('optionfour',' ')
+                if 'questionid' in request.session:
+                    questionid = request.session['questionid']
+                questioninstance = Questions.objects.get(questionid = questionid)
+                mcqobject = MCQOptions(optionone = optionone, optiontwo = optiontwo, optionthree = optionthree, optionfour = optionfour, questionid = questioninstance)
+                mcqobject.save()
+                return ListView.get(self, request, *args, **kwargs)
+
+            elif (request.session['TF'] == True):
+                answer = self.request.POST.get('answer','')
+                if 'questionid' in request.session:
+                    questionid = request.session['questionid']
+                questioninstance = Questions.objects.get(questionid = questionid)
+                rangequestionobject = RangeQuestions.objects.get(questionid = questioninstance)
+                rangequestionobject.answer = answer
+                rangequestionobject.save()
+                
+                return ListView.get(self, request, *args, **kwargs)
+            else:
+                print("OMG")
+                return ListView.get(self, request, *args, **kwargs)
+
+    def get_queryset(self):
+        currentmarks =  Range.objects.filter(rangeurl = self.kwargs['rangeurl']).values_list('maxscore')[0][0]
+        return currentmarks
+
+    def get_form_kwargs(self):
+        kwargs = super(CreateQuestion, self).get_form_kwargs()
+        kwargs.update({'request': self.request})
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['questiontypechoices'] = QUESTION_TYPE_CHOICES
+        context['rangename'] = Range.objects.filter(rangeurl = self.kwargs['rangeurl']).values_list('rangename')[0][0]
+        questiontopic = QuestionTopic.objects.all().values_list('topicname')
+        context['questiontopic'] = questiontopic
+        return context
+
+class ActivateRange(View):
+    def get(self, request, rangeurl):
+        rangeobject = Range.objects.get(rangeurl = rangeurl)
+        rangeobject.rangeactive = True
+        rangeobject.save()
+        return redirect('./')
+
+class DeactivateRange(View):
+    def get(self, request, rangeurl):
+        rangeobject = Range.objects.get(rangeurl = rangeurl)
+        rangeobject.rangeactive = False
+        rangeobject.save()
+        return redirect('./')
+
+class QuestionManagement(ListView, FilterView):
+    template_name = 'teachers/questionmanagement.html'
+    context_object_name = 'questions'
+    paginate_by = 10
+    filterset_class = QuestionFilter
+
+    def get_queryset(self):
+        questions = Questions.objects.all()
+        return questions
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['topics'] = QuestionTopic.objects.all()
+        print(context['topics'])
+        return context
 
 class DockerManagement(ListView):
     template_name = 'teachers/dockermanagement.html'
@@ -682,6 +943,43 @@ class DockerManagement(ListView):
     def get_queryset(self):
         dockers = UnavailablePorts.objects.all()
         return dockers
+
+class CreateImage(View):
+    def get(self, request):
+        data = {}
+        id = request.POST.get('id')	
+        endpoint1 = 'http://192.168.40.134:2376/images/create?fromImage=192.168.40.134:5000/{conid}'
+        url1 = endpoint1.format(conid=id)
+        response = requests.post(url1)
+        if response.status_code == 200:
+            data['Id'] = id
+            data['message'] = 'success'
+        elif response.status_code == 404:
+            data['message'] = 'no such container'
+        elif response.status_code == 500:
+            data['message'] = 'conflict'
+        else:
+            data['message'] = 'Error %s' % response.status_code
+        
+        reference = {}
+        range = request.POST.get('range')
+        endpoint2 = 'http://192.168.40.134:2376/images/192.168.40.134:5000/{0}/tag?repo={1}'
+        url2 = endpoint2.format(id, range)
+        response = requests.post(url2)
+        
+        if response.status_code == 201:
+            reference['Id'] = range
+            reference['message'] = 'success'
+        elif response.status_code == 400:
+            reference['message'] = 'Bad Parameter'
+        elif response.status_code == 404:
+            reference['message'] = 'no such image'
+        elif response.status_code == 409:
+            reference['message'] = 'conflict'
+        elif response.status_code == 500:
+            reference['message'] = 'server error'
+        else:
+            reference['message'] = 'Error %s' % response.status_code
 
 class AdminDockerKill(View):
     def get(self, request, containername):

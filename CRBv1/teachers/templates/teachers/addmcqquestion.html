@@ -1,0 +1,78 @@
+{% extends 'teachers/teacherbase.html' %}
+
+{% block header %}
+    Create MCQ Question Here
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 col-md-offset-1">
+        <div class="col-md-6 col-md-offset-3">
+            <div class="register-box-body">
+                    <p class="login-box-msg" style="font-size: 18px;">
+                            Create Question Number {{ questionnumber }} For Range : {{ rangename }}
+                            <br>
+                            Current Score for Range is : {{ currentmarks }} points
+                    </p>
+<form method="post">
+    {% csrf_token %}
+    <div style="margin: 0 auto">
+        <button type="submit" class="btn btn-success btn-block btn-flat" style="margin: 0 auto; font-size: 18px;">Complete Range Creation</button>
+    </div>
+</form>
+<br><br>
+<form method="post">
+    {% csrf_token %}
+    {% for info in question %}
+    <div class="form-group has-feedback">
+        <label for="topicname">Topic:</label>
+        <input type="text" name="title" class="form-control" value = {{ topicname }} disabled>
+    </div>
+    <div class="form-group has-feedback">
+            <label for="title">Title:</label>
+            <input type="text" name="title" class="form-control" value = {{ info.title }} disabled>
+    </div>
+
+    <div class="form-group has-feedback">
+            <label for="text">Question Text:</label>
+            <input type="text" name="text" class="form-control" value = {{ info.text }} disabled>
+    </div>
+
+    <div class="form-group has-feedback">
+        <label for="hint">Hint:</label>
+        <input type="text" name="hint" class="form-control" value = {{ info.hint }} disabled>
+    </div>
+
+    <div class="form-group has-feedback">
+        <label for="marks">Points:</label>
+        <input type="number" name="marks" class="form-control" value = {{ points }} disabled>
+    </div>
+ 
+    <div class="form-group has-feedback">
+        <label for="answer">Answer:</label>
+        <input type="text" name="answer" class="form-control" value = {{ answer }} disabled>
+    </div>
+
+    <div class="form-group has-feedback">
+        <label for="optionone">Option 1:</label>
+        <input type="text" name="optionone" class="form-control">
+    </div>
+
+    <div class="form-group has-feedback">
+        <label for="optiontwo">Option 2:</label>
+        <input type="text" name="optiontwo" class="form-control">
+    </div>
+
+    <div class="form-group has-feedback">
+        <label for="optionthree">Option 3:</label>
+        <input type="text" name="optionthree" class="form-control">
+    </div>
+
+    <div class="form-group has-feedback">
+        <label for="optionfour">Option 4:</label>
+        <input type="text" name="optionfour" class="form-control">
+    </div>
+    <button type="submit" class="btn btn-primary btn-block btn-flat pull-right" style="width: 100px">Submit</button>
+    {% endfor %}
+</form>
+{% endblock %}
