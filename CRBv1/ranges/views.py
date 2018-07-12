@@ -14,7 +14,6 @@ from django.contrib import messages
 from accounts.models import User
 
 class EnterCode(View):
-    class EnterCode(View):
     def get(self, request, *args, **kwargs):
         return render(request, 'ranges/joinrange.html')
     
