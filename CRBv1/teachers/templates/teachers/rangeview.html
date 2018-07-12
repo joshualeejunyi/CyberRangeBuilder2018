@@ -93,6 +93,9 @@
                                 <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
                                     Range Code
                                 </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Code Enabled
+                                </th>
                             </tr>
                         </thead>
                         {% for e in range %}
@@ -138,6 +141,11 @@
                                 <td> {{e.lastmodifiedby }}</td>
                                 <td> {{e.lastmodifieddate }}</td>
                                 <td> {{e.rangecode }}</td>
+                                {% if isopen == 1%}
+                                    <td> Enabled </td>
+                                {% else %}
+                                    <td> Disabled </td>
+                                {% endif %}
                             </tr>
                         {% endfor %}
                     </table>

@@ -19,6 +19,7 @@ class Range(models.Model):
     rangeurl = models.CharField(db_column='rangeURL', max_length=50, null=True, unique=True)
     studentsinrange = models.IntegerField(db_column='studentsInRange', null=True)
     isdisabled = models.BooleanField(db_column='isDisabled', default=False)
+    isopen = models.BooleanField(db_column='isOpen', default=False)
 
     class Meta:
         db_table = 'Range'
@@ -42,6 +43,7 @@ class FakeRange(models.Model):
     rangeurl = models.CharField(db_column='rangeURL', max_length=50, null=True, unique=True)
     studentsinrange = models.IntegerField(db_column='studentsInRange', null=True)
     isdisabled = models.BooleanField(db_column='isDisabled', default=False)
+    isopen = models.BooleanField(db_column='isOpen', default=False)
 
     class Meta:
         app_label = Range._meta.app_label

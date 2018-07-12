@@ -10,6 +10,44 @@ from django.utils import timezone
 from django.urls import reverse
 import requests
 from django.views.generic import View
+from django.contrib import messages
+from accounts.models import User
+
+class EnterCode(View):
+    class EnterCode(View):
+    def get(self, request, *args, **kwargs):
+        return render(request, 'ranges/joinrange.html')
+    
+    def post(self, request, *args, **kwargs):
+        form_rangecode = request.POST.get('rangecode')
+        
+        try:
+            selectedrange = Range.objects.get(rangecode = form_rangecode, isopen=1)
+            user = self.request.user
+            print(user)
+            requestuser = User.objects.get(username = user)
+            requestemail = requestuser.email
+            print(requestemail)
+
+            try:
+                checkifstudentinrange = RangeStudents.objects.get(rangeid = selectedrange,
+                                                                  email = requestuser)
+                messages.error(request,'You already belong in the range')
+                return render(request, 'ranges/entercode.html')
+
+            except RangeStudents.DoesNotExist:
+                datetimenow = datetime.datetime.now()
+                rangestudents_obj = RangeStudents(rangeID = selectedrange,
+                                                studentID = requestuser,
+                                                dateJoined = datetimenow)
+                
+                rangestudents_obj.save()
+                messages.success(request, 'Successfully Joined The Range')
+                return render(request, 'ranges/joinrange.html')
+
+        except Range.DoesNotExist:
+            selectedrange = None
+            messages.error(request, 'Invalid Range Code or Range Is Not Open')
 
 class DockerKill(View):
     def get(self, request):
@@ -23,7 +61,7 @@ class DockerKill(View):
                 serverip = '192.168.100.42'
             elif int(port) <= 9050:
                 serverip = '192.168.100.43'
-            serverip = 'localhost'
+            #serverip = 'localhost'
             endpoint = 'http://' + serverip + ':3125/containers/{conid}?force=True'
             url = endpoint.format(conid=containername)
             print(url)
@@ -45,7 +83,7 @@ class DockerKill(View):
                         serverip = '192.168.100.42'
                     elif int(port) <= 9050:
                         serverip = '192.168.100.43'
-                    serverip = 'localhost'
+                    #serverip = 'localhost'
                     endpoint = 'http://' + serverip + ':3125/containers/{conid}?force=True'
                     url = endpoint.format(conid=containername)
                     response = requests.delete(url)
@@ -141,7 +179,7 @@ class AttemptQuestionView(ListView, ModelFormMixin):
                 ]}
             }
         }
-        serverip = 'localhost'
+        #serverip = 'localhost'
         url = 'http://' + serverip + ':3125/containers/create'
         response = requests.post(url, json=payload)
         #print('HI IM HERE')
@@ -340,7 +378,7 @@ class AttemptMCQQuestionView(ListView, ModelFormMixin):
                 ]}
             }
         }
-        serverip = 'localhost'
+        #serverip = 'localhost'
         url = 'http://' + serverip + ':3125/containers/create'
         response = requests.post(url, json=payload)
         #print('HI IM HERE')

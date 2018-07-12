@@ -23,6 +23,48 @@ import datetime
 
 # Create your views here.
 
+class CreateImage(View):
+    def get(self, request, rangeurl, questionid, imageid):
+        #PULL FROM REGSITRY FROM IP ADDRESS 192.168.40.134:5000
+        data = {}
+        endpoint1 = 'http://192.168.100.42:8051/images/create?fromImage=192.168.100.42:5000/{conid}'
+        url1 = endpoint1.format(conid=imageid)
+        response = requests.post(url1)
+        if response.status_code == 200:
+            data['Id'] = id
+            data['message'] = 'success'
+        elif response.status_code == 404:
+            data['message'] = 'no such container'
+        elif response.status_code == 500:
+            data['message'] = 'conflict'
+        else:
+            data['message'] = 'Error %s' % response.status_code
+
+
+        #RENAME THE IMAGE NAME
+        #IMAGE NAME CANNOT HAVE CAPITAL LETTERS!!!!!!!!!!!!!!!!!!!!!!!!!
+        reference = {}
+        imagename = rangeurl + '.' + questionid
+        endpoint2 = 'http://192.168.100.42:8051/images/192.168.100.42:5000/{0}/tag?repo={1}'
+        url2 = endpoint2.format(id, range)
+        response = requests.post(url2)
+        
+        if response.status_code == 201:
+            reference['Id'] = range
+            reference['message'] = 'success'
+        elif response.status_code == 400:
+            reference['message'] = 'Bad Parameter'
+        elif response.status_code == 404:
+            reference['message'] = 'no such image'
+        elif response.status_code == 409:
+            reference['message'] = 'conflict'
+        elif response.status_code == 500:
+            reference['message'] = 'server error'
+        else:
+            reference['message'] = 'Error %s' % response.status_code
+
+
+
 class TeacherDashboard(ListView, PermissionRequiredMixin):
     template_name = 'teachers/teacherdashboard.html'
     context_object_name = 'usersobject'
@@ -436,6 +478,7 @@ class RangeView(ListView, FilterView):
             result = None
         
         context['answer'] = result
+        context['isopen'] = selectedrange.isopen
         context['rangename'] = Range.objects.filter(rangeurl= self.kwargs['rangeurl']).values_list('rangename')[0][0]
         context['range'] = Range.objects.filter(rangeurl = self.kwargs['rangeurl'])
         context['rangeurl'] = self.kwargs['rangeurl']
@@ -1045,43 +1088,6 @@ class DockerManagement(ListView):
     def get_queryset(self):
         dockers = UnavailablePorts.objects.all()
         return dockers
-
-class CreateImage(View):
-    def get(self, request):
-        data = {}
-        id = request.POST.get('id')	
-        endpoint1 = 'http://192.168.40.134:2376/images/create?fromImage=192.168.40.134:5000/{conid}'
-        url1 = endpoint1.format(conid=id)
-        response = requests.post(url1)
-        if response.status_code == 200:
-            data['Id'] = id
-            data['message'] = 'success'
-        elif response.status_code == 404:
-            data['message'] = 'no such container'
-        elif response.status_code == 500:
-            data['message'] = 'conflict'
-        else:
-            data['message'] = 'Error %s' % response.status_code
-        
-        reference = {}
-        range = request.POST.get('range')
-        endpoint2 = 'http://192.168.40.134:2376/images/192.168.40.134:5000/{0}/tag?repo={1}'
-        url2 = endpoint2.format(id, range)
-        response = requests.post(url2)
-        
-        if response.status_code == 201:
-            reference['Id'] = range
-            reference['message'] = 'success'
-        elif response.status_code == 400:
-            reference['message'] = 'Bad Parameter'
-        elif response.status_code == 404:
-            reference['message'] = 'no such image'
-        elif response.status_code == 409:
-            reference['message'] = 'conflict'
-        elif response.status_code == 500:
-            reference['message'] = 'server error'
-        else:
-            reference['message'] = 'Error %s' % response.status_code
 
 class AdminDockerKill(View):
     def get(self, request, containername):

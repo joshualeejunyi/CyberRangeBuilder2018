@@ -97,6 +97,7 @@ class ModifyRangeForm(ModelForm):
         enddate = cleaned_data.get("dateend")
         timestart = cleaned_data.get("timestart")
         timeend = cleaned_data.get("timeend")
+        isopen = cleaned_data.get("isopen")
 
         if startdate is not None or enddate is not None:
             if startdate < datetime.date.today():
@@ -124,7 +125,7 @@ class ModifyRangeForm(ModelForm):
 
     class Meta:
         model = Range
-        fields = ('rangename', 'datestart', 'timestart', 'dateend', 'timeend')
+        fields = ('rangename', 'datestart', 'timestart', 'dateend', 'timeend', 'isopen')
 
 class QuestionForm(ModelForm):
     def __init__(self, *args, **kwargs):
