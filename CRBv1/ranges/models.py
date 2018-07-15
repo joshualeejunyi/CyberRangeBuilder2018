@@ -86,8 +86,10 @@ class Questions(models.Model):
     topicid = models.ForeignKey(QuestionTopic, models.DO_NOTHING, db_column='topicid', unique=False, related_name='catid', null=True)
     usedocker = models.BooleanField(db_column='usedocker', default=False)
     createdby = models.ForeignKey('accounts.User', on_delete=models.DO_NOTHING, db_column='createdby', related_name="questioncreatedby", null=True)
-    datecreated = models.DateField(db_column='dateCreated', blank=True, null=True)
-    timecreated = models.TimeField(db_column='timecreated', null=True)
+    datecreated = models.DateTimeField(db_column='dateCreated', blank=True, null=True)
+    marks = models.IntegerField(db_column='marks', default=0)
+    answer = models.TextField(db_column='answer', null=True)
+    rangeid = models.ForeignKey(Range, db_column = 'rangeid', on_delete=models.DO_NOTHING, null=True)
 
     class Meta:
         db_table = 'Questions'

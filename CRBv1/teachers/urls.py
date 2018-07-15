@@ -63,10 +63,16 @@ urlpatterns = [
     path('rangemanagement/archived/unarchive/<rangeurl>/', login_required(views.UnarchiveRange.as_view()), name='unarchiverange'),
     path('rangemanagement/archived/delete/<rangeurl>/', login_required(views.DeleteRange.as_view()), name='deleterange'),
     path('rangemanagement/view/<rangeid>/edit/<questionid>/', login_required(views.EditQuestion.as_view()), name="editquestion"),
-
+    path('rangemanagement/view/<rangeurl>/importcsv', views.ImportCSV.as_view(), name='importcsv'),
+    path('rangemanagement/view/<rangeurl>/exportcsv', views.ExportCSV.as_view(), name='exportcsv'),
     path('questionmanagement/', login_required(views.QuestionManagement.as_view()), name='questionmanagement'),
 
     path('dockermanagement/', login_required(views.DockerManagement.as_view()), name='dockermanagement'),
     path('dockermanagement/kill/<containername>', login_required(views.AdminDockerKill.as_view()), name='killdocker'),
+
+    path('teachermanagement/', views.TeacherView.as_view(), name='teacherview'),
+    path('teachermanagement/addteacher', views.AddTeacher.as_view(), name='addteacher'),
+
+    
 
 ]  

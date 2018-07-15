@@ -1103,3 +1103,166 @@ class AdminDockerKill(View):
         deleteportsdb.delete()
 
         return redirect('/teachers/dockermanagement/')
+
+
+
+
+
+
+
+
+
+
+from tablib import *
+import logging
+import csv
+
+class ImportCSV(View):
+    def get(self, request, *args, **kwargs):
+        return render(request, 'teachers/importqns.html')
+
+    def post(self, request, *args, **kwargs):
+        rangeurl = self.kwargs['rangeurl']
+        data = {}
+        try:
+            csv_file = request.FILES["qnsfile"]
+            if not csv_file.name.endswith('.csv'):
+                messages.error(request,'File is not CSV type')
+                return render(request, 'teachers/importqns.html')
+            #if file is too large, return
+            if csv_file.multiple_chunks():
+                messages.error(request,"Uploaded file is too big (%.2f MB)." % (csv_file.size/(1000*1000),))
+                return render(request, 'teachers/importqns.html')
+            
+            file_data = csv_file.read().decode("utf-8")		
+
+            lines = file_data.split("\n")
+
+            #loop over the lines and save them in db. If error , store as string and then display
+            for line in lines:
+                if line:
+                    fields = line.split(",")
+                    data_dict = {}
+                    questiontype = fields[0]
+                    topicname = fields[1]
+                    title = fields[2]
+                    text = fields[3]
+                    answer = fields[4]
+                    hint = fields[5]
+                    marks = fields[6]
+                    
+                    if answer == 'TRUE':
+                        answer = 'True'
+                    if answer == 'FALSE':
+                        answer = 'False'
+
+                    print('questiontype is ' + str(questiontype))
+                    print('topicname is ' + str(topicname))
+                    print('title is ' + str(title))
+                    print('text is ' + str(text))
+                    print('answer is ' + str(answer))
+                    print('hint is ' + str(hint))
+                    print('marks is ' + str(marks))
+                    print('--------------------------------------------------------------------------------')
+
+                    datetimenow = datetime.datetime.now()
+                    username = self.request.user
+                    print(username)
+                    userinstance = User.objects.get(username = username)
+                    print(userinstance.email)
+                    questiontopicinstance = QuestionTopic.objects.get(topicname = topicname)
+                    question_obj = Questions(topicid = questiontopicinstance,
+                                            questiontype = questiontype,
+                                            title = title,
+                                            text = text,
+                                            hint = hint,
+                                            marks = marks,
+                                            answer = answer,
+                                            datecreated = datetimenow,
+                                            createdby = userinstance)
+                    question_obj.save()
+                    
+                    questioninstance = Questions.objects.all().order_by('-questionid')[0]
+                    rangeinstance = Range.objects.get(rangeurl = rangeurl)
+                    rangequestion_obj = RangeQuestions(questionid = questioninstance,
+                                                        rangeid = rangeinstance,
+                                                        isdisabled = False,
+                                                        answer = answer,
+                                                        registryid = '?')
+                    rangequestion_obj.save()
+
+                    if str(questiontype) == 'MCQ':
+                        optionone = fields[7]
+                        optiontwo = fields[8]
+                        optionthree = fields[9]
+                        optionfour = fields[10]
+                        print(optionone)
+                        print(optiontwo)
+                        print(optionthree)
+                        print(optionfour)
+                        mcqoptions_obj = MCQOptions(optionone = optionone,
+                                                    optiontwo = optiontwo,
+                                                    optionthree = optionthree,
+                                                    optionfour = optionfour,
+                                                    questionid = questioninstance)
+                        mcqoptions_obj.save()
+
+        except Exception as e:
+            logging.getLogger("error_logger").error("Unable to upload file. "+repr(e))
+            messages.error(request,"Unable to upload file. "+repr(e))
+            
+        return render(request, 'teachers/importqns.html')
+
+
+class ExportCSV(View):
+    def get(self, request, *args, **kwargs):
+        rangeurl = self.kwargs['rangeurl']
+        rangeinstance = Range.objects.get(rangeurl = rangeurl)
+        rangeid = rangeinstance.rangeid
+        rangequestioninstance = RangeQuestions.objects.filter(rangeid = rangeinstance).values_list('questionid', flat=True)
+
+        
+
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="questions.csv"'
+
+        writer = csv.writer(response)
+        writer.writerow(['QuestionType', 'Topic Name', 'Title', 'Text', 'Answer', 'Hint', 'Marks'])
+
+        questions = Questions.objects.filter(rangeid = rangeinstance).values_list('questiontype', 'topicid', 'title', 'text', 'answer', 'hint', 'marks')
+        for qns in questions:
+
+            writer.writerow(qns)
+        
+        return response
+
+class TeacherView(ListView):
+    template_name = 'teachers/teachermanagement.html'
+    context_object_name = 'teacherobjects'
+
+    def get_queryset(self):
+        allteachers = User.objects.filter(is_staff = 1)
+        return allteachers
+
+class AddTeacher(View):
+    def get(self, request, *args, **kwargs):
+        return render(request, 'teachers/addteacher.html')
+
+    def post(self, request, *args, **kwargs):
+        email = request.POST.get('email')
+        username = request.POST.get('username')
+        name = request.POST.get('name')
+        datenow = datetime.datetime.today().strftime('%Y-%m-%d')
+
+        user_obj = User(email = email,
+                        username = username,
+                        name = name,
+                        datejoined = datenow,
+                        password = 'testpassword',
+                        is_staff = 1
+                        )
+        user_obj.save()
+        user_obj.set_password()
+        messages.success(request, 'New Teacher Successfully Created')
+        return render(request, 'teachers/addteacher.html')
+

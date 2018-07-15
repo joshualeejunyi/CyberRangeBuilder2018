@@ -46,6 +46,17 @@ class AnswerForm(forms.ModelForm):
             studentobject.marksawarded = points
             studentobject.save()
 
+            pointsobject = RangeStudents.objects.get(rangeID=rangeinstance, studentID=user)
+            progress = progress + 1
+            pointsobject.progress = progress
+            pointsobject.lastaccess = currenttime
+            pointsobject.save()
+
+            if progress == numberofrangequestions:
+                pointsobject = RangeStudents.objects.get(rangeID=rangeinstance, studentID=user)
+                pointsobject.datecompleted = currenttime
+                pointsobject.save()
+
             if check is True:
                 pointsobject = RangeStudents.objects.get(rangeID = rangeinstance, studentID = user)
                 pointsobject.points += points
@@ -90,6 +101,17 @@ class AnswerMCQForm(forms.ModelForm):
             studentobject.answercorrect = check
             studentobject.marksawarded = points
             studentobject.save()
+
+            pointsobject = RangeStudents.objects.get(rangeID=rangeinstance, studentID=user)
+            progress = progress + 1
+            pointsobject.progress = progress
+            pointsobject.lastaccess = currenttime
+            pointsobject.save()
+
+            if progress == numberofrangequestions:
+                pointsobject = RangeStudents.objects.get(rangeID=rangeinstance, studentID=user)
+                pointsobject.datecompleted = currenttime
+                pointsobject.save()
 
             if check is True:
                 pointsobject = RangeStudents.objects.get(rangeID = rangeinstance, studentID = user)
