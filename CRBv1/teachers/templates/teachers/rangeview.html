@@ -186,6 +186,9 @@
                                     Question Marks
                                 </th>
                                 <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Hint Penalty
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
                                     Actions
                                 </th>
                         </thead>
@@ -215,19 +218,12 @@
                                     <td> {{x.text }} </td>
                                     <td> {{x.hint }} </td>
                                     <td>
-                                        {% for y in answer %}   
-                                            {% if y.questionid.questionid == x.questionid %}
-                                                {{ y.answer }}
-                                            {% endif %}
-                                        {% endfor %}
+                                        {{x.answer}}
                                     </td>
                                     <td> 
-                                        {% for a in marks %}
-                                            {% if a.questionid.questionid == x.questionid %}
-                                                {{ a.points }}
-                                            {% endif %}
-                                        {% endfor %}
+                                        {{x.points}}
                                     </td>
+                                    <td>{{x.hintpenalty}}</td>
                                     <td style="text-align: center">
                                         <a class="btn btn-block btn-primary" href="edit/{{ x.questionid }}">Edit</a>
                                         <a class="btn btn-block btn-primary" href="archive/{{ x.questionid }}">Archive</a>
@@ -243,7 +239,7 @@
                         {% endif %}
                     </table>
                     <br>
-                    <a class="btn btn-block btn-danger" style="width: 15%" href="archived">View Archived Questions</a>
+                    <a class="btn btn-block btn-danger" style="width: 30%" href="archived">View Archived Questions</a>
                 </div>
             </div>
             <div class="box">
@@ -335,7 +331,8 @@
 
                                 </td>
                                 <td>
-                                    <a class="btn btn-block btn-danger" href="remove/{{ user.username }}">Remove</a>
+                                    <a class="btn btn-block btn-success" href="report/{{ user.username }}">User Report</a>
+                                    <a class="btn btn-block btn-danger" href="remove/{{ user.username }}">Remove User</a>
                                 </td>
                             </tr>
                         {% endfor %}

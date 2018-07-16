@@ -30,12 +30,20 @@
 								
 								<div class="box-body">
 									<p>{{question.text}}</p>
-									<form method="post" class="pull-right">
-										{% csrf_token %}
-										{{ form }}
-										&nbsp;
-										<button class="btn btn-block btn-primary" type="submit">Submit</button>
-									</form>
+									<div>
+										<form method="post" class="pull-right" style="width:100%;">
+											{% csrf_token %}
+											{{ form }}
+											&nbsp;
+											{% if hint is None %}
+												<a href="activatehint" class="btn btn-block btn-danger pull-left" style="margin-top: 2%; max-width: 40%;">Use Hint <b>{% if question.hintpenalty is 0%}(no points deducted){%else%}({{question.hintpenalty}} points deducted){% endif %}</b></a>
+												<button class="btn btn-block btn-primary pull-right" type="submit" style="width: 20%;">Submit</button>
+											{% else %}
+												<h5 class="pull-left" style="width: 20%; margin-top: 2%;"><b>Hint:</b> {{question.hint}}</h5>
+												<button class="btn btn-block btn-primary pull-right" type="submit" style="width: 20%; margin-top: 2%;">Submit</button>
+											{% endif %}
+										</form>
+									</div>
 								</div>
 								
 								<div class="box-footer">
@@ -44,7 +52,7 @@
 							</div>
 						
 							<div style="width: 100px">
-								<a href="../play" class="btn btn-block btn-primary">Back</a>
+								<a href="../" class="btn btn-block btn-primary">Back</a>
 							</div>
 						</div>
 						{% if siab is not False %}
@@ -72,21 +80,25 @@
 									<div class="form-group">
 										<form method="post">
 											{% csrf_token %}
-											<div class="pull-right" style="width: 300px">
+											<div class="pull-right" style="width: 100%">
 												{{ form }}
+											{% if hint is None %}
+												<a href="activatehint" class="btn btn-block btn-danger pull-left" style="margin-top: 2%; max-width: 40%;">Use Hint <b>{% if question.hintpenalty is 0%}(no points deducted){%else%}({{question.hintpenalty}} points deducted){% endif %}</b></a>
+												<button class="btn btn-block btn-primary pull-right" type="submit" style="width: 20%;">Submit</button>
+											{% else %}
+												<h5 class="pull-left" style="width: 20%; margin-top: 2%;"><b>Hint:</b> {{question.hint}}</h5>
+												<button class="btn btn-block btn-primary pull-right" type="submit" style="width: 20%; margin-top: 2%;">Submit</button>
+											{% endif %}
 											</div>
-											<br>
+										</form>
 									</div>
 								</div>
-						
 								<div class="box-footer">
-									<button type="submit" class="btn btn-primary">Submit</button>
-										</form>
 									<p class="pull-right">{{ questionpoints }} points</p>
 								</div>
 							</div>
 						<div style="width: 100px">
-							<a href="../../play" class="btn btn-block btn-primary">Back</a>
+							<a href="../../" class="btn btn-block btn-primary">Back</a>
 						</div>
 					</div>
 					{% if siab is not False %}
@@ -113,24 +125,29 @@
 								<div class="form-group">
 									<form method="post">
 										{% csrf_token %}
-										<div class="pull-right" style="width: 300px">
+										<div class="pull-right" style="width: 100%;">
 											<select name="answergiven" class="form-control">
 												<option value="True" selected>True</option>
 												<option value="False" selected>False</option>
 											</select>
 										</div>
 										<br>
+										{% if hint is None %}
+											<a href="activatehint" class="btn btn-block btn-danger pull-left" style="margin-top: 2%; max-width: 40%;">Use Hint <b>{% if question.hintpenalty is 0%}(no points deducted){%else%}({{question.hintpenalty}} points deducted){% endif %}</b></a>
+											<button class="btn btn-block btn-primary pull-right" type="submit" style="width: 20%;">Submit</button>
+										{% else %}
+											<h5 class="pull-left" style="width: 20%; margin-top: 2%;"><b>Hint:</b> {{question.hint}}</h5>
+											<button class="btn btn-block btn-primary pull-right" type="submit" style="width: 20%; margin-top: 2%;">Submit</button>
+										{% endif %}
+									</form>
 								</div>
 							</div>
-						
 							<div class="box-footer">
-								<button type="submit" class="btn btn-primary">Submit</button>
-									</form>
 								<p class="pull-right">{{ questionpoints }} points</p>
 							</div>
 						</div>
 						<div style="width: 100px">
-							<a href="../play" class="btn btn-block btn-primary">Back</a>
+							<a href="../" class="btn btn-block btn-primary">Back</a>
 						</div>
 						</div>
 					{% if siab is not False %}
@@ -157,21 +174,26 @@
 									<div class="form-group">
 										<form method="post">
 											{% csrf_token %}
-											<div class="pull-right" style="width: 300px">
-											{{ form }}
+											<div class="pull-right" style="width: 100%;">
+												{{ form }}
+												{% if hint is None %}
+													<a href="activatehint" class="btn btn-block btn-danger pull-left" style="margin-top: 2%; max-width: 40%;">Use Hint <b>{% if question.hintpenalty is 0%}(no points deducted){%else%}({{question.hintpenalty}} points deducted){% endif %}</b></a>
+													<button class="btn btn-block btn-primary pull-right" type="submit" style="width: 20%;">Submit</button>
+												{% else %}
+													<h5 class="pull-left" style="width: 20%; margin-top: 2%;"><b>Hint:</b> {{question.hint}}</h5>
+													<button class="btn btn-block btn-primary pull-right" type="submit" style="width: 20%; margin-top: 2%;">Submit</button>
+												{% endif %}
 											</div>
-											<br>
+										</form>
 									</div>
 								</div>
 							
 								<div class="box-footer">
-									<button type="submit" class="btn btn-primary">Submit</button>
-										</form>
 									<p class="pull-right">{{ questionpoints }} points</p>
 								</div>
 							</div>
 							<div style="width: 100px">
-								<a href="../play" class="btn btn-block btn-primary">Back</a>
+								<a href="../" class="btn btn-block btn-primary">Back</a>
 							</div>
 						</div>
 						{% if siab is not False %}
@@ -198,21 +220,24 @@
 									<div class="form-group">
 										<form method="post">
 											{% csrf_token %}
-											<div class="pull-right" style="width: 500px">
-												<textarea class="form-control" name="answergiven" style="max-width: 500px"></textarea>
+											<div class="pull-right" style="width: 100%;">
+												<textarea class="form-control" name="answergiven" style="max-width: 100%; min-width: 100%;" required></textarea>
 											</div>
-											<br>
-									</div>
-								</div>
-							
+											{% if hint is None %}
+													<a href="activatehint" class="btn btn-block btn-danger pull-left" style="margin-top: 2%; max-width: 40%;">Use Hint <b>{% if question.hintpenalty is 0%}(no points deducted){%else%}({{question.hintpenalty}} points deducted){% endif %}</b></a>
+													<button class="btn btn-block btn-primary pull-right" type="submit" style="width: 20%;">Submit</button>
+												{% else %}
+													<h5 class="pull-left" style="width: 20%; margin-top: 2%;"><b>Hint:</b> {{question.hint}}</h5>
+													<button class="btn btn-block btn-primary pull-right" type="submit" style="width: 20%; margin-top: 2%;">Submit</button>
+												{% endif %}
+											</div>
+										</div>
 								<div class="box-footer">
-									<button type="submit" class="btn btn-primary">Submit</button>
-										</form>
 									<p class="pull-right">{{ questionpoints }} points</p>
 								</div>
 							</div>
 							<div style="width: 100px">
-								<a href="../play" class="btn btn-block btn-primary">Back</a>
+								<a href="../" class="btn btn-block btn-primary">Back</a>
 							</div>
 						</div>
 						{% if siab is not False %}
@@ -259,7 +284,7 @@
 									</div>
 								</div>
 								<div style="width: 100px">
-									<a href="../play" class="btn btn-block btn-primary">Back</a>
+									<a href="../" class="btn btn-block btn-primary">Back</a>
 								</div>
 							</div>
 							{% if siab is not False %}
@@ -301,7 +326,7 @@
 									</div>
 								</div>
 								<div style="width: 100px">
-									<a href="../play" class="btn btn-block btn-primary">Back</a>
+									<a href="../" class="btn btn-block btn-primary">Back</a>
 								</div>
 							</div>
 							{% if siab is not False %}
@@ -343,7 +368,7 @@
 									</div>
 								</div>
 								<div style="width: 100px">
-									<a href="../play" class="btn btn-block btn-primary">Back</a>
+									<a href="../" class="btn btn-block btn-primary">Back</a>
 								</div>
 							</div>
 							{% if siab is not False %}
@@ -385,7 +410,7 @@
 									</div>
 								</div>
 								<div style="width: 100px">
-									<a href="../../play" class="btn btn-block btn-primary">Back</a>
+									<a href="../../" class="btn btn-block btn-primary">Back</a>
 								</div>
 							</div>
 							{% if siab is not False %}
@@ -412,13 +437,8 @@
 											<form method="post">
 												Your Answer:
 												<textarea class="form-control" placeholder="{{answer.answergiven}}" disabled style="max-width: 100%"></textarea>
-												{% if answer.answercorrect %}
-													Correct!
-													<span class="glyphicon glyphicon-ok"></span>
-												{% else %}
-													Wrong! 
-													<span class="glyphicon glyphicon-remove"></span>
-												{% endif %}
+												Marking Pending!
+												<span class="glyphicon glyphicon-exclamation-sign"></span>
 											</form>
 										</div>
 									</div>
@@ -427,7 +447,7 @@
 									</div>
 								</div>
 								<div style="width: 100px">
-									<a href="../play" class="btn btn-block btn-primary">Back</a>
+									<a href="../" class="btn btn-block btn-primary">Back</a>
 								</div>
 							</div>
 							{% if siab is not False %}

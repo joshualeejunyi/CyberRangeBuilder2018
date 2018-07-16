@@ -38,6 +38,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         swappable = 'AUTH_USER_MODEL'
         db_table = 'User'
         verbose_name_plural = 'Users'
+        ordering = ['-lastmodifieddate', '-lastmodifiedtime']
 
 class Group(models.Model):
     groupid = models.AutoField(db_column='groupID', primary_key=True)

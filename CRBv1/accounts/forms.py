@@ -125,6 +125,9 @@ class AdminRegisterForm(UserCreationForm):
         admin = self.request.user
         user.lastmodifiedby = User.objects.get(username = admin)
         user.acceptedby = User.objects.get(username = admin)
+        user.isdisabled = False
+        user.isaccepted = True
+        user.isacceptedby = User.objects.get(username = admin)
         if commit:
             user.save()
         return user

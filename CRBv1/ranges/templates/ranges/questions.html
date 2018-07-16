@@ -20,7 +20,7 @@
 
 {% block content %}
 	<section class="content">
-		<div class="row" style=" margin: 0 auto;">
+		<!-- <div class="row" style=" margin: 0 auto;">
 			<h4>
 				<strong>Range Mastery</strong>
 				<span class="progress-number" style="font-size: 18px;">({{ userscored }}/{{ maxscore}} points):</span>
@@ -29,6 +29,44 @@
 				
 				<div class="progress lg">
 				<div class="progress-bar progress-bar-green" style="width: {{ percent }}%"></div>
+				</div>
+			</div>
+		</div> -->
+
+		<div class="row" style="margin: 0 auto;">
+			<div class="box box-widget" style="box-shadow: 1px 2px 5px grey;">
+				<div class="box-header with-border">
+					<span style="font-size: 22px;">
+						<b>Range Details:</b>
+					</span>
+					<div class="box-tools">
+						<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+					</div>
+				</div>
+
+				<div class="box-body">
+					<div style="font-size: 20px;">
+						{{ rangeinfo }}
+					</div>
+					
+				</div>
+			</div>
+		</div>
+		<div class="row" style="margin: 0 auto;">
+			<div class="box box-widget" style="box-shadow: 1px 2px 5px grey;">
+				<div class="box-header with-border">
+					<span style="font-size: 22px;">
+						<b>Range Mastery</b>
+						<span class="progress-number" style="font-size: 20px;">({{ userscored }}/{{ maxscore}} points):</span>
+					</span>
+				</div>
+				
+				<div class="box-body">
+					<div class="progress-group">
+						<div class="progress lg">
+							<div class="progress-bar progress-bar-green" style="width: {{ percent }}%"></div>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -42,7 +80,7 @@
           </div>
         </div>
         <div class="box-body">
-        		{% for question in questionobject %}
+				{% for question in questionobject %}
 					{% if topic.topicid is question.topicid.topicid %}
 						{% for attempted in attemptedquestions %}
 							{% if attempted.questionid.questionid is question.questionid %}
@@ -55,11 +93,7 @@
 						        				<div class="info-box-content">
 						          					<span class="info-box-text">{{ question.title }}</span>
 						          					<span class="info-box-number">
-														{% for x in questionpoints %}
-															{% if x.questionid.questionid == question.questionid %}
-																{{x.points}} points
-															{% endif %}
-														{% endfor %}
+														{{ question.points }} points
 													</span>
 							        			</div>
 					      				</div>
@@ -73,22 +107,18 @@
 						        				<div class="info-box-content">
 						          					<span class="info-box-text">{{ question.title }}</span>
 						          					<span class="info-box-number">
-														{% for x in questionpoints %}
-															{% if x.questionid.questionid == question.questionid %}
-																{{x.points}} points
-															{% endif %}
-														{% endfor %}
+														{{ question.points }} points
 													</span>
 							        			</div>
 					      				</div>
 				    				</div>
 								</a>
 								{% endif %}
-								{% endif %}
+							{% endif %}
 						{% endfor %}
-
+						
 						{% for unattempted in unattemptedquestions %}
-							{% if unattempted.questionid.questionid is question.questionid %}
+							{% if unattempted.questionid is question.questionid %}
 							{% if question.questiontype == 'MCQ' %}
 								<a href="Question{{ question.questionid }}/MCQ" style="color:black;">
 				    				<div class="col-md-4 col-sm-6 col-xs-5">
@@ -97,11 +127,7 @@
 						        				<div class="info-box-content">
 						          					<span class="info-box-text">{{ question.title }}</span>
 						          					<span class="info-box-number">
-														{% for x in questionpoints %}
-															{% if x.questionid.questionid == question.questionid %}
-																{{x.points}} points
-															{% endif %}
-														{% endfor %}
+														{{ question.points }} points
 													</span>
 							        			</div>
 					      				</div>
@@ -115,11 +141,7 @@
 						        				<div class="info-box-content">
 						          					<span class="info-box-text">{{ question.title }}</span>
 						          					<span class="info-box-number">
-														{% for x in questionpoints %}
-															{% if x.questionid.questionid == question.questionid %}
-																{{x.points}} points
-															{% endif %}
-														{% endfor %}
+														{{ question.points }} points
 													</span>
 							        			</div>
 					      				</div>

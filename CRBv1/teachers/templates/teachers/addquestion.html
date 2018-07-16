@@ -27,7 +27,7 @@
     {% csrf_token %}
     <div class="form-group has-feedback">
         <label for="questiontype">Question Type:</label>
-        <select name="questiontype" class="form-control" value="">
+        <select name="questiontype" class="form-control" value="" required>
             <option value="" disabled selected hidden>Choose A Question Type...</option>
             {% for x in questiontypechoices %}	
                 <option value='{{ x.0 }}'>{{ x.1 }}</option>
@@ -37,7 +37,7 @@
 
     <div class="form-group has-feedback">
         <label for="topicname">Topic of Question:</label>
-        <select name="topicname" id = "ourtopic" class="form-control" value="">
+        <select name="topicname" id = "ourtopic" class="form-control" value="" required>
             <option value="" disabled selected hidden>Choose A Topic...</option>
             {% for e in questiontopic %}	
                 <option value='{{ e.0 }}'>{{ e.0 }}</option>
@@ -63,7 +63,12 @@
     <div class="form-group has-feedback">
         <label for="points">Points:</label>
         <input type="number" name="points" class="form-control" required>
-    </div>    
+    </div>
+    
+    <div class="form-group has-feedback">
+        <label for="hintpenalty">Hint Penalty:</label>
+        <input type="number" name="hintpenalty" class="form-control">
+    </div>
 
     <div class="form-group has-feedback">
         <label for="answer">Answer:</label>
@@ -74,11 +79,11 @@
         <label for="usedocker">Use shell-in-a-box?</label>
         <select name="usedocker" class="form-control">
             <option value="no" selected>No</option>
-            <option value="yes" selected>Yes</option>
+            <option value="yes">Yes</option>
         </select>
     </div>
     <div class="form-group has-feedback">
-        <label for="registryid">Registry ID (if using shell-in-a-box):</label>
+        <label for="registryid">Registry Image Name (if using shell-in-a-box):</label>
     {% if form.registryid.errors %}
         <input type="text" name="registryid" class="form-control" style="border-color: #dd4b39;">
         <ul style="color: #dd4b39">

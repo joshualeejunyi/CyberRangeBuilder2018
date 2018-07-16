@@ -33,4 +33,5 @@ urlpatterns = [
     url(r'^ranges/', include('ranges.urls'), name='ranges'),
     url(r'^teachers/', include('teachers.urls'), name='teachers'),
     url(r'^progress/', include('progress.urls'), name='progress'),
+    url(r'^settings/', include('settings.urls'), name='settings'),
 ]

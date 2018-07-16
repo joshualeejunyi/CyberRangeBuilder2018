@@ -56,7 +56,7 @@ class DockerKill(View):
             print("HI")
             port = previousport[0][0]
             containername = UnavailablePorts.objects.filter(studentid = self.request.user).values_list('containername')[0][0]
-            if int(port) >= 9051:
+            if int(port) >= 9052:
                 serverip = '192.168.100.42'
             elif int(port) <= 9050:
                 serverip = '192.168.100.43'
@@ -78,7 +78,7 @@ class DockerKill(View):
                 if timediff > datetime.timedelta(hours = 3):
                     containername = entry.containername
                     port = entry.portnumber
-                    if int(port) >= 9051:
+                    if int(port) >= 9052:
                         serverip = '192.168.100.42'
                     elif int(port) <= 9050:
                         serverip = '192.168.100.43'
@@ -117,7 +117,7 @@ class AttemptQuestionView(ListView, ModelFormMixin):
         
         else:
             #return first available port for docker server
-            return 9051 
+            return 9052 
 
         #print('FIRST --->')
         #print(dockerserver, webserver)
@@ -158,7 +158,7 @@ class AttemptQuestionView(ListView, ModelFormMixin):
         if port == -1:
             return HttpResponse('SERVER BUSY. PLEASE TRY AGAIN LATER.')
         # port 8051 is reserved for API
-        elif port >= 9051:
+        elif port >= 9052:
             serverip = '192.168.100.42'
         elif port <= 9050:
             serverip = '192.168.100.43'
@@ -284,8 +284,15 @@ class AttemptQuestionView(ListView, ModelFormMixin):
             #print("HERE ARE THE OPTIONS" + str(options))
             context['mcqoptions'] = options
 
-        points = RangeQuestions.objects.filter(rangeid = self.rangeid, questionid = self.kwargs['questionid']).values_list('points')[0][0]
+        points = Questions.objects.filter(rangeid = self.rangeid, questionid = self.kwargs['questionid']).values_list('points')[0][0]
         context['questionpoints'] = points
+        hintactivated = StudentHints.objects.filter(rangeid = self.rangeid, questionid = self.kwargs['questionid'], studentid = self.request.user).values_list('hintactivated')
+        if len(hintactivated) != 0:
+            hint = hintactivated[0][0]
+        else:
+            hint = None
+        
+        context['hint'] = hint
 
         return context
 
@@ -316,7 +323,7 @@ class AttemptMCQQuestionView(ListView, ModelFormMixin):
         
         else:
             #return first available port for docker server
-            return 9051 
+            return 9052 
 
         #print('FIRST --->')
         #print(dockerserver, webserver)
@@ -357,7 +364,7 @@ class AttemptMCQQuestionView(ListView, ModelFormMixin):
         if port == -1:
             return HttpResponse('SERVER BUSY. PLEASE TRY AGAIN LATER.')
         # port 8051 is reserved for API
-        elif port >= 9051:
+        elif port >= 9052:
             serverip = '192.168.100.42'
         elif port <= 9050:
             serverip = '192.168.100.43'
@@ -489,7 +496,7 @@ class AttemptMCQQuestionView(ListView, ModelFormMixin):
             #print("HERE ARE THE OPTIONS" + str(options))
             context['mcqoptions'] = options
 
-        points = RangeQuestions.objects.filter(rangeid = self.rangeid, questionid = self.kwargs['questionid']).values_list('points')[0][0]
+        points = Questions.objects.filter(rangeid = self.rangeid, questionid = self.kwargs['questionid']).values_list('points')[0][0]
         context['questionpoints'] = points
         usedocker = Questions.objects.filter(questionid = self.kwargs['questionid']).values_list('usedocker')[0][0]
         if usedocker is True:
@@ -497,7 +504,30 @@ class AttemptMCQQuestionView(ListView, ModelFormMixin):
             context['siab'] = siab
         else:
             context['siab'] = False
+
+        hintactivated = StudentHints.objects.filter(rangeid = self.rangeid, questionid = self.kwargs['questionid'], studentid = self.request.user).values_list('hintactivated')
+        if len(hintactivated) != 0:
+            hint = hintactivated[0][0]
+        else:
+            hint = None
+        
+        context['hint'] = hint
         return context
+
+class ActivateHint(View):
+    def get(self, request, questionid, rangeurl):
+        user = self.request.user
+        hintobj = StudentHints()
+        hintobj.studentid = user
+        rangeinstance = Range.objects.get(rangeurl = rangeurl)
+        hintobj.rangeid = rangeinstance
+        questioninstance = Questions.objects.get(questionid = questionid)
+        hintobj.questionid = questioninstance
+        hintobj.hintactivated = True
+        hintobj.save()
+
+        return redirect('./')
+
 
 class QuestionsView(ListView):
     template_name = 'ranges/questions.html'
@@ -513,7 +543,7 @@ class QuestionsView(ListView):
         
         # get the current range id using rangename we got above
         currentrangeid = Range.objects.filter(rangeurl = rangeurl).values_list('rangeid')[0][0]
-        #print("rangeid ----->>>" + str(currentrangeid))
+        print("rangeid ----->>>" + str(currentrangeid))
 
         # now that i got the range id
         # what do i need?
@@ -524,21 +554,21 @@ class QuestionsView(ListView):
         # do i need the categoryname?
 
         # get the questionids of the questions in the range in a queryset
-        questionidsinrange = RangeQuestions.objects.filter(rangeid = currentrangeid).values_list("questionid")
-        #print("firstquestionid ----->>>>>" + str(questionidsinrange))
+        questionidsinrange = Questions.objects.filter(rangeid = currentrangeid).values_list("questionid")
+        print("firstquestionid ----->>>>>" + str(questionidsinrange))
 
         # create empty list for topics
         topiclist = []
 
         if len(questionidsinrange) != 0:
-            #print("number --->>>>> " + str(len(questionidsinrange)))
+            print("number --->>>>> " + str(len(questionidsinrange)))
             # get the queryset of the topicid of the first question
             topicidqueryset = Questions.objects.filter(questionid = (questionidsinrange[0][0]))
-            #print("firstquestiontopic ----->>>>>> " + str(topicidqueryset))
+            print("firstquestiontopic ----->>>>>> " + str(topicidqueryset))
 
             # loop so that i can get all the topic ids of the questions in the range
             for x in range(0, len(questionidsinrange)):
-                #print("HI")
+                print("HI")
                 currenttopicidqueryset = Questions.objects.filter(questionid=(questionidsinrange[x][0]))
                 currenttopicidforlistinteger = Questions.objects.filter(questionid=(questionidsinrange[x][0])).values_list("topicid")[0][0]
 
@@ -563,14 +593,14 @@ class QuestionsView(ListView):
                             questiontopicqueryset = questiontopicqueryset | qs
 
                 # test print
-                #print("TOPICS ------>>>>> " + str(questiontopicqueryset))
+                print("TOPICS ------>>>>> " + str(questiontopicqueryset))
         else:
             # probably won't be none but still
             questiontopicqueryset = None
 
         # return topics as a context YEBOI YAY ME
         context['topics'] = questiontopicqueryset
-        #print("OMG FML ___>>>" + str(context['topics']))
+        print("OMG FML ___>>>" + str(context['topics']))
 
         # gotta get the instance cause django
         rangeinstance = Range.objects.get(rangeurl = rangeurl)
@@ -609,18 +639,18 @@ class QuestionsView(ListView):
         for x in range(0, len(questionidsinrange)):
             if questionidsinrange[x][0] not in attemptedlist:
                 unattemptedlist.append(questionidsinrange[x][0])
-                #print(unattemptedlist)
+                print(unattemptedlist)
 
         #print("ORHOR DIDN'T DO ----->>>>>" + str(unattemptedlist[0]))
 
         if len(unattemptedlist) != 0:
             # get the first entry
             #print("rangeinstance" + str(currentrangeid))
-            unattemptedquestionsqueryset = RangeQuestions.objects.filter(questionid = unattemptedlist[0], rangeid = currentrangeid)
-            #print("HELP" + str(unattemptedquestionsqueryset))
+            unattemptedquestionsqueryset = Questions.objects.filter(questionid = unattemptedlist[0], rangeid = currentrangeid)
+            print("HELP" + str(unattemptedquestionsqueryset))
             for q in unattemptedlist:
                 if q != unattemptedlist[0]:
-                    uqs = RangeQuestions.objects.filter(questionid = q, rangeid = currentrangeid)
+                    uqs = Questions.objects.filter(questionid = q, rangeid = currentrangeid)
                     unattemptedquestionsqueryset = unattemptedquestionsqueryset | uqs
                 
                 #print("fml " + str(unattemptedquestionsqueryset))
@@ -637,39 +667,27 @@ class QuestionsView(ListView):
 
         userscored = RangeStudents.objects.filter(rangeID = currentrangeid, studentID = user).values_list('points')[0][0]
         maxscore = Range.objects.filter(rangeurl = rangeurl).values_list('maxscore')[0][0]
-        percent = int(userscored ) / int(maxscore) * 100
+        if maxscore is None:
+            maxscore = 0
+            percent = 0
+        else:
+            percent = int(userscored ) / int(maxscore) * 100
         context['userscored'] = userscored
         context['maxscore'] = maxscore
         context['percent'] = percent
-        points = RangeQuestions.objects.filter(rangeid = currentrangeid)
+        points = Questions.objects.filter(rangeid = currentrangeid)
         context['questionpoints'] = points
+        context['rangeinfo'] = Range.objects.filter(rangeurl= rangeurl).values_list('rangeinfo')[0][0]
         return context
 
     def get_queryset(self):
         self.rangeurl = get_object_or_404(Range, rangeurl=self.kwargs['rangeurl'], rangeactive=1)
         DockerKill.get(self, self.request)
-        # get the range id
         currentrangeid = Range.objects.filter(rangeurl = self.kwargs['rangeurl']).values_list('rangeid')[0][0]
-        #print(currentrangeid)
-
-        # use range id to get the questionids in the current range
-        questions = RangeQuestions.objects.filter(rangeid = currentrangeid).values_list('questionid')
-        #print("1 --> ORDER" + str(questions))
-        if len(questions) != 0:
-            # get the first object of assigned range (because need to declare var before our little concat trick later)
-            result = Questions.objects.filter(questionid=(questions[0][0]))
-            #print('2 --> ' + str(result))
-            for x in range(1, len(questions)):
-                #this for loop will concat all the assigned ranges together for our template to call
-                currentquestion= Questions.objects.filter(questionid=(questions[x][0]))
-                result = result | currentquestion # if i didn't get the first object just now python will scold me
-                # print('3 --> ' + str(result))
-        else:
-            # if there are no questions return None if not rip cause it shouldn't be none
-            result = None
-        #print("FMLLLLLLLL " +str(result))
-        #final = result.order_by('rangequestions__questionorder')[1:]
-        return result
+        questions = Questions.objects.filter(rangeid = currentrangeid)
+        if len(questions) == 0:
+            questions = None
+        return questions
 
 class RangesView(ListView):
     template_name = 'ranges/viewranges.html'
@@ -691,6 +709,10 @@ class RangesView(ListView):
                     if timecheck:
                         checkifalreadyinactive = Range.objects.filter(rangeid = x[0]).values_list("rangeactive")[0][0]
                         if checkifalreadyinactive == 1:
+                            studentobject = RangeStudents.objects.filter(rangeid = x[0], datecompleted=None)
+                            studentobject.datecompleted = currenttime
+                            studentobject.save()
+
                             rangeobject = Range.objects.get(rangeid = x[0])
                             rangeobject.rangeactive = 0
                             rangeobject.save()

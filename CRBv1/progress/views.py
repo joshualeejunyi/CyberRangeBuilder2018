@@ -1,6 +1,6 @@
 from django.views import generic
 
-from ranges.models import RangeStudents, Range, QuestionTopic, Questions, StudentQuestions, RangeQuestions
+from ranges.models import *
 
 from accounts.models import User
 
@@ -144,7 +144,7 @@ class ReportView(generic.ListView):
         context['total_score'] = total_score[0]
 
         # For Question Report
-        questionidlist = RangeQuestions.objects.filter(rangeid=completedrange).values_list('questionid', flat=True)
+        questionidlist = Questions.objects.filter(rangeid=completedrange).values_list('questionid', flat=True)
 
         questiontitles=[]
         questiontexts=[]
@@ -168,7 +168,7 @@ class ReportView(generic.ListView):
             useranswers.append(useranswer)
 
         for x in questionidlist:
-            questionanswer = RangeQuestions.objects.filter(questionid=x, rangeid=completedrange).values_list('answer')[0][0]
+            questionanswer = Questions.objects.filter(questionid=x, rangeid=completedrange).values_list('answer')[0][0]
             questionanswers.append(questionanswer)
 
         for x in questionidlist:
@@ -176,7 +176,7 @@ class ReportView(generic.ListView):
             usermarks.append(usermark)
 
         for x in questionidlist:
-            questionmark = Questions.objects.filter(questionid=x).values_list('marks')[0][0]
+            questionmark = Questions.objects.filter(questionid=x).values_list('points')[0][0]
             questionmarks.append(questionmark)
 
         for x in questionidlist:

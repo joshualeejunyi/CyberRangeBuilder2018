@@ -20,6 +20,9 @@ import requests
 from .choices import *
 from django.contrib import messages
 import datetime
+from tablib import *
+import logging
+import csv
 
 # Create your views here.
 
@@ -450,40 +453,42 @@ class RangeView(ListView, FilterView):
         selectedrange = Range.objects.get(rangeurl= self.kwargs['rangeurl'])
         selectedrangeid = selectedrange.rangeid
         #print(selectedrangeid)
-        questions = RangeQuestions.objects.filter(rangeid = selectedrangeid, isdisabled = False).values_list('questionid')
-        print(len(questions))
-        if len(questions) != 0:
-            result = Questions.objects.filter(questionid=(questions[0][0]))
-            for x in range(1, len(questions)):
-                currentquestion= Questions.objects.filter(questionid=(questions[x][0]))
+        result = Questions.objects.filter(rangeid = selectedrangeid, isarchived = False)
+        #questions = RangeQuestions.objects.filter(rangeid = selectedrangeid, isdisabled = False).values_list('questionid')
+        # print(len(questions))
+        # if len(questions) != 0:
+        #     result = Questions.objects.filter(questionid=(questions[0][0]))
+        #     for x in range(1, len(questions)):
+        #         currentquestion= Questions.objects.filter(questionid=(questions[x][0]))
                 
-                result = result | currentquestion # if i didn't get the first object just now python will scold me
-        else:
-            result = None
-        print(result)
+        #         result = result | currentquestion # if i didn't get the first object just now python will scold me
+        # else:
+        #     result = None
+        # print(result)
+        if len(result) == 0:
+            return None
         return result
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        print(context)
         selectedrange = Range.objects.get(rangeurl= self.kwargs['rangeurl'])
         selectedrangeid = selectedrange.rangeid
-        questions = RangeQuestions.objects.filter(rangeid = selectedrangeid, isdisabled = False).values_list('questionid')
-        if len(questions) != 0:
-            result = RangeQuestions.objects.filter(questionid=(questions[0][0]))
-            for x in range(1, len(questions)):
-                currentquestion= RangeQuestions.objects.filter(questionid=(questions[x][0]))
-                result = result | currentquestion # if i didn't get the first object just now python will scold me
-        else:
-            result = None
+        # questions = RangeQuestions.objects.filter(rangeid = selectedrangeid, isdisabled = False).values_list('questionid')
+        # if len(questions) != 0:
+        #     result = RangeQuestions.objects.filter(questionid=(questions[0][0]))
+        #     for x in range(1, len(questions)):
+        #         currentquestion= RangeQuestions.objects.filter(questionid=(questions[x][0]))
+        #         result = result | currentquestion # if i didn't get the first object just now python will scold me
+        # else:
+        #     result = None
         
-        context['answer'] = result
+        # context['answer'] = result
         context['isopen'] = selectedrange.isopen
         context['rangename'] = Range.objects.filter(rangeurl= self.kwargs['rangeurl']).values_list('rangename')[0][0]
         context['range'] = Range.objects.filter(rangeurl = self.kwargs['rangeurl'])
         context['rangeurl'] = self.kwargs['rangeurl']
         context['topics'] = QuestionTopic.objects.all()
-        context['marks'] = RangeQuestions.objects.filter(rangeid = selectedrangeid)
+        # context['marks'] = RangeQuestions.objects.filter(rangeid = selectedrangeid)
         context['activated'] = Range.objects.filter(rangeurl= self.kwargs['rangeurl']).values_list('rangeactive')[0][0]
         rangeid = Range.objects.filter(rangeurl = self.kwargs['rangeurl']).values_list('rangeid')[0][0]
         studentsinrange = RangeStudents.objects.filter(rangeID = rangeid).values_list('studentID')
@@ -504,7 +509,6 @@ class RangeView(ListView, FilterView):
         groupsinrange = RangeStudents.objects.filter(rangeID = rangeid).exclude(groupid__isnull=True).values_list('groupid').distinct()
         if len(groupsinrange) != 0:
             groups = Group.objects.filter(groupid = groupsinrange[0][0])
-            print(groups)
             for x in range(1, len(groupsinrange)):
                 currentgroup = Group.objects.filter(groupid = groupsinrange[x][0])
                 groups = groups | currentgroup
@@ -523,17 +527,17 @@ class ArchivedRangeQuestions(ListView, FilterView):
         selectedrange = Range.objects.get(rangeurl= self.kwargs['rangeurl'])
         selectedrangeid = selectedrange.rangeid
         #print(selectedrangeid)
-        questions = RangeQuestions.objects.filter(rangeid = selectedrangeid, isdisabled = True).values_list('questionid')
-        print(len(questions))
-        if len(questions) != 0:
-            result = Questions.objects.filter(questionid=(questions[0][0]))
-            for x in range(1, len(questions)):
-                currentquestion= Questions.objects.filter(questionid=(questions[x][0]))
+        result = Questions.objects.filter(rangeid = selectedrangeid, isarchived = True)
+        # print(len(questions))
+        # if len(questions) != 0:
+        #     result = Questions.objects.filter(questionid=(questions[0][0]))
+        #     for x in range(1, len(questions)):
+        #         currentquestion= Questions.objects.filter(questionid=(questions[x][0]))
                 
-                result = result | currentquestion # if i didn't get the first object just now python will scold me
-        else:
-            result = None
-        print(result)
+        #         result = result | currentquestion # if i didn't get the first object just now python will scold me
+        # else:
+        #     result = None
+        # print(result)
         return result
 
     def get_context_data(self, **kwargs):
@@ -541,21 +545,21 @@ class ArchivedRangeQuestions(ListView, FilterView):
         print(context)
         selectedrange = Range.objects.get(rangeurl= self.kwargs['rangeurl'])
         selectedrangeid = selectedrange.rangeid
-        questions = RangeQuestions.objects.filter(rangeid = selectedrangeid, isdisabled = True).values_list('questionid')
-        if len(questions) != 0:
-            result = RangeQuestions.objects.filter(questionid=(questions[0][0]))
-            for x in range(1, len(questions)):
-                currentquestion= RangeQuestions.objects.filter(questionid=(questions[x][0]))
-                result = result | currentquestion # if i didn't get the first object just now python will scold me
-        else:
-            result = None
+        # questions = RangeQuestions.objects.filter(rangeid = selectedrangeid, isdisabled = True).values_list('questionid')
+        # if len(questions) != 0:
+        #     result = RangeQuestions.objects.filter(questionid=(questions[0][0]))
+        #     for x in range(1, len(questions)):
+        #         currentquestion= RangeQuestions.objects.filter(questionid=(questions[x][0]))
+        #         result = result | currentquestion # if i didn't get the first object just now python will scold me
+        # else:
+        #     result = None
         
-        context['answer'] = result
+        # context['answer'] = result
         context['rangename'] = Range.objects.filter(rangeurl= self.kwargs['rangeurl']).values_list('rangename')[0][0]
         context['range'] = Range.objects.filter(rangeurl = self.kwargs['rangeurl'])
         context['rangeurl'] = self.kwargs['rangeurl']
         context['topics'] = QuestionTopic.objects.all()
-        context['marks'] = RangeQuestions.objects.filter(rangeid = selectedrangeid)
+        # context['marks'] = RangeQuestions.objects.filter(rangeid = selectedrangeid)
         return context
 
 class AddQuestioninRange(ListView, FilterView):
@@ -570,7 +574,7 @@ class AddQuestioninRange(ListView, FilterView):
         # get current range id
         currentrangeid = Range.objects.filter(rangeurl = self.kwargs['rangeurl']).values_list('rangeid')[0][0]
 
-        questionsinrange = RangeQuestions.objects.filter(rangeid = currentrangeid).values_list('questionid')
+        questionsinrange = Questions.objects.filter(rangeid = currentrangeid).values_list('questionid')
 
         unimportedquestions = Questions.objects.exclude(questionid__in=questionsinrange)
         print(unimportedquestions)
@@ -584,23 +588,23 @@ class AddQuestioninRange(ListView, FilterView):
         context['topics'] = QuestionTopic.objects.all()
         return context
 
-class AddQuestionAnswer(View):
-    def get(self, request, rangeurl, questionid):
-        return render(request, template_name = 'teachers/addquestionanswer.html')
+# class AddQuestionAnswer(View):
+#     def get(self, request, rangeurl, questionid):
+#         return render(request, template_name = 'teachers/addquestionanswer.html')
 
-    def post(self, request, rangeurl, questionid):
-        rqobject = RangeQuestions()
-        currentrangeid = Range.objects.filter(rangeurl = rangeurl).values_list('rangeid')[0][0]
-        rangeinstance = Range.objects.get(rangeid = currentrangeid)
-        rqobject.rangeid = rangeinstance
-        questioninstance = Questions.objects.get(questionid = questionid)
-        rqobject.questionid = questioninstance
-        rqobject.answer = request.POST.get('answer')
-        print(request.POST.get('answer'))
-        rqobject.isdisabled = False
-        rqobject.save()
+#     def post(self, request, rangeurl, questionid):
+#         rqobject = RangeQuestions()
+#         currentrangeid = Range.objects.filter(rangeurl = rangeurl).values_list('rangeid')[0][0]
+#         rangeinstance = Range.objects.get(rangeid = currentrangeid)
+#         rqobject.rangeid = rangeinstance
+#         questioninstance = Questions.objects.get(questionid = questionid)
+#         rqobject.questionid = questioninstance
+#         rqobject.answer = request.POST.get('answer')
+#         print(request.POST.get('answer'))
+#         rqobject.isdisabled = False
+#         rqobject.save()
 
-        return redirect('../../')
+#         return redirect('../../')
 
 class EditQuestion (UpdateView):
     form_class = ModifyQuestionForm
@@ -622,7 +626,7 @@ class EditQuestion (UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         selectedquestion = Questions.objects.get(questionid = self.kwargs['questionid'])
-        selectedrangequestion = RangeQuestions.objects.get(questionid = self.kwargs['questionid'])
+        selectedrangequestion = Questions.objects.get(questionid = self.kwargs['questionid'])
         context['rangequestions'] = selectedrangequestion
         questiontopic = QuestionTopic.objects.all().values_list('topicname')
         context['questiontopic'] = questiontopic
@@ -696,7 +700,7 @@ class DeleteRange(View):
         rangeobj = Range.objects.get(rangeurl = rangeurl)
         rangeid = Range.objects.filter(rangeurl = rangeurl).values_list('rangeid')[0][0]
         rangestudentsobj = RangeStudents.objects.filter(rangeID = rangeid)
-        rangequestionsobj = RangeQuestions.objects.filter(rangeid = rangeid)
+        rangequestionsobj = Questions.objects.filter(rangeid = rangeid)
         fakerangeobj = FakeRange.objects.filter(rangeid = rangeid)
         rangequestionsobj.delete()
         rangestudentsobj.delete()
@@ -721,12 +725,12 @@ class ArchiveQuestion(View):
         questionid = self.kwargs['questionid']
         rangeinstance = Range.objects.get(rangeurl = rangeurl)
         selectedquestioninstance = Questions.objects.get(questionid = questionid)
-        selectedrangequestion = RangeQuestions.objects.get(rangeid=rangeinstance, questionid=selectedquestioninstance)
-        selectedrangequestion.isdisabled = 1
+        selectedrangequestion = Questions.objects.get(rangeid=rangeinstance, questionid=selectedquestioninstance)
+        selectedrangequestion.isarchived = 1
         selectedrangequestion.save()
 
-        questionmarks = RangeQuestions.objects.filter(rangeid=rangeinstance, questionid = selectedquestioninstance).values_list('points')[0][0]
-        updatedscore = rangeinstance.maxscore - questionmarks
+        # questionmarks = RangeQuestions.objects.filter(rangeid=rangeinstance, questionid = selectedquestioninstance).values_list('points')[0][0]
+        updatedscore = rangeinstance.maxscore - selectedrangequestion.marks
         rangeinstance.maxscore = updatedscore
         rangeinstance.save()
         return redirect(previousurl)
@@ -738,12 +742,12 @@ class UnarchiveQuestion(View):
         questionid = self.kwargs['questionid']
         rangeinstance = Range.objects.get(rangeurl = rangeurl)
         selectedquestioninstance = Questions.objects.get(questionid = questionid)
-        selectedrangequestion = RangeQuestions.objects.get(rangeid=rangeinstance, questionid=selectedquestioninstance)
-        selectedrangequestion.isdisabled = 0
+        selectedrangequestion = Questions.objects.get(rangeid=rangeinstance, questionid=selectedquestioninstance)
+        selectedrangequestion.isarchived = 0
         selectedrangequestion.save()
 
-        questionmarks = RangeQuestions.objects.filter(rangeid=rangeinstance, questionid = selectedquestioninstance).values_list('points')[0][0]
-        updatedscore = rangeinstance.maxscore + questionmarks
+        # questionmarks = RangeQuestions.objects.filter(rangeid=rangeinstance, questionid = selectedquestioninstance).values_list('points')[0][0]
+        updatedscore = rangeinstance.maxscore + selectedrangequestion.marks
         rangeinstance.maxscore = updatedscore
         rangeinstance.save()
         return redirect(previousurl)
@@ -754,7 +758,7 @@ class DeleteQuestionFromRange(View):
         rangeurl = self.kwargs['rangeurl']
         questionid = self.kwargs['questionid']
         rangeinstance = Range.objects.get(rangeurl = rangeurl)
-        selectedquestioninstance = RangeQuestions.objects.get(questionid = questionid)
+        selectedquestioninstance = Questions.objects.get(questionid = questionid)
         selectedquestioninstance.delete()
         return redirect(previousurl)
 
@@ -919,18 +923,15 @@ class CreateQuestion(ListView, ModelFormMixin):
         self.form = self.get_form(self.form_class)
 
         if self.form.is_valid():
+            rangeinstance = Range.objects.get(rangeurl = self.kwargs['rangeurl'])
             question, topicname = self.form.save()
             optionone = request.POST.get('optionone',' ')
-            answer = self.request.POST.get('answer','')
-            points = self.request.POST.get('points','')
+            points = request.POST.get('points',' ')
+            answer = request.POST.get('answer',' ')
             registryid = self.request.POST.get('registryid','')
             questionid = question.questionid
             request.session['questionid'] = questionid
             questioninstance = Questions.objects.get(questionid = questionid)
-            registryid = self.request.POST.get('registryid','')
-            rangeinstance = Range.objects.get(rangeurl = self.kwargs['rangeurl'])
-            rangequestionobject = RangeQuestions(rangeid = rangeinstance, questionid = questioninstance, answer = answer, points = points, registryid = registryid)
-            rangequestionobject.save()
 
             currentrangescore = rangeinstance.maxscore
             if currentrangescore is None:
@@ -940,6 +941,7 @@ class CreateQuestion(ListView, ModelFormMixin):
             
             rangeinstance.maxscore = currentrangescore
             rangeinstance.save()
+        
             request.session['TF'] = False
 
             if question.questiontype == 'MCQ' and optionone == ' ':
@@ -1024,9 +1026,8 @@ class CreateQuestion(ListView, ModelFormMixin):
                 if 'questionid' in request.session:
                     questionid = request.session['questionid']
                 questioninstance = Questions.objects.get(questionid = questionid)
-                rangequestionobject = RangeQuestions.objects.get(questionid = questioninstance)
-                rangequestionobject.answer = answer
-                rangequestionobject.save()
+                questioninstance.answer = answer
+                questioninstance.save()
                 
                 return ListView.get(self, request, *args, **kwargs)
             else:
@@ -1039,7 +1040,8 @@ class CreateQuestion(ListView, ModelFormMixin):
 
     def get_form_kwargs(self):
         kwargs = super(CreateQuestion, self).get_form_kwargs()
-        kwargs.update({'request': self.request})
+        rangeinstance = Range.objects.get(rangeurl = self.kwargs['rangeurl'])
+        kwargs.update({'request': self.request, 'rangeinstance': rangeinstance})
         return kwargs
 
     def get_context_data(self, **kwargs):
@@ -1103,19 +1105,6 @@ class AdminDockerKill(View):
         deleteportsdb.delete()
 
         return redirect('/teachers/dockermanagement/')
-
-
-
-
-
-
-
-
-
-
-from tablib import *
-import logging
-import csv
 
 class ImportCSV(View):
     def get(self, request, *args, **kwargs):
@@ -1266,3 +1255,31 @@ class AddTeacher(View):
         messages.success(request, 'New Teacher Successfully Created')
         return render(request, 'teachers/addteacher.html')
 
+class ReportView(generic.ListView):
+    template_name='teachers/report.html'
+    context_object_name = 'questions'
+    def get_queryset(self):
+        username = self.kwargs['username']
+        useremail = User.objects.filter(username=username).values_list('email')[0][0]
+        rangeid = Range.objects.filter(rangeurl=self.kwargs['rangeurl']).values_list('rangeid')[0][0]
+        questions = Questions.objects.filter(rangeid=rangeid)
+        print(questions)
+
+        return questions
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        rangeurl = self.kwargs['rangeurl']
+        username = self.kwargs['username']
+        context['username'] = username
+        useremail = User.objects.filter(username=username).values_list('email')[0][0]
+        rangeid = Range.objects.filter(rangeurl=rangeurl).values_list('rangeid')[0][0]
+
+        context['rangename'] = Range.objects.filter(rangeurl=rangeurl).values_list('rangename')[0][0]
+        context['maxscore'] = Range.objects.filter(rangeurl=rangeurl).values_list('maxscore')[0][0]
+        context['totalscore'] = RangeStudents.objects.filter(studentID=useremail).values_list('points')[0][0]
+        context['useranswer'] = StudentQuestions.objects.filter(rangeid=rangeid, studentid=useremail).values_list('answergiven')[0][0]
+        context['usermark'] = StudentQuestions.objects.filter(rangeid=rangeid, studentid=useremail).all()
+        context['topic'] = QuestionTopic.objects.all()
+
+        return context

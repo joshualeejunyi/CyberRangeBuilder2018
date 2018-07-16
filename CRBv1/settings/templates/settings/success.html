@@ -1,0 +1,33 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title_outer %}
+	<title>
+		{%block title %}
+			Cyber Range
+		{% endblock %}
+	</title>
+
+{% endblock %}
+
+{% block content_header%}
+	<section class="content-header">
+		<h1>
+			{% block page_name %}{% endblock %}
+			<small>{% block page_description %}{% endblock %}</small>
+		</h1>
+		{% block breadcrumbs %}
+
+		{% endblock %}
+	</section>
+{% endblock%}
+
+{% block content %}
+
+<div class="row">
+	<div class="col text-center">
+			<h1> You have successfully changed your user settings.</h1>
+
+			<a href="/dashboard/" class="btn  btn-primary" style="margin-top:5%; width: 200px;"> Back to Dashboard </a>
+		</div>
+</div>
+{% endblock %}

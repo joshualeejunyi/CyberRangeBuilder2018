@@ -16,7 +16,7 @@
 		<div class="col-md-6">
 			<div class="box box-solid box-primary" style="box-shadow: 1px 2px 5px grey;">
                 <div class="box-header with-border">
-                    <h3 class="box-title" style="font-size:22px;">Active Ranges</h3>
+                    <h3 class="box-title" style="font-size:22px;">Uncompleted Ranges</h3>
                     <div class="box-tools pull-right">
 					<button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
 				</div>
@@ -127,21 +127,21 @@
     <h4 style="margin-left: 1.5%"> Your latest completed ranges </h4>
 
         {% if lengthofranges == 1 %}
-        {% for rangename,score,maxscore,number in zip4ranges %}
+        {% for rangename,score,maxscore,number,rangeurl in zip4ranges %}
         <div class="col-lg-3 col-6">
                 <div class="small-box bg-light-blue">
                   <div class="inner">
                     <p style="font-size: 25px">{{score}}/{{maxscore}}</p>
                     <p>{{rangename}}</p>
                   </div>
-                  <a href="#" class="small-box-footer" style="padding:3% 0">View report <i class="fa fa-arrow-circle-right"></i></a>
+                  <a href="/progress/{{ rangeurl }}/report" class="small-box-footer" style="padding:3% 0">View report <i class="fa fa-arrow-circle-right"></i></a>
                 </div>
         </div>
         {% endfor %}
 
             {% elif lengthofranges == 2 %}
 
-            {% for rangename,score,maxscore,number in zip4ranges %}
+            {% for rangename,score,maxscore,number,rangeurl in zip4ranges %}
 
                 {% if number == 1 %}
                 <div class="col-lg-3 col-6">
@@ -150,7 +150,7 @@
                             <p style="font-size: 25px">{{score}}/{{maxscore}}</p>
                             <p class="align-right">{{rangename}}</p>
                           </div>
-                          <a href="#" class="small-box-footer" style="padding:3% 0">View report <i class="fa fa-arrow-circle-right"></i></a>
+                          <a href="/progress/{{ rangeurl }}/report" class="small-box-footer" style="padding:3% 0">View report <i class="fa fa-arrow-circle-right"></i></a>
                         </div>
                 </div>
                 {% endif %}
@@ -161,7 +161,7 @@
                             <p style="font-size: 25px">{{score}}/{{maxscore}}</p>
                             <p>{{rangename}}</p>
                           </div>
-                          <a href="#" class="small-box-footer" style="padding:3% 0">View report <i class="fa fa-arrow-circle-right"></i></a>
+                          <a href="/progress/{{ rangeurl }}/report" class="small-box-footer" style="padding:3% 0">View report <i class="fa fa-arrow-circle-right"></i></a>
                         </div>
                 </div>
                 {% endif %}
@@ -170,7 +170,7 @@
 
             {% elif lengthofranges == 3 %}
 
-            {% for rangename,score,maxscore,number in zip4ranges %}
+            {% for rangename,score,maxscore,number,rangeurl in zip4ranges %}
 
                 {% if number == 1 %}
                 <div class="col-lg-3 col-6">
@@ -179,7 +179,7 @@
                             <p style="font-size: 25px">{{score}}/{{maxscore}}</p>
                             <p class="align-right">{{rangename}}</p>
                           </div>
-                          <a href="#" class="small-box-footer" style="padding:3% 0">View report <i class="fa fa-arrow-circle-right"></i></a>
+                          <a href="/progress/{{ rangeurl }}/report" class="small-box-footer" style="padding:3% 0">View report <i class="fa fa-arrow-circle-right"></i></a>
                         </div>
                 </div>
                 {% endif %}
@@ -190,7 +190,7 @@
                             <p style="font-size: 25px">{{score}}/{{maxscore}}</p>
                             <p>{{rangename}}</p>
                           </div>
-                          <a href="#" class="small-box-footer" style="padding:3% 0">View report <i class="fa fa-arrow-circle-right"></i></a>
+                          <a href="/progress/{{ rangeurl }}/report" class="small-box-footer" style="padding:3% 0">View report <i class="fa fa-arrow-circle-right"></i></a>
                         </div>
                 </div>
                 {% endif %}
@@ -201,7 +201,7 @@
                             <p style="font-size: 25px; color=blue;">{{score}}/{{maxscore}}</p>
                             <p>{{rangename}}</p>
                           </div>
-                          <a href="#" class="small-box-footer" style="padding:3% 0">View report <i class="fa fa-arrow-circle-right"></i></a>
+                          <a href="/progress/{{ rangeurl }}/report" class="small-box-footer" style="padding:3% 0">View report <i class="fa fa-arrow-circle-right"></i></a>
                         </div>
                 </div>
                 {% endif %}
@@ -210,7 +210,7 @@
 
         {% elif lengthofranges == 4 %}
 
-            {% for rangename,score,maxscore,number in zip4ranges %}
+            {% for rangename,score,maxscore,number,rangeurl in zip4ranges %}
 
                 {% if number == 1 %}
                 <div class="col-lg-3 col-6">
@@ -219,7 +219,7 @@
                             <p style="font-size: 25px">{{score}}/{{maxscore}}</p>
                             <p class="align-right">{{rangename}}</p>
                           </div>
-                          <a href="#" class="small-box-footer" style="padding:3% 0">View report <i class="fa fa-arrow-circle-right"></i></a>
+                          <a href="/progress/{{ rangeurl }}/report" class="small-box-footer" style="padding:3% 0">View report <i class="fa fa-arrow-circle-right"></i></a>
                         </div>
                 </div>
                 {% endif %}
@@ -230,7 +230,7 @@
                             <p style="font-size: 25px">{{score}}/{{maxscore}}</p>
                             <p>{{rangename}}</p>
                           </div>
-                          <a href="#" class="small-box-footer" style="padding:3% 0">View report <i class="fa fa-arrow-circle-right"></i></a>
+                          <a href="/progress/{{ rangeurl }}/report" class="small-box-footer" style="padding:3% 0">View report <i class="fa fa-arrow-circle-right"></i></a>
                         </div>
                 </div>
                 {% endif %}
@@ -241,7 +241,7 @@
                             <p style="font-size: 25px; color=blue;">{{score}}/{{maxscore}}</p>
                             <p>{{rangename}}</p>
                           </div>
-                          <a href="#" class="small-box-footer" style="padding:3% 0">View report <i class="fa fa-arrow-circle-right"></i></a>
+                          <a href="/progress/{{ rangeurl }}/report" class="small-box-footer" style="padding:3% 0">View report <i class="fa fa-arrow-circle-right"></i></a>
                         </div>
                 </div>
                 {% endif %}
@@ -252,7 +252,7 @@
                             <p style="font-size: 25px">{{score}}/{{maxscore}}</p>
                             <p>{{rangename}}</p>
                           </div>
-                          <a href="#" class="small-box-footer" style="padding:3% 0">View report <i class="fa fa-arrow-circle-right"></i></a>
+                          <a href="/progress/{{ rangeurl }}/report" class="small-box-footer" style="padding:3% 0">View report <i class="fa fa-arrow-circle-right"></i></a>
                         </div>
                 </div>
                 {% endif %}

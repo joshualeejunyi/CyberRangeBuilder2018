@@ -64,6 +64,7 @@ class DashboardView(generic.ListView):
             finalpointslist = []
             finalnamelist = []
             finalmaxlist = []
+            finalurllist = []
 
             for x in latest4id:
                 finalpointslist.append(RangeStudents.objects.filter(studentID=user, rangeID=x).order_by('datecompleted').values_list('points')[0][0])
@@ -81,6 +82,11 @@ class DashboardView(generic.ListView):
                 if len(finalmaxlist) == 4:
                     break
 
+            for x in latest4id:
+                finalurllist.append(Range.objects.filter(rangeid=x).values_list('rangeurl')[0][0])
+                if len(finalurllist) == 4:
+                    break
+
             listofrangelength = range(1, (len(finalnamelist)+1))
 
             if user not in userrankings:
@@ -93,10 +99,7 @@ class DashboardView(generic.ListView):
             else:
                 context['userintop5'] = True
 
-            print(finalnamelist)
-            print(finalpointslist)
-            print(finalmaxlist)
-            context['zip4ranges'] = zip(finalnamelist, finalpointslist, finalmaxlist, listofrangelength)
+            context['zip4ranges'] = zip(finalnamelist, finalpointslist, finalmaxlist, listofrangelength, finalurllist)
             context['lengthofranges'] = len(finalnamelist)
 
 

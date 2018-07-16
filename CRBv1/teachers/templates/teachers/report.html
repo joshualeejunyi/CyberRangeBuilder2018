@@ -1,0 +1,151 @@
+{% extends 'teachers/teacherbase.html' %}
+
+{% block title_outer %}
+	<title>
+		{%block title %}
+			Cyber Range
+		{% endblock %}
+	</title>
+<head>
+
+    <input type="hidden" id="correct" name="variable" value="{{ totalscore }}">
+    <input type="hidden" id="maxscore" name="variable" value="{{ maxscore }}">
+
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+		<script>
+      google.charts.load('current', {'packages':['corechart']});
+
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+
+        // Create the data table.
+        var data = new google.visualization.DataTable();
+		var correct = parseInt(document.getElementById("correct").value);
+		var maxscore = parseInt(document.getElementById("maxscore").value);
+		var incorrect = maxscore-correct
+
+        data.addColumn('string', 'Answer');
+        data.addColumn('number', 'Amount');
+        data.addRows([
+          ['Points Achieved', correct],
+          ['Points lost', incorrect],
+        ]);
+
+        // Set chart options
+        var options = {
+        'width': "100%",
+        'height': 380,
+        'backgroundColor': 'transparent',
+        pieHole: 0.4
+        };
+
+        // Instantiate and draw our chart, passing in some options.
+        var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
+        chart.draw(data, options);
+      }
+    </script>
+
+  </head>
+{% endblock %}
+
+{% block content_header%}
+	<section class="content-header">
+		<h1>
+			{% block page_name %}{% endblock %}
+			<small>{% block page_description %}{% endblock %}</small>
+		</h1>
+		{% block breadcrumbs %}
+
+		{% endblock %}
+	</section>
+{% endblock%}
+
+{% block content %}
+    <h1 class="text-center"> {{username}}'s Report of <strong>{{ rangename }}</strong></h1>
+    <div class="row">
+        <div class="col" style="text-align:center; margin-left: 25%; width: 50%">
+                <h3> Range score: <strong> {{totalscore}} / {{maxscore}} </strong> </h3>
+                <div id="chart_div"></div>
+            </div>
+    </div>
+
+    		<div class="row">
+
+
+			<div class="col" style="width: 70%; margin-left: 15%; margin-top: 3%">
+				<div class="box box-solid box-primary" style="box-shadow: 1px 2px 5px grey;">
+					<div class="box-header">
+						<h3 class="box-title" style="font-size:22px;">{{ rangename }} Questions</h3>
+						<div class="box-tools pull-right">
+						<button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+						</div>
+					</div>
+					<div class="box-body">
+					<table id="studentstable" class="table table-bordered table-hover dataTable" role="grid" style="table-layout: fixed; width: 100%; word-wrap: break-word; display: table;">
+						<thead>
+							<tr role="row">
+								<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="5%">
+									#
+								</th>
+								<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="10%">
+									Topic
+								</th>
+								<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="10%">
+									Question Title
+								</th>
+								<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="25%">
+									Question Text
+								</th>
+								<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="20%">
+									Given Answer
+								</th>
+								<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="20%">
+									Correct Answer
+								</th>
+								<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="10%">
+									Question Points
+								</th>
+								<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="10%">
+									Points Awarded
+								</th>
+								<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="10%">
+									Actions
+								</th>
+							</tr>
+						</thead>
+						<tbody>
+						{% for x in questions %}
+							<tr role="row">
+								<td>{{ forloop.counter }}</td>
+								<td>
+									{% for y in topic %}
+										{% if x.topicid.topicid == y.topicid%}
+											{{ x.topicid.topicname }}
+										{% endif %}
+									{% endfor %}
+								</td>
+								<td>{{ x.title }}</td>
+								<td>{{ x.text }}</td>
+								<td>{{ useranswer }}</td>
+								<td>{{ x.answer }}</td>
+								<td>{{ x.points }}</td>
+								<td>
+									{% for y in usermark %}
+										{% if y.questionid.questionid == x.questionid %}
+											{{ y.marksawarded }}
+										{% endif %}
+									{% endfor %}
+								</td>
+								<td>
+
+								</td>
+							</tr>
+						{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+{% endblock %}

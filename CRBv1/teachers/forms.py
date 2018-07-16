@@ -48,6 +48,9 @@ class RangeForm(ModelForm):
         timestart = cleaned_data.get("timestart")
         timeend = cleaned_data.get("timeend")
 
+        self.startdate = startdate
+        self.enddate = enddate
+
         if startdate is not None or enddate is not None:
             if startdate < datetime.date.today():
                 msg = u"Please choose a Start Date starting from today!"
@@ -78,13 +81,17 @@ class RangeForm(ModelForm):
         email = User.objects.get(username = admin)
         createdrange.createdbyusername = email
 
+        if self.startdate is not None or self.enddate is not None:
+            createdrange.timestart = '08:30:AM'
+            createdrange.timeend = '11:59:PM'
+
         if commit:
             createdrange.save()
         return createdrange
 
     class Meta:
         model = Range
-        fields = ('rangename', 'maxscore', 'rangeurl', 'datestart', 'timestart', 'dateend', 'timeend')
+        fields = ('rangename', 'maxscore', 'rangeurl', 'datestart', 'timestart', 'dateend', 'timeend', 'attempts', 'rangeinfo')
 
 class ModifyRangeForm(ModelForm):
     def __init__(self, *args, **kwargs):
@@ -125,11 +132,12 @@ class ModifyRangeForm(ModelForm):
 
     class Meta:
         model = Range
-        fields = ('rangename', 'datestart', 'timestart', 'dateend', 'timeend', 'isopen')
+        fields = ('rangename', 'datestart', 'timestart', 'dateend', 'timeend', 'isopen', 'attempts', 'rangeinfo')
 
 class QuestionForm(ModelForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop("request")
+        self.rangeinstance = kwargs.pop("rangeinstance")
         super(QuestionForm, self).__init__(*args, **kwargs)
 
     def clean(self):
@@ -153,6 +161,8 @@ class QuestionForm(ModelForm):
         question.createdby = email
         question.datecreated = datetime.date.today()
         question.timecreated = datetime.datetime.now().time()
+        rangeid = self.rangeinstance.rangeid
+        question.rangeid = self.rangeinstance
 
         if commit:
             question.save()
@@ -160,7 +170,7 @@ class QuestionForm(ModelForm):
 
     class Meta:
         model = Questions
-        fields = ('questiontype', 'title', 'text', 'hint', 'usedocker')
+        fields = ('questiontype', 'title', 'text', 'hint', 'hintpenalty', 'answer', 'usedocker', 'points',)
 
 class ModifyQuestionForm(ModelForm):
     def __init__(self, *args, **kwargs):
@@ -187,4 +197,4 @@ class ModifyQuestionForm(ModelForm):
 
     class Meta:
         model = Questions
-        fields = ('title', 'text', 'hint',)
+        fields = ('title', 'text', 'hint', 'hintpenalty',)

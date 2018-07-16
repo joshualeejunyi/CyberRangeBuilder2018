@@ -20,7 +20,9 @@ class Range(models.Model):
     studentsinrange = models.IntegerField(db_column='studentsInRange', null=True)
     isdisabled = models.BooleanField(db_column='isDisabled', default=False)
     isopen = models.BooleanField(db_column='isOpen', default=False)
-
+    rangeinfo = models.TextField(db_column='rangeInfo', blank=True, null=True)
+    attempts = models.PositiveIntegerField(db_column='attempts', default=0)
+    
     class Meta:
         db_table = 'Range'
         verbose_name_plural = 'Ranges'
@@ -44,6 +46,8 @@ class FakeRange(models.Model):
     studentsinrange = models.IntegerField(db_column='studentsInRange', null=True)
     isdisabled = models.BooleanField(db_column='isDisabled', default=False)
     isopen = models.BooleanField(db_column='isOpen', default=False)
+    rangeinfo = models.TextField(db_column='rangeInfo', blank=True, null=True)
+    attempts = models.PositiveIntegerField(db_column='attempts', default=0)
 
     class Meta:
         app_label = Range._meta.app_label
@@ -68,7 +72,6 @@ class RangeStudents(models.Model):
         db_table = 'RangeStudents'
         verbose_name_plural = 'RangeStudents'
 
-
 class QuestionTopic(models.Model):
     topicid = models.AutoField(db_column='topicid', primary_key=True)
     topicname = models.CharField(db_column='topicname', max_length=100, null=True)
@@ -83,13 +86,17 @@ class Questions(models.Model):
     title = models.CharField(db_column='questiontitle', max_length=255, null=True)
     text = models.TextField(db_column='questiontext')
     hint = models.TextField(db_column='hint')
+    hintpenalty = models.PositiveIntegerField(db_column='hintpenalty', default=0)
     topicid = models.ForeignKey(QuestionTopic, models.DO_NOTHING, db_column='topicid', unique=False, related_name='catid', null=True)
-    usedocker = models.BooleanField(db_column='usedocker', default=False)
     createdby = models.ForeignKey('accounts.User', on_delete=models.DO_NOTHING, db_column='createdby', related_name="questioncreatedby", null=True)
     datecreated = models.DateTimeField(db_column='dateCreated', blank=True, null=True)
-    marks = models.IntegerField(db_column='marks', default=0)
+    points = models.PositiveIntegerField(db_column='points', default=0)
     answer = models.TextField(db_column='answer', null=True)
     rangeid = models.ForeignKey(Range, db_column = 'rangeid', on_delete=models.DO_NOTHING, null=True)
+    usedocker = models.BooleanField(db_column='usedocker', default=False)
+    registryid = models.CharField(db_column='registryID', max_length=255, null=True)
+    isarchived = models.BooleanField(db_column='isArchived', default=False)
+
 
     class Meta:
         db_table = 'Questions'
@@ -127,9 +134,21 @@ class StudentQuestions(models.Model):
     answercorrect = models.BooleanField(db_column='right/wrong', default=False)
     marksawarded = models.IntegerField(db_column='marksawarded')
 
+
     class Meta:
         db_table = 'StudentQuestions'
         verbose_name_plural = 'StudentQuestions'
+
+
+class StudentHints(models.Model):
+    studentid = models.ForeignKey('accounts.User', on_delete=models.CASCADE, db_column='studentid', unique=False)
+    rangeid = models.ForeignKey(Range, on_delete=models.CASCADE, db_column='rangeid', unique=False)
+    questionid = models.ForeignKey(Questions, models.DO_NOTHING, db_column='questionid', unique=False)
+    hintactivated = models.BooleanField(db_column='hintactivated', default=False)
+
+    class Meta:
+        db_table = 'StudentHints'
+        verbose_name_plural = 'StudentHints'
 
 class UnavailablePorts(models.Model):
     portnumber = models.IntegerField(db_column='portNumber', primary_key=True)

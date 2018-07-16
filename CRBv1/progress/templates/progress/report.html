@@ -75,28 +75,59 @@
 
 
 			<div class="col" style="width: 70%; margin-left: 15%; margin-top: 3%">
-				{% for title, text, userans, questionans, usermarks, questionmarks,topics in reportdata %}
 				<div class="box box-solid box-primary" style="box-shadow: 1px 2px 5px grey;">
-				<div class="box-header">
-					<h3 class="box-title" style="font-size:22px;">Question {{ forloop.counter }}:</h3>
-                    <div class="box-tools pull-right">
-					<button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
-				</div>
-                </div>
-                <div class="box-body">
-					<h3 class="text-info text-center"> {{ topics }}</h3>
-					<h3 class="text-center"> <strong>{{ title }}</strong></h3>
-					<div class="box">
-					<h4> Description: {{ text }}</h4>
+					<div class="box-header">
+						<h3 class="box-title" style="font-size:22px;">{{ range_name }} Questions</h3>
+						<div class="box-tools pull-right">
+						<button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+						</div>
 					</div>
-						<p style="font-size: 14px"> Your answer: {{ userans }}</p>
-						<p style="font-size: 14px"> Correct answer: {{ questionans }}</p>
-					    <p style="font-size: 14px" > Marks achieved: {{usermarks}}/{{questionmarks}}</p>
+					<div class="box-body">
+					<table id="studentstable" class="table table-bordered table-hover dataTable" role="grid" style="table-layout: fixed; width: 100%; word-wrap: break-word; display: table;">
+						<thead>
+							<tr role="row">
+								<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="5%">
+									#
+								</th>
+								<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="10%">
+									Topic
+								</th>
+								<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="10%">
+									Question Title
+								</th>
+								<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="30%">
+									Question Text
+								</th>
+								<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="15%">
+									Given Answer
+								</th>
+								<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="15%">
+									Correct Answer
+								</th>
+								<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="6%">
+									Question Points
+								</th>
+								<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="6%">
+									Points Awarded
+								</th>
+							</tr>
+						</thead>
+						<tbody>
+						{% for title, text, userans, questionans, usermarks, questionmarks,topics in reportdata %}
+							<tr role="row">
+								<td>{{ forloop.counter }}</td>
+								<td>{{ topics }}</td>
+								<td>{{ title }}</td>
+								<td>{{ text }}</td>
+								<td>{{ userans }}</td>
+								<td>{{ questionans }}</td>
+								<td>{{ usermarks }}</td>
+								<td>{{ questionmarks }}</td>
+							</tr>
+						{% endfor %}
+						</tbody>
+					</table>
 				</div>
-
-				</div>
-			{% endfor %}
 			</div>
-
 		</div>
 {% endblock %}

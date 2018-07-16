@@ -1,23 +1,30 @@
 from django import forms
 from .models import *
+from django.utils import timezone
 
 class AnswerForm(forms.ModelForm):
     answergiven = forms.CharField(label='Answer', max_length=100, widget=forms.TextInput(attrs={'class' : 'form-control'}))
 
-    # def __init__(self, *args, **kwargs):
-    #     questiontype = kwargs.pop('extra')
-    #     super(UserCreationForm, self).__init__(*args, **kwargs)
-    #     for i, question in enumerate(extra):
-    #         self.fields['custom_%s' % i] = forms.CharField(label=question)
-
     def checkAnswer(self, user, answergiven, questioninstance, rangeinstance, questionid):
-        points = RangeQuestions.objects.filter(questionid = questionid).values_list('points')[0][0]
-        #print("MARKKKKKK ->>>>>>>" + str(marks))
-        correctanswer = RangeQuestions.objects.filter(questionid = questionid).values_list('answer')[0][0]
-        isthisashortanswer = Questions.objects.filter(questionid = questionid).values_list('questiontype')[0][0]
+        points = Questions.objects.filter(questionid = questionid).values_list('points')[0][0]
+        hintactivated = StudentHints.objects.filter(studentid = user, rangeid = rangeinstance, questionid = questioninstance).values_list('hintactivated')
+        if len(hintactivated) != 0:
+            points = points - int(Questions.objects.filter(questionid = questionid).values_list('hintpenalty')[0][0])
+            print('deducted')
+            print(points)
 
+        correctanswer = Questions.objects.filter(questionid = questionid).values_list('answer')[0][0]
+        isthisashortanswer = Questions.objects.filter(questionid = questionid).values_list('questiontype')[0][0]
         repeatedcheck = StudentQuestions.objects.filter(questionid = questionid, studentid = user, rangeid = rangeinstance)
+        numberofrangequestions = Questions.objects.filter(rangeid=rangeinstance).count()
+        progress = RangeStudents.objects.filter(rangeID=rangeinstance, studentID=user).values_list('progress')[0][0]
+        if progress is None:
+            progress = 0
+        else:
+            progress = int(progress)
+
         if len(repeatedcheck) == 0:
+            print('repeatedcheck')
             check = False
             if isthisashortanswer == 'SA':
                 saanswer = correctanswer.lower().split()
@@ -31,7 +38,8 @@ class AnswerForm(forms.ModelForm):
                             keycheck += 1
                             if keycheck == keywords:
                                 check = True
-
+            elif isthisashortanswer == 'OE':
+                check = False
             else:
                 if answergiven.lower() == correctanswer.lower():
                     check = True
@@ -43,26 +51,31 @@ class AnswerForm(forms.ModelForm):
             studentobject.questionid = questioninstance
             studentobject.answergiven = answergiven
             studentobject.answercorrect = check
-            studentobject.marksawarded = points
-            studentobject.save()
 
             pointsobject = RangeStudents.objects.get(rangeID=rangeinstance, studentID=user)
             progress = progress + 1
             pointsobject.progress = progress
-            pointsobject.lastaccess = currenttime
+            pointsobject.lastaccess = timezone.now()
             pointsobject.save()
 
             if progress == numberofrangequestions:
                 pointsobject = RangeStudents.objects.get(rangeID=rangeinstance, studentID=user)
-                pointsobject.datecompleted = currenttime
+                pointsobject.datecompleted = timezone.now()
                 pointsobject.save()
 
             if check is True:
+                print("here")
                 pointsobject = RangeStudents.objects.get(rangeID = rangeinstance, studentID = user)
                 pointsobject.points += points
                 pointsobject.save()
+
+                studentobject.marksawarded = points
+                studentobject.save()
             
                 return True
+            else:
+                studentobject.marksawarded = 0
+                studentobject.save()
 
         else:
             return False
@@ -81,15 +94,23 @@ class AnswerMCQForm(forms.ModelForm):
         self.fields['answergiven'].choices = self.choices
 
     def checkAnswer(self, user, answergiven, questioninstance, rangeinstance, questionid):
-        points = RangeQuestions.objects.filter(questionid = questionid).values_list('points')[0][0]
-        #print("MARKKKKKK ->>>>>>>" + str(marks))
-        correctanswer = RangeQuestions.objects.filter(questionid = questionid).values_list('answer')[0][0]
+        points = Questions.objects.filter(questionid = questionid).values_list('points')[0][0]
+        hintactivated = StudentHints.objects.filter(studentid = user, rangeid = rangeinstance, questionid = questioninstance).values_list('hintactivated')
+        if len(hintactivated) != 0:
+            points = points - int(Questions.objects.filter(questionid = questionid).values_list('hintpenalty')[0][0])
+        correctanswer = Questions.objects.filter(questionid = questionid).values_list('answer')[0][0]
 
         repeatedcheck = StudentQuestions.objects.filter(questionid = questionid, studentid = user, rangeid = rangeinstance)
+        
+        numberofrangequestions = Questions.objects.filter(rangeid=rangeinstance).count()
+        progress = RangeStudents.objects.filter(rangeID=rangeinstance, studentID=user).values_list('progress')[0][0]
+        if progress is None:
+            progress = 0
+        else:
+            progress = int(progress)
+
         if len(repeatedcheck) == 0:
             check = False
-            print(answergiven.lower())
-            print(correctanswer.lower())
             if answergiven.lower() == correctanswer.lower():
                 check = True
 
@@ -99,26 +120,27 @@ class AnswerMCQForm(forms.ModelForm):
             studentobject.questionid = questioninstance
             studentobject.answergiven = answergiven
             studentobject.answercorrect = check
-            studentobject.marksawarded = points
-            studentobject.save()
 
             pointsobject = RangeStudents.objects.get(rangeID=rangeinstance, studentID=user)
             progress = progress + 1
             pointsobject.progress = progress
-            pointsobject.lastaccess = currenttime
+            pointsobject.lastaccess = timezone.now()
             pointsobject.save()
 
             if progress == numberofrangequestions:
                 pointsobject = RangeStudents.objects.get(rangeID=rangeinstance, studentID=user)
-                pointsobject.datecompleted = currenttime
+                pointsobject.datecompleted = timezone.now()
                 pointsobject.save()
 
             if check is True:
+                studentobject.marksawarded = points
                 pointsobject = RangeStudents.objects.get(rangeID = rangeinstance, studentID = user)
                 pointsobject.points += points
                 pointsobject.save()
-            
+                studentobject.save()
                 return True
+            else:
+                studentobject.save()
 
         else:
             return False
