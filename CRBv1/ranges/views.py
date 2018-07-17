@@ -23,10 +23,10 @@ class EnterCode(View):
         try:
             selectedrange = Range.objects.get(rangecode = form_rangecode, isopen=1)
             user = self.request.user
-            print(user)
+            #print(user)
             requestuser = User.objects.get(username = user)
             requestemail = requestuser.email
-            print(requestemail)
+            #print(requestemail)
 
             try:
                 checkifstudentinrange = RangeStudents.objects.get(rangeid = selectedrange,
@@ -53,7 +53,7 @@ class DockerKill(View):
         # delete old port if existing
         previousport = UnavailablePorts.objects.filter(studentid = self.request.user).values_list('portnumber')
         if previousport:
-            print("HI")
+            #print("HI")
             port = previousport[0][0]
             containername = UnavailablePorts.objects.filter(studentid = self.request.user).values_list('containername')[0][0]
             if int(port) >= 9052:
@@ -63,7 +63,7 @@ class DockerKill(View):
             #serverip = 'localhost'
             endpoint = 'http://' + serverip + ':3125/containers/{conid}?force=True'
             url = endpoint.format(conid=containername)
-            print(url)
+            #print(url)
             response = requests.delete(url)
             # need to delete from db
             deleteportsdb = UnavailablePorts.objects.filter(studentid = self.request.user)
@@ -74,7 +74,7 @@ class DockerKill(View):
         if allentriesinportsdb != 0:
             for entry in allentriesinportsdb:
                 timediff = timezone.now() - entry.datetimecreated 
-                print(timediff)
+                #print(timediff)
                 if timediff > datetime.timedelta(hours = 3):
                     containername = entry.containername
                     port = entry.portnumber
@@ -205,18 +205,20 @@ class AttemptQuestionView(ListView, ModelFormMixin):
             return redirect('/error')
 
 
-    def checkattempted(self):
+    def checkattemptlimit(self):
         attempted = False
         user = self.request.user
         questioninstance = Questions.objects.get(questionid = self.kwargs['questionid'])
         rangeurl = self.kwargs['rangeurl']
-        rangeinstance = Range.objects.get(rangeurl = rangeurl)
-        if StudentQuestions.objects.filter(studentid = user, rangeid = rangeinstance, questionid = questioninstance):
-            #print("attempted")
-            attempted = True
-        # else:
-            #print("not attempted")
-        
+        rangeid = Range.objects.filter(rangeurl=rangeurl).values_list('rangeid')[0][0]
+        userattempts = StudentQuestions.objects.filter(studentid = user, rangeid = rangeid, questionid = questioninstance).values_list('attempts')
+        if len(userattempts) != 0:
+            userattempts = userattempts[0][0]
+            maxattempts = Range.objects.filter(rangeid = rangeid).values_list('attempts')[0][0]
+            print(userattempts)
+            print(maxattempts)
+            if maxattempts != 0 and userattempts == maxattempts:
+                attempted = True
         return attempted
 
     def result(self):
@@ -268,7 +270,7 @@ class AttemptQuestionView(ListView, ModelFormMixin):
             context['siab'] = siab
         else:
             context['siab'] = False
-        context['attempted'] = self.checkattempted()
+        context['attempted'] = self.checkattemptlimit()
         context['result'] = self.result()
         #print('ATTEMPTED ----->>>>> ' + str(context['attempted']))
         #print('RESULT ----->>>>> ' + str(context['result']))
@@ -443,17 +445,13 @@ class AttemptMCQQuestionView(ListView, ModelFormMixin):
             check = self.form.checkAnswer(user, answergiven, questioninstance, rangeinstance, questionid)
             return ListView.get(self, request, *args, **kwargs)
 
-    def checkattempted(self):
-        attempted = False
+    def checkattemptlimit(self):
         user = self.request.user
         questioninstance = Questions.objects.get(questionid = self.kwargs['questionid'])
         rangeurl = self.kwargs['rangeurl']
         rangeinstance = Range.objects.get(rangeurl = rangeurl)
-        if StudentQuestions.objects.filter(studentid = user, rangeid = rangeinstance, questionid = questioninstance):
-            #print("attempted")
-            attempted = True
-        # else:
-            #print("not attempted")
+        attempts = StudentQuestions.objects.filter(studentid = user, rangeid = rangeinstance, questionid = questioninstance).values_list('attempt')[0][0]
+        maxattempts = Range.objects.filter()
         
         return attempted
 
@@ -480,7 +478,7 @@ class AttemptMCQQuestionView(ListView, ModelFormMixin):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['attempted'] = self.checkattempted()
+        context['attempted'] = self.checkattemptlimit()
         context['result'] = self.result()
         #print('ATTEMPTED ----->>>>> ' + str(context['attempted']))
         #print('RESULT ----->>>>> ' + str(context['result']))
@@ -543,7 +541,7 @@ class QuestionsView(ListView):
         
         # get the current range id using rangename we got above
         currentrangeid = Range.objects.filter(rangeurl = rangeurl).values_list('rangeid')[0][0]
-        print("rangeid ----->>>" + str(currentrangeid))
+        #print("rangeid ----->>>" + str(currentrangeid))
 
         # now that i got the range id
         # what do i need?
@@ -555,20 +553,20 @@ class QuestionsView(ListView):
 
         # get the questionids of the questions in the range in a queryset
         questionidsinrange = Questions.objects.filter(rangeid = currentrangeid).values_list("questionid")
-        print("firstquestionid ----->>>>>" + str(questionidsinrange))
+        #print("firstquestionid ----->>>>>" + str(questionidsinrange))
 
         # create empty list for topics
         topiclist = []
 
         if len(questionidsinrange) != 0:
-            print("number --->>>>> " + str(len(questionidsinrange)))
+            #print("number --->>>>> " + str(len(questionidsinrange)))
             # get the queryset of the topicid of the first question
             topicidqueryset = Questions.objects.filter(questionid = (questionidsinrange[0][0]))
-            print("firstquestiontopic ----->>>>>> " + str(topicidqueryset))
+            #print("firstquestiontopic ----->>>>>> " + str(topicidqueryset))
 
             # loop so that i can get all the topic ids of the questions in the range
             for x in range(0, len(questionidsinrange)):
-                print("HI")
+                #print("HI")
                 currenttopicidqueryset = Questions.objects.filter(questionid=(questionidsinrange[x][0]))
                 currenttopicidforlistinteger = Questions.objects.filter(questionid=(questionidsinrange[x][0])).values_list("topicid")[0][0]
 
@@ -593,14 +591,14 @@ class QuestionsView(ListView):
                             questiontopicqueryset = questiontopicqueryset | qs
 
                 # test print
-                print("TOPICS ------>>>>> " + str(questiontopicqueryset))
+                #print("TOPICS ------>>>>> " + str(questiontopicqueryset))
         else:
             # probably won't be none but still
             questiontopicqueryset = None
 
         # return topics as a context YEBOI YAY ME
         context['topics'] = questiontopicqueryset
-        print("OMG FML ___>>>" + str(context['topics']))
+        #print("OMG FML ___>>>" + str(context['topics']))
 
         # gotta get the instance cause django
         rangeinstance = Range.objects.get(rangeurl = rangeurl)
@@ -608,7 +606,8 @@ class QuestionsView(ListView):
         # get the user id 
         user = self.request.user
         # get the queryset of attempted questions
-        context['attemptedquestions'] = StudentQuestions.objects.filter(studentid = user, rangeid = currentrangeid)
+        context['attemptedquestions'] = StudentQuestions.objects.filter(studentid = user, rangeid = currentrangeid, answercorrect = 0)
+        context['correct'] = StudentQuestions.objects.filter(studentid = user, rangeid = currentrangeid, answercorrect = 1)
 
         # should i get the queryset of questions that are not attempted? probably easier for the template. fricking template so damn dumb
 
@@ -639,7 +638,7 @@ class QuestionsView(ListView):
         for x in range(0, len(questionidsinrange)):
             if questionidsinrange[x][0] not in attemptedlist:
                 unattemptedlist.append(questionidsinrange[x][0])
-                print(unattemptedlist)
+                #print(unattemptedlist)
 
         #print("ORHOR DIDN'T DO ----->>>>>" + str(unattemptedlist[0]))
 
@@ -647,7 +646,7 @@ class QuestionsView(ListView):
             # get the first entry
             #print("rangeinstance" + str(currentrangeid))
             unattemptedquestionsqueryset = Questions.objects.filter(questionid = unattemptedlist[0], rangeid = currentrangeid)
-            print("HELP" + str(unattemptedquestionsqueryset))
+            #print("HELP" + str(unattemptedquestionsqueryset))
             for q in unattemptedlist:
                 if q != unattemptedlist[0]:
                     uqs = Questions.objects.filter(questionid = q, rangeid = currentrangeid)
@@ -680,12 +679,12 @@ class QuestionsView(ListView):
         context['rangeinfo'] = Range.objects.filter(rangeurl= rangeurl).values_list('rangeinfo')[0][0]
         adminemail = Range.objects.filter(rangeurl= rangeurl).values_list('createdbyusername')[0][0]
         adminusername = User.objects.filter(email=adminemail).values_list('name')[0][0]
-        print(adminusername)
+        #print(adminusername)
         context['rangeadmin'] = adminusername
         context['attempts'] = Range.objects.filter(rangeurl=rangeurl).values_list('attempts')[0][0]
         rangeid = Range.objects.filter(rangeurl=rangeurl).values_list('rangeid')[0][0]
         context['attempted'] = StudentQuestions.objects.filter(studentid = user, rangeid = rangeid)
-        print(context['attempted'])
+        #print(context['attempted'])
         return context
 
     def get_queryset(self):

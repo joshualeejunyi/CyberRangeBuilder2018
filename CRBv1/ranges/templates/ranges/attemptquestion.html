@@ -29,7 +29,7 @@
 								</div>
 								
 								<div class="box-body">
-									<p>{{question.text}}</p>
+									<p>{{question.text | safe | cut:"<p>" | cut:"</p>"}}</p>
 									<div>
 										<form method="post" class="pull-right" style="width:100%;">
 											{% csrf_token %}
@@ -75,7 +75,7 @@
 								</div>
 								
 								<div class="box-body">
-									<p>{{question.text}}</p>
+									<p>{{question.text | safe | cut:"<p>" | cut:"</p>"}}</p>
 								
 									<div class="form-group">
 										<form method="post">
@@ -121,7 +121,7 @@
 								</div>
 							
 							<div class="box-body">
-								<p>{{question.text}}</p>
+								<p>{{question.text | safe | cut:"<p>" | cut:"</p>"}}</p>
 								<div class="form-group">
 									<form method="post">
 										{% csrf_token %}
@@ -170,7 +170,7 @@
 								</div>
 		
 								<div class="box-body">
-									<p>{{question.text}}</p>
+									<p>{{question.text | safe | cut:"<p>" | cut:"</p>"}}</p>
 									<div class="form-group">
 										<form method="post">
 											{% csrf_token %}
@@ -216,7 +216,7 @@
 								</div>
 								
 								<div class="box-body">
-									<p>{{question.text}}</p>
+									<p>{{question.text | safe | cut:"<p>" | cut:"</p>"}}</p>
 									<div class="form-group">
 										<form method="post">
 											{% csrf_token %}
@@ -264,7 +264,7 @@
 										</div>
 									</div>
 									<div class="box-body">
-										<p>{{question.text}}</p>
+										<p>{{question.text | safe | cut:"<p>" | cut:"</p>"}}</p>
 										<div class="pull-right" style="width: 50%">
 											<form method="post">
 												Your Answer:
@@ -306,7 +306,7 @@
 										</div>
 									</div>
 									<div class="box-body">
-										<p>{{question.text}}</p>
+										<p>{{question.text | safe | cut:"<p>" | cut:"</p>"}}</p>
 										<div class="pull-right" style="width: 50%">
 											<form method="post">
 											Your Answer:
@@ -348,7 +348,7 @@
 										</div>
 									</div>
 									<div class="box-body">
-										<p>{{question.text}}</p>
+										<p>{{question.text | safe | cut:"<p>" | cut:"</p>"}}</p>
 										<div class="pull-right" style="width: 50%">
 											<form method="post">
 												Your Answer:
@@ -390,7 +390,7 @@
 										</div>
 									</div>
 									<div class="box-body">
-										<p>{{question.text}}</p>
+										<p>{{question.text | safe | cut:"<p>" | cut:"</p>"}}</p>
 										<div class="pull-right" style="width: 30%">
 											<form method="post">
 												Your Answer:
@@ -432,7 +432,7 @@
 										</div>
 									</div>
 									<div class="box-body">
-										<p>{{question.text}}</p>
+										<p>{{question.text | safe | cut:"<p>" | cut:"</p>"}}</p>
 										<div class="pull-right" style="width: 50%">
 											<form method="post">
 												Your Answer:

@@ -134,7 +134,7 @@ class StudentQuestions(models.Model):
     answergiven = models.CharField(db_column='answergiven', max_length=100)
     answercorrect = models.BooleanField(db_column='right/wrong', default=False)
     marksawarded = models.PositiveIntegerField(db_column='marksawarded', default=0)
-    attempts = models.PositiveIntegerField(db_column='attempts', default=0)
+    attempts = models.PositiveIntegerField(db_column='attempts', default=1)
 
 
     class Meta:
