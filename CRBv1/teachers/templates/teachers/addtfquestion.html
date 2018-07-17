@@ -27,9 +27,12 @@
     </div>
 
     <div class="form-group has-feedback">
-            <label for="text">Question Text:</label>
-            <input type="text" name="text" class="form-control" value = {{ info.text }} disabled>
+        <label for="description">Question Description:</label>
+        <div class="panel panel-default">
+    {{ info.text | safe }}
+        </div>
     </div>
+
 
     <div class="form-group has-feedback">
         <label for="hint">Hint:</label>

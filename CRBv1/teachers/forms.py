@@ -8,6 +8,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from random import randint
 import re
+from tinymce import TinyMCE
 
 class AddGroup(ModelForm):
     groupname = forms.CharField(label = "Group Name", widget=forms.TextInput(attrs={'class' : 'form-group has-feedback'})),
@@ -133,7 +134,7 @@ class ModifyRangeForm(ModelForm):
     class Meta:
         model = Range
         fields = ('rangename', 'datestart', 'timestart', 'dateend', 'timeend', 'isopen', 'attempts', 'rangeinfo')
-
+        
 class QuestionForm(ModelForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop("request")
@@ -173,6 +174,7 @@ class QuestionForm(ModelForm):
         fields = ('questiontype', 'title', 'text', 'hint', 'hintpenalty', 'answer', 'usedocker', 'points',)
 
 class ModifyQuestionForm(ModelForm):
+
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop("request")
         super(ModifyQuestionForm, self).__init__(*args, **kwargs)

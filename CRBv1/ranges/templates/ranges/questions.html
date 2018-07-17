@@ -42,11 +42,29 @@
 					</div>
 				</div>
 				<div class="box-solid" style="box-shadow: 1px 2px 5px grey; margin:1%;">
-					<div class="box-body" style="font-size: 20px;">
-						{{ rangeinfo }}
+					<div class="box-header with-border">
+						<span style="font-size: 20px;">Range Info:</span>
+					</div>
+					<div class="box-body" style="font-size: 18px;">
+						{{ rangeinfo | safe | cut:"<p>" | cut:"</p>" }}
+					</div>
+					<div class="box-footer">
+						<span class="pull-right" style="font-size: 18px;">
+							Posted by: {{ rangeadmin }}
+						</span>
 					</div>
 				</div>
-				<div class="box-footer"></div>
+				<div class="box-footer">
+					<p style="font-size: 18px;">
+						Attempts per Question: 
+						{% if attempts == 0 %}
+							Unlimited
+						{% else %}
+							{{ attempts }} 
+						{% endif %}
+					</p>
+					
+				</div>
 			</div>
 		</div>
 	{% for topic in topics %}
@@ -74,6 +92,18 @@
 						          					<span class="info-box-number"  style="font-size: 20px;">
 														{{ question.points }} points
 													</span>
+													<span class="info-box-text"  style="font-size: 18px;">
+														Attempts:
+														{% if not attempted.attempts %}
+															0
+														{% else %}
+															{{attempted.attempts}}
+														{% endif %}
+														{% if attempts is not 0 %}
+														/
+														{{ attempts}}
+														{% endif %}
+													</span>
 							        			</div>
 					      				</div>
 				    				</div>
@@ -87,6 +117,18 @@
 						          					<span class="info-box-text" style="font-size: 20px;">{{ question.title }}</span>
 						          					<span class="info-box-number" style="font-size: 20px;">
 														{{ question.points }} points
+													</span>
+													<span class="info-box-text"  style="font-size: 18px;">
+														Attempts:
+														{% if not attempted.attempts %}
+															0
+														{% else %}
+															{{attempted.attempts}}
+														{% endif %}
+														{% if attempts is not 0 %}
+														/
+														{{ attempts}}
+														{% endif %}
 													</span>
 							        			</div>
 					      				</div>
@@ -108,6 +150,18 @@
 						          					<span class="info-box-number" style="font-size: 20px;">
 														{{ question.points }} points
 													</span>
+													<span class="info-box-text"  style="font-size: 18px;">
+														Attempts:
+														{% if not attempted.attempts %}
+															0
+														{% else %}
+															{{attempted.attempts}}
+														{% endif %}
+														{% if attempts is not 0 %}
+														/
+														{{ attempts}}
+														{% endif %}
+													</span>
 							        			</div>
 					      				</div>
 				    				</div>
@@ -121,6 +175,18 @@
 						          					<span class="info-box-text" style="font-size: 20px;">{{ question.title }}</span>
 						          					<span class="info-box-number" style="font-size: 20px;">
 														{{ question.points }} points
+													</span>
+													<span class="info-box-text"  style="font-size: 18px;">
+														Attempts:
+														{% if not attempted.attempts %}
+															0
+														{% else %}
+															{{attempted.attempts}}
+														{% endif %}
+														{% if attempts is not 0 %}
+														/
+														{{ attempts}}
+														{% endif %}
 													</span>
 							        			</div>
 					      				</div>

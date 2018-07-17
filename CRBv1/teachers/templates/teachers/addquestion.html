@@ -16,6 +16,7 @@
                             points
                     </p>
 <form method="post">
+    {{ form.media }}
     {% csrf_token %}
     <input type="hidden" name="done" value = "done">
     <div style="margin: 0 auto">
@@ -51,8 +52,10 @@
     </div>
 
     <div class="form-group has-feedback">
-        <label for="text">Question Text:</label>
-        <input type="text" name="text" class="form-control" required>
+        <label for="text">Question Description:</label>
+        <div class="box">
+            {{ form.text }}
+        </div>
     </div>
 
     <div class="form-group has-feedback">

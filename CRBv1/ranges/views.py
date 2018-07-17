@@ -678,6 +678,14 @@ class QuestionsView(ListView):
         points = Questions.objects.filter(rangeid = currentrangeid)
         context['questionpoints'] = points
         context['rangeinfo'] = Range.objects.filter(rangeurl= rangeurl).values_list('rangeinfo')[0][0]
+        adminemail = Range.objects.filter(rangeurl= rangeurl).values_list('createdbyusername')[0][0]
+        adminusername = User.objects.filter(email=adminemail).values_list('name')[0][0]
+        print(adminusername)
+        context['rangeadmin'] = adminusername
+        context['attempts'] = Range.objects.filter(rangeurl=rangeurl).values_list('attempts')[0][0]
+        rangeid = Range.objects.filter(rangeurl=rangeurl).values_list('rangeid')[0][0]
+        context['attempted'] = StudentQuestions.objects.filter(studentid = user, rangeid = rangeid)
+        print(context['attempted'])
         return context
 
     def get_queryset(self):

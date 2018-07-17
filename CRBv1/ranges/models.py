@@ -1,5 +1,6 @@
 from django.db import models
 from teachers.choices import *
+from tinymce import HTMLField
 # Create your models here.
 
 class Range(models.Model):
@@ -20,7 +21,7 @@ class Range(models.Model):
     studentsinrange = models.PositiveIntegerField(db_column='studentsInRange', default=0,null=True)
     isdisabled = models.BooleanField(db_column='isDisabled', default=False)
     isopen = models.BooleanField(db_column='isOpen', default=False)
-    rangeinfo = models.TextField(db_column='rangeInfo', blank=True, null=True)
+    rangeinfo = HTMLField(db_column='rangeInfo', default="")
     attempts = models.PositiveIntegerField(db_column='attempts', default=0)
     
     class Meta:
@@ -46,7 +47,7 @@ class FakeRange(models.Model):
     studentsinrange = models.PositiveIntegerField(db_column='studentsInRange', default=0,null=True)
     isdisabled = models.BooleanField(db_column='isDisabled', default=False)
     isopen = models.BooleanField(db_column='isOpen', default=False)
-    rangeinfo = models.TextField(db_column='rangeInfo', blank=True, null=True)
+    rangeinfo = HTMLField(db_column='rangeInfo', default="")
     attempts = models.PositiveIntegerField(db_column='attempts', default=0)
 
     class Meta:
@@ -84,7 +85,7 @@ class Questions(models.Model):
     questionid = models.AutoField(db_column='questionID', primary_key=True)
     questiontype = models.CharField(db_column='questiontype', choices = QUESTION_TYPE_CHOICES, default='FL', max_length=100)
     title = models.CharField(db_column='questiontitle', max_length=255, null=True)
-    text = models.TextField(db_column='questiontext')
+    text = HTMLField(db_column='questiontext', default="")
     hint = models.TextField(db_column='hint')
     hintpenalty = models.PositiveIntegerField(db_column='hintpenalty', default=0)
     topicid = models.ForeignKey(QuestionTopic, models.DO_NOTHING, db_column='topicid', unique=False, related_name='catid', null=True)

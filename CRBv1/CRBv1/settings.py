@@ -35,6 +35,7 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'dmit2.bulletplus.com']
 # Application definition
 
 INSTALLED_APPS = [
+    'tinymce',
     'settings',
     'progress',
     'teachers',
@@ -118,6 +119,33 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+
+#Tinymce
+TINYMCE_DEFAULT_CONFIG = {
+    'height': '10%',
+    'width': '100%',
+    'cleanup_on_startup': True,
+    'custom_undo_redo_levels': 20,
+    'selector': 'textarea',
+    'theme': 'modern',
+    'plugins': '''
+            save link preview codesample contextmenu
+            table code lists fullscreen contextmenu directionality searchreplace wordcount visualblocks
+            visualchars code fullscreen autolink lists  charmap print  hr
+            ''',
+    'toolbar1': '''
+            fullscreen preview bold italic underline | 
+            fontsizeselect  | alignleft alignright |
+            aligncenter alignjustify | bullist numlist table |
+            | codesample |
+            ''',
+    'toolbar2': '''
+            hr |  code |
+            ''',
+    'contextmenu': 'formats | link image',
+    'menubar': False,
+    'statusbar': True,
+    }
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.0/topics/i18n/

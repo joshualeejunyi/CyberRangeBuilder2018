@@ -120,6 +120,7 @@ class AnswerMCQForm(forms.ModelForm):
             studentobject.questionid = questioninstance
             studentobject.answergiven = answergiven
             studentobject.answercorrect = check
+            studentobjects.attempts = studentobjects.attempts + 1
 
             pointsobject = RangeStudents.objects.get(rangeID=rangeinstance, studentID=user)
             progress = progress + 1
