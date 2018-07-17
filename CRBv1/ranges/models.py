@@ -11,13 +11,13 @@ class Range(models.Model):
     timestart = models.TimeField(db_column='timeStart', blank=True, null=True)
     dateend = models.DateField(db_column='dateEnd', blank=True, null=True)
     timeend = models.TimeField(db_column='timeEnd', blank=True, null=True)
-    maxscore = models.IntegerField(db_column='maxScore', blank=True, null=True)
+    maxscore = models.PositiveIntegerField(db_column='maxScore', default=0, blank=True, null=True)
     lastmodifieddate = models.DateField(db_column='lastModifiedDate', blank=True, null=True)
     rangecode = models.IntegerField(db_column='rangeCode', blank=True, null=True, unique=True)
     lastmodifiedby = models.ForeignKey('accounts.User', models.DO_NOTHING, db_column='lastModifiedBy', blank=True, null=True, related_name='LMBR')
     createdbyusername = models.ForeignKey('accounts.User', models.DO_NOTHING, db_column='createdby', related_name='CBR', default='super')
     rangeurl = models.CharField(db_column='rangeURL', max_length=50, null=True, unique=True)
-    studentsinrange = models.IntegerField(db_column='studentsInRange', null=True)
+    studentsinrange = models.PositiveIntegerField(db_column='studentsInRange', default=0,null=True)
     isdisabled = models.BooleanField(db_column='isDisabled', default=False)
     isopen = models.BooleanField(db_column='isOpen', default=False)
     rangeinfo = models.TextField(db_column='rangeInfo', blank=True, null=True)
@@ -37,13 +37,13 @@ class FakeRange(models.Model):
     timestart = models.TimeField(db_column='timeStart', blank=True, null=True)
     dateend = models.DateField(db_column='dateEnd', blank=True, null=True)
     timeend = models.TimeField(db_column='timeEnd', blank=True, null=True)
-    maxscore = models.IntegerField(db_column='maxScore', blank=True, null=True)
+    maxscore = models.PositiveIntegerField(db_column='maxScore', default=0, blank=True, null=True)
     lastmodifieddate = models.DateField(db_column='lastModifiedDate', blank=True, null=True)
     rangecode = models.IntegerField(db_column='rangeCode', blank=True, null=True, unique=True)
     lastmodifiedby = models.ForeignKey('accounts.User', models.DO_NOTHING, db_column='lastModifiedBy', blank=True, null=True, related_name='fLMBR')
     createdbyusername = models.ForeignKey('accounts.User', models.DO_NOTHING, db_column='createdby', related_name='fCBR', default='super')
     rangeurl = models.CharField(db_column='rangeURL', max_length=50, null=True, unique=True)
-    studentsinrange = models.IntegerField(db_column='studentsInRange', null=True)
+    studentsinrange = models.PositiveIntegerField(db_column='studentsInRange', default=0,null=True)
     isdisabled = models.BooleanField(db_column='isDisabled', default=False)
     isopen = models.BooleanField(db_column='isOpen', default=False)
     rangeinfo = models.TextField(db_column='rangeInfo', blank=True, null=True)
@@ -118,7 +118,7 @@ class RangeQuestions(models.Model):
     rangeid = models.ForeignKey(Range, models.DO_NOTHING, db_column='rangeID', unique=False)
     questionid = models.ForeignKey(Questions, models.DO_NOTHING, db_column='questionID', unique=False)
     answer = models.CharField(db_column='answer', max_length=255, null=True)
-    points = models.IntegerField(db_column='points', default=0)
+    points = models.PositiveIntegerField(db_column='points', default=0)
     isdisabled = models.BooleanField(db_column='isDisabled', default=False)
     registryid = models.CharField(db_column='registryID', max_length=255, null=True)
 
@@ -132,7 +132,8 @@ class StudentQuestions(models.Model):
     questionid = models.ForeignKey(Questions, models.DO_NOTHING, db_column='questionid', unique=False)
     answergiven = models.CharField(db_column='answergiven', max_length=100)
     answercorrect = models.BooleanField(db_column='right/wrong', default=False)
-    marksawarded = models.IntegerField(db_column='marksawarded')
+    marksawarded = models.PositiveIntegerField(db_column='marksawarded', default=0)
+    attempts = models.PositiveIntegerField(db_column='attempts', default=0)
 
 
     class Meta:
@@ -151,7 +152,7 @@ class StudentHints(models.Model):
         verbose_name_plural = 'StudentHints'
 
 class UnavailablePorts(models.Model):
-    portnumber = models.IntegerField(db_column='portNumber', primary_key=True)
+    portnumber = models.PositiveIntegerField(db_column='portNumber', primary_key=True)
     studentid = models.ForeignKey('accounts.User', models.DO_NOTHING, db_column='studentid')
     containername = models.TextField(db_column='containerName', null=True)
     datetimecreated = models.DateTimeField(db_column='dateTimeCreated', null=True)

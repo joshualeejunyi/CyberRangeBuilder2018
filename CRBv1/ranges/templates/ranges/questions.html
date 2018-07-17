@@ -4,7 +4,8 @@
 	<section class="content-header">
 		<h1>
             {% block page_name %}
-                {{ rangename }} Questions
+                <div style="padding: 0; margin: 0; margin-bottom: -10%;">
+				</div>
             {% endblock %}
 		    <small>
                 {% block page_description %}
@@ -20,60 +21,38 @@
 
 {% block content %}
 	<section class="content">
-		<!-- <div class="row" style=" margin: 0 auto;">
-			<h4>
-				<strong>Range Mastery</strong>
-				<span class="progress-number" style="font-size: 18px;">({{ userscored }}/{{ maxscore}} points):</span>
-			</h4>
-			<div class="progress-group">
-				
-				<div class="progress lg">
-				<div class="progress-bar progress-bar-green" style="width: {{ percent }}%"></div>
-				</div>
-			</div>
-		</div> -->
-
 		<div class="row" style="margin: 0 auto;">
 			<div class="box box-widget" style="box-shadow: 1px 2px 5px grey;">
 				<div class="box-header with-border">
 					<span style="font-size: 22px;">
-						<b>Range Details:</b>
-					</span>
-					<div class="box-tools">
-						<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
-					</div>
-				</div>
-
-				<div class="box-body">
-					<div style="font-size: 20px;">
-						{{ rangeinfo }}
-					</div>
-					
-				</div>
-			</div>
-		</div>
-		<div class="row" style="margin: 0 auto;">
-			<div class="box box-widget" style="box-shadow: 1px 2px 5px grey;">
-				<div class="box-header with-border">
-					<span style="font-size: 22px;">
-						<b>Range Mastery</b>
-						<span class="progress-number" style="font-size: 20px;">({{ userscored }}/{{ maxscore}} points):</span>
+						<b>{{ rangename }}</b>
 					</span>
 				</div>
-				
-				<div class="box-body">
-					<div class="progress-group">
-						<div class="progress lg">
-							<div class="progress-bar progress-bar-green" style="width: {{ percent }}%"></div>
+				<div class="box-solid" style="box-shadow: 1px 2px 5px grey; margin: 1%;">
+					<div class="box-body">
+						<h4 style="font-size: 20px;">
+							Range Mastery
+							<span class="progress-number" style="font-size: 20px;">({{ userscored }}/{{ maxscore}} points):</span>
+						</h4>
+						<div class="progress-group">
+							<div class="progress lg">
+								<div class="progress-bar progress-bar-green" style="width: {{ percent }}%;"></div>
+							</div>
 						</div>
 					</div>
 				</div>
+				<div class="box-solid" style="box-shadow: 1px 2px 5px grey; margin:1%;">
+					<div class="box-body" style="font-size: 20px;">
+						{{ rangeinfo }}
+					</div>
+				</div>
+				<div class="box-footer"></div>
 			</div>
 		</div>
 	{% for topic in topics %}
-	<div class="box box-solid box-primary" style="box-shadow: 1px 2px 5px grey;">
+	<div class="box box-solid box-primary" style="box-shadow: 1px 2px 5px grey; font-size: 20px;">
         <div class="box-header with-border">
-          <h3 class="box-title">{{ topic.topicname }}</h3>
+          <h3 class="box-title" style="font-size: 22px;">{{ topic.topicname }}</h3>
           <div class="box-tools pull-right">
             <button type="button" class="btn btn-box-tool" data-widget="collapse" data-toggle="tooltip" title="" data-original-title="Collapse">
               <i class="fa fa-minus"></i></button>
@@ -91,8 +70,8 @@
 					      				<div class="info-box" style="box-shadow: 1px 2px 5px grey;">
 						        			<span class="info-box-icon bg-green"><span class="glyphicon glyphicon-question-sign"></span></span>
 						        				<div class="info-box-content">
-						          					<span class="info-box-text">{{ question.title }}</span>
-						          					<span class="info-box-number">
+						          					<span class="info-box-text" style="font-size: 20px;">{{ question.title }}</span>
+						          					<span class="info-box-number"  style="font-size: 20px;">
 														{{ question.points }} points
 													</span>
 							        			</div>
@@ -105,8 +84,8 @@
 					      				<div class="info-box" style="box-shadow: 1px 2px 5px grey;">
 						        			<span class="info-box-icon bg-green"><span class="glyphicon glyphicon-question-sign"></span></span>
 						        				<div class="info-box-content">
-						          					<span class="info-box-text">{{ question.title }}</span>
-						          					<span class="info-box-number">
+						          					<span class="info-box-text" style="font-size: 20px;">{{ question.title }}</span>
+						          					<span class="info-box-number" style="font-size: 20px;">
 														{{ question.points }} points
 													</span>
 							        			</div>
@@ -125,8 +104,8 @@
 					      				<div class="info-box" style="box-shadow: 1px 2px 5px grey;">
 						        			<span class="info-box-icon bg-red"><span class="glyphicon glyphicon-question-sign"></span></span>
 						        				<div class="info-box-content">
-						          					<span class="info-box-text">{{ question.title }}</span>
-						          					<span class="info-box-number">
+						          					<span class="info-box-text" style="font-size: 20px;">{{ question.title }}</span>
+						          					<span class="info-box-number" style="font-size: 20px;">
 														{{ question.points }} points
 													</span>
 							        			</div>
@@ -139,8 +118,8 @@
 					      				<div class="info-box" style="box-shadow: 1px 2px 5px grey;">
 						        			<span class="info-box-icon bg-red"><span class="glyphicon glyphicon-question-sign"></span></span>
 						        				<div class="info-box-content">
-						          					<span class="info-box-text">{{ question.title }}</span>
-						          					<span class="info-box-number">
+						          					<span class="info-box-text" style="font-size: 20px;">{{ question.title }}</span>
+						          					<span class="info-box-number" style="font-size: 20px;">
 														{{ question.points }} points
 													</span>
 							        			</div>
@@ -164,7 +143,7 @@
 	</div>
     {% endif %}
    	<div style="width: 100px; box-shadow: 1px 2px 5px grey;">
-		<a href="../../" class="btn btn-block btn-primary">Back</a>
+		<a href="../../" class="btn btn-block btn-primary" style="font-size: 20px;">Back</a>
 	</div>
 	</section>
 {% endblock %}
