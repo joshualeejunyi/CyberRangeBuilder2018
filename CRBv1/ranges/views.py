@@ -112,12 +112,12 @@ class AttemptQuestionView(ListView, ModelFormMixin):
                 if database[x][0] <= 9050:
                     webserver.append(database[x])
                 # if the port belongs to dockerserver, append to dockerserver list
-                elif database[x][0] >=9052:
+                elif database[x][0] >=9051:
                     dockerserver.append(database[x])
         
         else:
             #return first available port for docker server
-            return 9052 
+            return 9051
 
         #print('FIRST --->')
         #print(dockerserver, webserver)
@@ -127,9 +127,9 @@ class AttemptQuestionView(ListView, ModelFormMixin):
         #print('SECOND --->')
         #print(webserversize, dockerserversize)
         
-        if dockerserversize < 50:
-            if int(dockerserver[dockerserversize - 1][0]) == 9100:
-                for x in range(0, 48):
+        if dockerserversize < 48:
+            if int(dockerserver[dockerserversize - 1][0]) == 9098:
+                for x in range(0, 46):
                     if int(dockerserver[x + 1][0]) - int(dockerserver[x][0]) != 1:
                         result = int(dockerserver[x][0]) + 1
                         return result
@@ -158,7 +158,7 @@ class AttemptQuestionView(ListView, ModelFormMixin):
         if port == -1:
             return HttpResponse('SERVER BUSY. PLEASE TRY AGAIN LATER.')
         # port 8051 is reserved for API
-        elif port >= 9052:
+        elif port >= 9051:
             serverip = '192.168.100.42'
         elif port <= 9050:
             serverip = '192.168.100.43'
@@ -293,9 +293,15 @@ class AttemptQuestionView(ListView, ModelFormMixin):
             hint = hintactivated[0][0]
         else:
             hint = None
-        
-        context['hint'] = hint
 
+        rangeid = Range.objects.filter(rangeurl = self.kwargs['rangeurl']).values_list('rangeid')[0][0]
+        context['hint'] = hint
+        correctcheck = StudentQuestions.objects.filter(studentid = self.request.user, rangeid = rangeid, questionid = questionid, answercorrect = 1)
+        if len(correctcheck) == 1:
+            context['correct'] = True
+        else:
+            context['correct'] = False
+        print(context['correct'])
         return context
 
 
@@ -325,7 +331,7 @@ class AttemptMCQQuestionView(ListView, ModelFormMixin):
         
         else:
             #return first available port for docker server
-            return 9052 
+            return 9051
 
         #print('FIRST --->')
         #print(dockerserver, webserver)
@@ -335,9 +341,9 @@ class AttemptMCQQuestionView(ListView, ModelFormMixin):
         #print('SECOND --->')
         #print(webserversize, dockerserversize)
         
-        if dockerserversize < 50:
-            if int(dockerserver[dockerserversize - 1][0]) == 9100:
-                for x in range(0, 48):
+        if dockerserversize < 48:
+            if int(dockerserver[dockerserversize - 1][0]) == 9098:
+                for x in range(0, 46):
                     if int(dockerserver[x + 1][0]) - int(dockerserver[x][0]) != 1:
                         result = int(dockerserver[x][0]) + 1
                         return result
@@ -366,7 +372,7 @@ class AttemptMCQQuestionView(ListView, ModelFormMixin):
         if port == -1:
             return HttpResponse('SERVER BUSY. PLEASE TRY AGAIN LATER.')
         # port 8051 is reserved for API
-        elif port >= 9052:
+        elif port >= 9051:
             serverip = '192.168.100.42'
         elif port <= 9050:
             serverip = '192.168.100.43'
@@ -683,8 +689,7 @@ class QuestionsView(ListView):
         context['rangeadmin'] = adminusername
         context['attempts'] = Range.objects.filter(rangeurl=rangeurl).values_list('attempts')[0][0]
         rangeid = Range.objects.filter(rangeurl=rangeurl).values_list('rangeid')[0][0]
-        context['attempted'] = StudentQuestions.objects.filter(studentid = user, rangeid = rangeid)
-        #print(context['attempted'])
+        context['studentattempted'] = StudentQuestions.objects.filter(studentid = user, rangeid = rangeid)
         return context
 
     def get_queryset(self):

@@ -92,7 +92,19 @@
 						          					<span class="info-box-number"  style="font-size: 20px;">
 														{{ question.points }} points
 													</span>
-													<span class="info-box-text"  style="font-size: 18px;">
+													<span class="info-box-text"  style="font-size: 18px; margin-bottom: -1%;">
+														Attempts:
+														{% for x in studentattempted %}
+															{% if x.questionid.questionid == question.questionid %}
+																{{ x.attempts }}
+															{% else %}
+																0
+															{% endif %}
+														{% endfor %}
+														{% if attempts is not 0 %}
+														/
+														{{ attempts}}
+														{% endif %}
 													</span>
 							        			</div>
 					      				</div>
@@ -108,7 +120,19 @@
 						          					<span class="info-box-number" style="font-size: 20px;">
 														{{ question.points }} points
 													</span>
-													<span class="info-box-text"  style="font-size: 18px;">
+													<span class="info-box-text"  style="font-size: 18px; margin-bottom: -1%;">
+														Attempts:
+														{% for x in studentattempted %}
+															{% if x.questionid.questionid == question.questionid %}
+																{{ x.attempts }}
+															{% else %}
+																0
+															{% endif %}
+														{% endfor %}
+														{% if attempts is not 0 %}
+														/
+														{{ attempts}}
+														{% endif %}
 													</span>
 							        			</div>
 					      				</div>
@@ -124,28 +148,32 @@
 								<a href="Question{{ question.questionid }}/MCQ" style="color:black;">
 				    				<div class="col-md-4 col-sm-6 col-xs-5">
 					      				<div class="info-box" style="box-shadow: 1px 2px 5px grey;">
-						        			<span class="info-box-icon bg-red"><span class="glyphicon glyphicon-question-sign"></span></span>
-						        				<div class="info-box-content">
-						          					<span class="info-box-text" style="font-size: 20px;">{{ question.title }}</span>
-						          					<span class="info-box-number" style="font-size: 20px;">
-														{{ question.points }} points
-													</span>
-													<span class="info-box-text"  style="font-size: 18px;">
-														Attempts:
-														{% if question.questionid not in attempted %}
+						        			<span class="info-box-icon bg-red">
+												<span class="glyphicon glyphicon-question-sign">													
+												</span>
+											</span>
+											<div class="info-box-content">
+												<span class="info-box-text" style="font-size: 20px;">
+													{{ question.title }}
+												</span>
+												<span class="info-box-number" style="font-size: 20px;">
+													{{ question.points }} points
+												</span>
+												<span class="info-box-text"  style="font-size: 18px; margin-bottom: -1%;">
+													Attempts:
+													{% for x in studentattempted %}
+														{% if x.questionid.questionid == question.questionid %}
+															{{ x.attempts }}
+														{% else %}
 															0
 														{% endif %}
-														{% for stuff in attempted %}
-															{% if stuff.questionid.questionid == question.questionid %}
-																{{ stuff.attempts }}
-															{% endif %}
-														{% endfor %}
-														{% if attempts is not 0 %}
-														/
-														{{ attempts}}
-														{% endif %}
-													</span>
-							        			</div>
+													{% endfor %}
+													{% if attempts is not 0 %}
+													/
+													{{ attempts}}
+													{% endif %}
+												</span>
+							        		</div>
 					      				</div>
 				    				</div>
 								</a>
@@ -159,14 +187,13 @@
 						          					<span class="info-box-number" style="font-size: 20px;">
 														{{ question.points }} points
 													</span>
-													<span class="info-box-text"  style="font-size: 18px;">
+													<span class="info-box-text"  style="font-size: 18px; margin-bottom: -1%;">
 														Attempts:
-														{% if question.questionid not in attempted %}
-															0
-														{% endif %}
-														{% for stuff in attempted %}
-															{% if stuff.questionid.questionid == question.questionid %}
-																{{ stuff.attempts }}
+														{% for x in studentattempted %}
+															{% if x.questionid.questionid == question.questionid %}
+																{{ x.attempts }}
+															{% else %}
+																0
 															{% endif %}
 														{% endfor %}
 														{% if attempts is not 0 %}
@@ -194,14 +221,13 @@
 														<span class="info-box-number" style="font-size: 20px;">
 															{{ question.points }} points
 														</span>
-														<span class="info-box-text"  style="font-size: 18px;">
+														<span class="info-box-text"  style="font-size: 18px; margin-bottom: -1%;">
 															Attempts:
-															{% if question.questionid not in attempted %}
-																0
-															{% endif %}
-															{% for stuff in attempted %}
-																{% if stuff.questionid.questionid == question.questionid %}
-																	{{ stuff.attempts }}
+															{% for x in studentattempted %}
+																{% if x.questionid.questionid == question.questionid %}
+																	{{ x.attempts }}
+																{% else %}
+																	0
 																{% endif %}
 															{% endfor %}
 															{% if attempts is not 0 %}
@@ -223,14 +249,13 @@
 														<span class="info-box-number" style="font-size: 20px;">
 															{{ question.points }} points
 														</span>
-														<span class="info-box-text"  style="font-size: 18px;">
+														<span class="info-box-text"  style="font-size: 18px; margin-bottom: -1%;">
 															Attempts:
-															{% if question.questionid not in attempted %}
-																0
-															{% endif %}
-															{% for stuff in attempted %}
-																{% if stuff.questionid.questionid == question.questionid %}
-																	{{ stuff.attempts }}
+															{% for x in studentattempted %}
+																{% if x.questionid.questionid == question.questionid %}
+																	{{ x.attempts }}
+																{% else %}
+																	0
 																{% endif %}
 															{% endfor %}
 															{% if attempts is not 0 %}

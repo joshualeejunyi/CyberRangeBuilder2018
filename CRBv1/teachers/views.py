@@ -30,42 +30,53 @@ class CreateImage(View):
     def get(self, request, rangeurl, questionid, imageid):
         #PULL FROM REGSITRY FROM IP ADDRESS 192.168.40.134:5000
         data = {}
-        endpoint1 = 'http://192.168.100.42:8051/images/create?fromImage=192.168.100.42:5000/{conid}'
-        url1 = endpoint1.format(conid=imageid)
-        response = requests.post(url1)
-        if response.status_code == 200:
-            data['Id'] = id
-            data['message'] = 'success'
-        elif response.status_code == 404:
-            data['message'] = 'no such container'
-        elif response.status_code == 500:
-            data['message'] = 'conflict'
-        else:
-            data['message'] = 'Error %s' % response.status_code
-
-
-        #RENAME THE IMAGE NAME
-        #IMAGE NAME CANNOT HAVE CAPITAL LETTERS!!!!!!!!!!!!!!!!!!!!!!!!!
-        reference = {}
-        imagename = rangeurl + '.' + questionid
-        endpoint2 = 'http://192.168.100.42:8051/images/192.168.100.42:5000/{0}/tag?repo={1}'
-        url2 = endpoint2.format(id, range)
-        response = requests.post(url2)
+        serverip = ['192.168.100.42', '192.168.100.43']
         
-        if response.status_code == 201:
-            reference['Id'] = range
-            reference['message'] = 'success'
-        elif response.status_code == 400:
-            reference['message'] = 'Bad Parameter'
-        elif response.status_code == 404:
-            reference['message'] = 'no such image'
-        elif response.status_code == 409:
-            reference['message'] = 'conflict'
-        elif response.status_code == 500:
-            reference['message'] = 'server error'
-        else:
-            reference['message'] = 'Error %s' % response.status_code
+        for ip in serverip:
+            endpoint1 = 'http://' + ip + '/images/create?fromImage=dmit2.bulletplus.com:9100/{conid}'
+            url1 = endpoint1.format(conid=imageid)
+            response = requests.post(url1)
+            if response.status_code != 200:
+                pass
+                # data['Id'] = id
+                # data['message'] = 'success'
+            elif response.status_code == 404:
+                return -1 # no container
+                # data['message'] = 'no such container'
+            elif response.status_code == 500:
+                return -2 # server error
+            else:
+                return response.status_code
 
+
+            #RENAME THE IMAGE NAME
+            #IMAGE NAME CANNOT HAVE CAPITAL LETTERS!!!!!!!!!!!!!!!!!!!!!!!!!
+            reference = {}
+            imagename = rangeurl + '.' + questionid
+            endpoint2 = 'http://' + ip + '/images/dmit2.bulletplus.com:9100/{0}/tag?repo={1}'
+            url2 = endpoint2.format(id, range)
+            response = requests.post(url2)
+            
+            if response.status_code == 201:
+                # reference['Id'] = range
+                # reference['message'] = 'success'
+                pass
+            elif response.status_code == 400:
+                return -3
+                # reference['message'] = 'Bad Parameter'
+            elif response.status_code == 404:
+                return -4
+                # reference['message'] = 'no such image'
+            elif response.status_code == 409:
+                return -5 # conflict
+                # reference['message'] = 'conflict'
+            elif response.status_code == 500:
+                return -2 # server error
+                # reference['message'] = 'server error'
+            else:
+                return response.status_code
+
+        return 0
 
 
 class TeacherDashboard(ListView, PermissionRequiredMixin):
@@ -944,6 +955,16 @@ class CreateQuestion(ListView, ModelFormMixin):
         
             request.session['TF'] = False
 
+            rangeurl = self.kwargs['rangeurl']
+            if (request.POST.get('usedocker') == 'yes'):
+
+                print("YAY it works")
+                imageid = request.POST.get('registryid')
+                error = CreateImage.get(self, request, rangeurl, questionid, imageid)
+                if error is not 0:
+                    return HttpResponse('ERROR')
+
+
             if question.questiontype == 'MCQ' and optionone == ' ':
                 rangename = Range.objects.filter(rangeurl = self.kwargs['rangeurl']).values_list('rangename')[0][0]
                 questionobject = Questions.objects.filter(questionid = question.questionid)
@@ -972,14 +993,11 @@ class CreateQuestion(ListView, ModelFormMixin):
                     'topicname' : topicname,
                     }
                 return render(request, 'teachers/addtfquestion.html', args)
-
+                
+                    
             return ListView.get(self, request, *args, **kwargs)
         else:
-            ## IF THE USER IS DONE W CREATING QUESTION THEN WILL REDIRECT THEM TO VIEW RANGE ###
-            if (request.POST.get('usedocker') == 'Yes' and request.POST.get('registryid') == ""):
-                print("no registry")
-                return ListView.get(self, request, *args, **kwargs)
-
+            ## IF THE USER IS DONE W CREATING QUESTION THEN WILL REDIRECT THEM TO VIEW RANGE ##
             if (request.POST.get('done')):
                 rangeurl = self.kwargs['rangeurl']
                 url = "/teachers/rangemanagement/view/" + rangeurl
@@ -1006,8 +1024,6 @@ class CreateQuestion(ListView, ModelFormMixin):
                     messages.error(request, 'Topic Name Already Exists in Database ')
 
                 return ListView.get(self, request, *args, **kwargs)
-
-           
 
             elif (request.POST.get('optionone',' ') != ' '):
                 optionone = request.POST.get('optionone', ' ')

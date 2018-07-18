@@ -1,5 +1,3 @@
-CREATE DATABASE  IF NOT EXISTS `CRB` /*!40100 DEFAULT CHARACTER SET latin1 */;
-USE `CRB`;
 -- MySQL dump 10.13  Distrib 5.7.22, for Linux (x86_64)
 --
 -- Host: localhost    Database: CRB
@@ -43,7 +41,7 @@ CREATE TABLE `Group` (
   CONSTRAINT `Group_createdBy_e8a86322_fk_User_email` FOREIGN KEY (`createdBy`) REFERENCES `User` (`email`),
   CONSTRAINT `Group_groupLeader_dda63499_fk_User_email` FOREIGN KEY (`groupLeader`) REFERENCES `User` (`email`),
   CONSTRAINT `Group_lastModifiedBy_2b8379dc_fk_User_email` FOREIGN KEY (`lastModifiedBy`) REFERENCES `User` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -52,7 +50,7 @@ CREATE TABLE `Group` (
 
 LOCK TABLES `Group` WRITE;
 /*!40000 ALTER TABLE `Group` DISABLE KEYS */;
-INSERT INTO `Group` VALUES (1,'bestgroup','2018-07-11','00:46:10.654321',0,NULL,NULL,'karlkwan@gmail.com','joshualee@gmail.com',NULL),(2,'group','2018-07-12','14:47:03.516580',0,NULL,NULL,'karlkwan@gmail.com',NULL,NULL);
+INSERT INTO `Group` VALUES (1,'bestgroup','2018-07-15','16:29:59.392327',0,NULL,NULL,'karlkwan@gmail.com','joshualee@gmail.com',NULL);
 /*!40000 ALTER TABLE `Group` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -74,10 +72,10 @@ CREATE TABLE `GroupRange` (
   PRIMARY KEY (`ID`),
   KEY `GroupRange_addedBy_3485f07a_fk_User_email` (`addedBy`),
   KEY `GroupRange_groupID_1897bfba_fk_Group_groupID` (`groupID`),
-  KEY `GroupRange_rangeID_834b66ea_fk_Range_rangeID` (`rangeID`),
+  KEY `GroupRange_rangeID_834b66ea_fk` (`rangeID`),
   CONSTRAINT `GroupRange_addedBy_3485f07a_fk_User_email` FOREIGN KEY (`addedBy`) REFERENCES `User` (`email`),
   CONSTRAINT `GroupRange_groupID_1897bfba_fk_Group_groupID` FOREIGN KEY (`groupID`) REFERENCES `Group` (`groupID`),
-  CONSTRAINT `GroupRange_rangeID_834b66ea_fk_Range_rangeID` FOREIGN KEY (`rangeID`) REFERENCES `Range` (`rangeID`)
+  CONSTRAINT `GroupRange_rangeID_834b66ea_fk` FOREIGN KEY (`rangeID`) REFERENCES `Range` (`rangeID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -105,7 +103,7 @@ CREATE TABLE `MCQOptions` (
   `OptionFour` varchar(100) NOT NULL,
   `questionid` int(11) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `MCQOptions_questionid_3371087c_uniq` (`questionid`),
+  UNIQUE KEY `questionid` (`questionid`),
   CONSTRAINT `MCQOptions_questionid_3371087c_fk_Questions_questionID` FOREIGN KEY (`questionid`) REFERENCES `Questions` (`questionID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -116,7 +114,7 @@ CREATE TABLE `MCQOptions` (
 
 LOCK TABLES `MCQOptions` WRITE;
 /*!40000 ALTER TABLE `MCQOptions` DISABLE KEYS */;
-INSERT INTO `MCQOptions` VALUES (1,'mcq','halp','bye','hay',3);
+INSERT INTO `MCQOptions` VALUES (1,'mcqanswer','no','noa','yes',16);
 /*!40000 ALTER TABLE `MCQOptions` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -131,7 +129,7 @@ CREATE TABLE `QuestionTopic` (
   `topicid` int(11) NOT NULL AUTO_INCREMENT,
   `topicname` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`topicid`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -140,7 +138,7 @@ CREATE TABLE `QuestionTopic` (
 
 LOCK TABLES `QuestionTopic` WRITE;
 /*!40000 ALTER TABLE `QuestionTopic` DISABLE KEYS */;
-INSERT INTO `QuestionTopic` VALUES (1,'newtopic'),(2,'too hot salted egg'),(3,'testtopic'),(4,'flagtopic'),(5,'mcqtopic'),(6,'shortanswertopic'),(7,'openended'),(8,'truorfarlse');
+INSERT INTO `QuestionTopic` VALUES (1,'flagtopic');
 /*!40000 ALTER TABLE `QuestionTopic` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -157,17 +155,24 @@ CREATE TABLE `Questions` (
   `questiontitle` varchar(255) DEFAULT NULL,
   `questiontext` longtext NOT NULL,
   `hint` longtext NOT NULL,
-  `topicid` int(11) DEFAULT NULL,
   `usedocker` tinyint(1) NOT NULL,
+  `dateCreated` datetime(6) DEFAULT NULL,
+  `answer` longtext,
   `createdby` varchar(254) DEFAULT NULL,
-  `dateCreated` date DEFAULT NULL,
-  `timecreated` time(6) DEFAULT NULL,
+  `rangeid` int(11) DEFAULT NULL,
+  `topicid` int(11) DEFAULT NULL,
+  `registryID` varchar(255) DEFAULT NULL,
+  `isArchived` tinyint(1) NOT NULL,
+  `points` int(10) unsigned NOT NULL,
+  `hintpenalty` int(10) unsigned NOT NULL,
   PRIMARY KEY (`questionID`),
-  KEY `Questions_topicid_f463268f_fk_QuestionTopic_topicid` (`topicid`),
   KEY `Questions_createdby_43a92c1c_fk_User_email` (`createdby`),
+  KEY `Questions_rangeid_f2763797_fk_Range_rangeID` (`rangeid`),
+  KEY `Questions_topicid_f463268f_fk_QuestionTopic_topicid` (`topicid`),
   CONSTRAINT `Questions_createdby_43a92c1c_fk_User_email` FOREIGN KEY (`createdby`) REFERENCES `User` (`email`),
+  CONSTRAINT `Questions_rangeid_f2763797_fk_Range_rangeID` FOREIGN KEY (`rangeid`) REFERENCES `Range` (`rangeID`),
   CONSTRAINT `Questions_topicid_f463268f_fk_QuestionTopic_topicid` FOREIGN KEY (`topicid`) REFERENCES `QuestionTopic` (`topicid`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -176,7 +181,7 @@ CREATE TABLE `Questions` (
 
 LOCK TABLES `Questions` WRITE;
 /*!40000 ALTER TABLE `Questions` DISABLE KEYS */;
-INSERT INTO `Questions` VALUES (1,'FL','test','test','test',1,1,'karlkwan@gmail.com','2018-07-11','15:07:10.277354'),(2,'FL','this is a flag question','this is a flag text','flag',4,0,'karlkwan@gmail.com','2018-07-11','17:33:48.901609'),(3,'MCQ','this is an mcq title','this is an mcq text','mcq',5,1,'karlkwan@gmail.com','2018-07-11','17:34:16.463635'),(4,'SA','this is a short answer','short answer text','short',6,1,'karlkwan@gmail.com','2018-07-11','17:35:03.456095'),(5,'OE','openendedbro','what is open','open',7,1,'karlkwan@gmail.com','2018-07-11','17:35:31.337931'),(6,'TF','this is true','this is false','what is tf',8,1,'karlkwan@gmail.com','2018-07-11','17:36:03.295252');
+INSERT INTO `Questions` VALUES (14,'FL','Hidden','<p><strong>In ~/problems/123b421f123e21g2g/ there is a flag file that you cannot list, in it, the flag is yours to capture.</strong></p>','flagtest',0,'2018-07-14 16:00:00.000000','54686520466c6167206973203d3a3324325f403d','karlkwan@gmail.com',2,1,NULL,0,10,5),(15,'FL','new','new','new',0,'2018-07-15 00:00:00.000000','new','karlkwan@gmail.com',NULL,1,NULL,0,10,0),(16,'MCQ','mcqquestion','mcqtext','mcqhint',0,'2018-07-15 16:00:00.000000','mcqanswer','karlkwan@gmail.com',2,1,NULL,0,10,3),(17,'SA','shortanswertitle','shortanswertext','hint',0,'2018-07-15 16:00:00.000000','shortanswer','karlkwan@gmail.com',2,1,NULL,0,10,5),(18,'TF','tf','tftext','hint',0,'2018-07-15 16:00:00.000000','True','karlkwan@gmail.com',2,1,NULL,0,10,5),(19,'OE','oe','text','hint',0,'2018-07-15 16:00:00.000000','oe','karlkwan@gmail.com',2,1,NULL,0,20,10),(20,'FL','asdf','<p>asdf</p>','asdf',1,'2018-07-17 16:00:00.000000','abc','karlkwan@gmail.com',3,1,NULL,0,5,1),(21,'FL','asdf','<p>asdf</p>','asdf',1,'2018-07-17 16:00:00.000000','abc','karlkwan@gmail.com',3,1,NULL,0,5,1),(22,'FL','asdf','<p>asdfasdf</p>','aasdf',1,'2018-07-17 16:00:00.000000','asdf','karlkwan@gmail.com',3,1,NULL,0,234,4),(23,'FL','klj','<p>lkjasdfasdf</p>','ljjkl',1,'2018-07-17 16:00:00.000000','jkl','karlkwan@gmail.com',3,1,NULL,0,42,453),(24,'FL','asdf','<p>lkjasdfasdf</p>','adfs',1,'2018-07-17 16:00:00.000000','wfd','karlkwan@gmail.com',3,1,NULL,0,4355,3454),(25,'FL','asdf','<p>lkjasdfasdf</p>','adfs',1,'2018-07-17 16:00:00.000000','wfd','karlkwan@gmail.com',3,1,NULL,0,4355,3454),(26,'FL','asdf','<p>lkjasdfasdf</p>','adfs',1,'2018-07-17 16:00:00.000000','wfd','karlkwan@gmail.com',3,1,NULL,0,4355,3454),(27,'FL','asdf','<p>lkjasdfasdf</p>','adfs',1,'2018-07-17 16:00:00.000000','wfd','karlkwan@gmail.com',3,1,NULL,0,4355,3454),(28,'FL','jkldsj','<p>lkjlk</p>','sfdkla',1,'2018-07-17 16:00:00.000000','fjdskal','karlkwan@gmail.com',3,1,NULL,0,10,10),(29,'FL','jkldsj','<p>lkjlk</p>','sfdkla',1,'2018-07-17 16:00:00.000000','fjdskal','karlkwan@gmail.com',3,1,NULL,0,10,10),(30,'FL','kjlj','<p>lkjlk</p>','klj',1,'2018-07-17 16:00:00.000000','jkl','karlkwan@gmail.com',3,1,NULL,0,38,234);
 /*!40000 ALTER TABLE `Questions` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -195,24 +200,26 @@ CREATE TABLE `Range` (
   `dateEnd` date DEFAULT NULL,
   `dateStart` date DEFAULT NULL,
   `isDisabled` tinyint(1) NOT NULL,
+  `isOpen` tinyint(1) NOT NULL,
   `lastModifiedBy` varchar(254) DEFAULT NULL,
   `lastModifiedDate` date DEFAULT NULL,
-  `maxScore` int(11) DEFAULT NULL,
+  `maxScore` int(10) unsigned DEFAULT NULL,
   `rangeActive` tinyint(1) NOT NULL,
   `rangeCode` int(11) DEFAULT NULL,
   `rangeURL` varchar(50) DEFAULT NULL,
-  `studentsInRange` int(11) DEFAULT NULL,
+  `studentsInRange` int(10) unsigned DEFAULT NULL,
   `timeEnd` time(6) DEFAULT NULL,
   `timeStart` time(6) DEFAULT NULL,
-  `isOpen` tinyint(1) NOT NULL,
+  `attempts` int(10) unsigned NOT NULL,
+  `rangeInfo` longtext NOT NULL,
   PRIMARY KEY (`rangeID`),
   UNIQUE KEY `rangeCode` (`rangeCode`),
-  UNIQUE KEY `Range_rangeURL_a80344a3_uniq` (`rangeURL`),
+  UNIQUE KEY `rangeURL` (`rangeURL`),
   KEY `Range_createdby_4d2f29e0_fk_User_email` (`createdby`),
   KEY `Range_lastModifiedBy_35f0a21b_fk_User_email` (`lastModifiedBy`),
   CONSTRAINT `Range_createdby_4d2f29e0_fk_User_email` FOREIGN KEY (`createdby`) REFERENCES `User` (`email`),
   CONSTRAINT `Range_lastModifiedBy_35f0a21b_fk_User_email` FOREIGN KEY (`lastModifiedBy`) REFERENCES `User` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -221,7 +228,7 @@ CREATE TABLE `Range` (
 
 LOCK TABLES `Range` WRITE;
 /*!40000 ALTER TABLE `Range` DISABLE KEYS */;
-INSERT INTO `Range` VALUES (23,'Cyber Range #1','karlkwan@gmail.com','2018-07-11','2019-08-12','2018-07-12',0,'karlkwan@gmail.com','2018-07-12',50,1,998658,'testrange',NULL,'11:59:00.000000','10:49:00.000000',1),(24,'testrange','karlkwan@gmail.com','2018-07-12',NULL,NULL,0,NULL,NULL,NULL,1,682327,'newnewrange',NULL,NULL,NULL,1);
+INSERT INTO `Range` VALUES (2,'newrange','karlkwan@gmail.com','2018-07-15','2018-07-30','2018-07-17',0,0,'karlkwan@gmail.com','2018-07-17',60,1,924165,'newrange',NULL,'12:59:00.000000','08:30:00.000000',0,'<p>Hello Students, This is your first cyber range. Here are some things to take note: Username for your shell is \"guest\", Password is \"root\". iThis range will not be counted in your final grade.Have fun playing!!</p>'),(3,'dextersrange','karlkwan@gmail.com','2018-07-16','2018-07-30','2018-07-16',0,0,NULL,NULL,17764,1,332670,'dextersrange',NULL,'11:59:00.000000','08:30:00.000000',0,'this is dexters range');
 /*!40000 ALTER TABLE `Range` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -235,17 +242,17 @@ DROP TABLE IF EXISTS `RangeQuestions`;
 CREATE TABLE `RangeQuestions` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `answer` varchar(255) DEFAULT NULL,
+  `points` int(10) unsigned NOT NULL,
+  `isDisabled` tinyint(1) NOT NULL,
+  `registryID` varchar(255) DEFAULT NULL,
   `questionID` int(11) NOT NULL,
   `rangeID` int(11) NOT NULL,
-  `isDisabled` tinyint(1) NOT NULL,
-  `points` int(11) NOT NULL,
-  `registryID` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `RangeQuestions_questionID_b51c40c3_fk_Questions_questionID` (`questionID`),
   KEY `RangeQuestions_rangeID_4ec72b4b_fk_Range_rangeID` (`rangeID`),
   CONSTRAINT `RangeQuestions_questionID_b51c40c3_fk_Questions_questionID` FOREIGN KEY (`questionID`) REFERENCES `Questions` (`questionID`),
   CONSTRAINT `RangeQuestions_rangeID_4ec72b4b_fk_Range_rangeID` FOREIGN KEY (`rangeID`) REFERENCES `Range` (`rangeID`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -254,7 +261,6 @@ CREATE TABLE `RangeQuestions` (
 
 LOCK TABLES `RangeQuestions` WRITE;
 /*!40000 ALTER TABLE `RangeQuestions` DISABLE KEYS */;
-INSERT INTO `RangeQuestions` VALUES (2,'flag',2,23,0,10,'flag'),(3,'mcq',3,23,0,10,''),(4,'this is a short answer',4,23,0,10,'short'),(5,'open',5,23,0,10,''),(6,'True',6,23,0,10,'tf');
 /*!40000 ALTER TABLE `RangeQuestions` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -273,17 +279,17 @@ CREATE TABLE `RangeStudents` (
   `dateCompleted` date DEFAULT NULL,
   `timeCompleted` time(6) DEFAULT NULL,
   `lastaccess` datetime(6) DEFAULT NULL,
+  `groupid` int(11) DEFAULT NULL,
   `rangeID` int(11) NOT NULL,
   `email` varchar(254) NOT NULL,
-  `groupid` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
+  KEY `RangeStudents_groupid_f7d179b4_fk_Group_groupID` (`groupid`),
   KEY `RangeStudents_rangeID_bc51c70c_fk_Range_rangeID` (`rangeID`),
   KEY `RangeStudents_email_af1dd9e3_fk_User_email` (`email`),
-  KEY `RangeStudents_groupid_f7d179b4_fk_Group_groupID` (`groupid`),
   CONSTRAINT `RangeStudents_email_af1dd9e3_fk_User_email` FOREIGN KEY (`email`) REFERENCES `User` (`email`),
   CONSTRAINT `RangeStudents_groupid_f7d179b4_fk_Group_groupID` FOREIGN KEY (`groupid`) REFERENCES `Group` (`groupID`),
   CONSTRAINT `RangeStudents_rangeID_bc51c70c_fk_Range_rangeID` FOREIGN KEY (`rangeID`) REFERENCES `Range` (`rangeID`)
-) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -292,7 +298,7 @@ CREATE TABLE `RangeStudents` (
 
 LOCK TABLES `RangeStudents` WRITE;
 /*!40000 ALTER TABLE `RangeStudents` DISABLE KEYS */;
-INSERT INTO `RangeStudents` VALUES (17,'2018-07-10 16:00:00.000000',NULL,0,NULL,NULL,NULL,23,'dextergui@gmail.com',NULL),(18,'2018-07-10 16:00:00.000000',NULL,0,NULL,NULL,NULL,23,'dextergui@gmail.com',1),(19,'2018-07-10 16:00:00.000000',NULL,40,NULL,NULL,NULL,23,'joshualee@gmail.com',1);
+INSERT INTO `RangeStudents` VALUES (4,'2018-07-14 16:00:00.000000',16,0,'2018-07-16',NULL,'2018-07-17 04:42:10.202957',NULL,2,'joshualee@gmail.com'),(5,'2018-07-15 16:00:00.000000',NULL,0,NULL,NULL,NULL,NULL,3,'joshualee@gmail.com');
 /*!40000 ALTER TABLE `RangeStudents` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -312,7 +318,7 @@ CREATE TABLE `StudentGroup` (
   KEY `StudentGroup_studentID_0165a6d1_fk_User_email` (`studentID`),
   CONSTRAINT `StudentGroup_groupID_45126783_fk_Group_groupID` FOREIGN KEY (`groupID`) REFERENCES `Group` (`groupID`),
   CONSTRAINT `StudentGroup_studentID_0165a6d1_fk_User_email` FOREIGN KEY (`studentID`) REFERENCES `User` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -321,8 +327,41 @@ CREATE TABLE `StudentGroup` (
 
 LOCK TABLES `StudentGroup` WRITE;
 /*!40000 ALTER TABLE `StudentGroup` DISABLE KEYS */;
-INSERT INTO `StudentGroup` VALUES (1,1,'dextergui@gmail.com'),(2,1,'joshualee@gmail.com');
+INSERT INTO `StudentGroup` VALUES (1,1,'dextergui@gmail.com'),(2,1,'joshualee@gmail.com'),(3,1,'jonathanau@gmail.com');
 /*!40000 ALTER TABLE `StudentGroup` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `StudentHints`
+--
+
+DROP TABLE IF EXISTS `StudentHints`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `StudentHints` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `hintactivated` tinyint(1) NOT NULL,
+  `questionid` int(11) NOT NULL,
+  `rangeid` int(11) NOT NULL,
+  `studentid` varchar(254) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `StudentHints_questionid_0154d770_fk_Questions_questionID` (`questionid`),
+  KEY `StudentHints_rangeid_f8ed50c9_fk_Range_rangeID` (`rangeid`),
+  KEY `StudentHints_studentid_231b4111_fk_User_email` (`studentid`),
+  CONSTRAINT `StudentHints_questionid_0154d770_fk_Questions_questionID` FOREIGN KEY (`questionid`) REFERENCES `Questions` (`questionID`),
+  CONSTRAINT `StudentHints_rangeid_f8ed50c9_fk_Range_rangeID` FOREIGN KEY (`rangeid`) REFERENCES `Range` (`rangeID`),
+  CONSTRAINT `StudentHints_studentid_231b4111_fk_User_email` FOREIGN KEY (`studentid`) REFERENCES `User` (`email`)
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `StudentHints`
+--
+
+LOCK TABLES `StudentHints` WRITE;
+/*!40000 ALTER TABLE `StudentHints` DISABLE KEYS */;
+INSERT INTO `StudentHints` VALUES (8,1,14,2,'joshualee@gmail.com'),(9,1,16,2,'joshualee@gmail.com'),(10,1,17,2,'joshualee@gmail.com'),(11,1,18,2,'joshualee@gmail.com'),(12,1,19,2,'joshualee@gmail.com');
+/*!40000 ALTER TABLE `StudentHints` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -336,10 +375,11 @@ CREATE TABLE `StudentQuestions` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `answergiven` varchar(100) NOT NULL,
   `right/wrong` tinyint(1) NOT NULL,
-  `marksawarded` int(11) NOT NULL,
+  `marksawarded` int(10) unsigned NOT NULL,
   `questionid` int(11) NOT NULL,
   `rangeID` int(11) NOT NULL,
   `email` varchar(254) NOT NULL,
+  `attempts` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `StudentQuestions_questionid_a35630ff_fk_Questions_questionID` (`questionid`),
   KEY `StudentQuestions_rangeID_828774ff_fk_Range_rangeID` (`rangeID`),
@@ -347,7 +387,7 @@ CREATE TABLE `StudentQuestions` (
   CONSTRAINT `StudentQuestions_email_18d1090a_fk_User_email` FOREIGN KEY (`email`) REFERENCES `User` (`email`),
   CONSTRAINT `StudentQuestions_questionid_a35630ff_fk_Questions_questionID` FOREIGN KEY (`questionid`) REFERENCES `Questions` (`questionID`),
   CONSTRAINT `StudentQuestions_rangeID_828774ff_fk_Range_rangeID` FOREIGN KEY (`rangeID`) REFERENCES `Range` (`rangeID`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -356,7 +396,7 @@ CREATE TABLE `StudentQuestions` (
 
 LOCK TABLES `StudentQuestions` WRITE;
 /*!40000 ALTER TABLE `StudentQuestions` DISABLE KEYS */;
-INSERT INTO `StudentQuestions` VALUES (1,'flag',1,10,2,23,'joshualee@gmail.com'),(2,'mcq',1,10,3,23,'joshualee@gmail.com'),(3,'this is short answer',1,10,4,23,'joshualee@gmail.com'),(4,'True',1,10,6,23,'joshualee@gmail.com'),(5,'asdfdsagads',0,10,5,23,'joshualee@gmail.com');
+INSERT INTO `StudentQuestions` VALUES (10,'flag',0,0,14,2,'joshualee@gmail.com',1);
 /*!40000 ALTER TABLE `StudentQuestions` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -368,7 +408,7 @@ DROP TABLE IF EXISTS `UnavailablePorts`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `UnavailablePorts` (
-  `portNumber` int(11) NOT NULL,
+  `portNumber` int(10) unsigned NOT NULL,
   `containerName` longtext,
   `dateTimeCreated` datetime(6) DEFAULT NULL,
   `studentid` varchar(254) NOT NULL,
@@ -405,11 +445,11 @@ CREATE TABLE `User` (
   `teacher` tinyint(1) NOT NULL,
   `acceptedBy` varchar(254) DEFAULT NULL,
   `admin` tinyint(1) NOT NULL,
+  `isaccepted` tinyint(1) NOT NULL,
+  `isdisabled` tinyint(1) NOT NULL,
   `lastModifiedBy` varchar(254) DEFAULT NULL,
   `lastModifiedTime` time(6) DEFAULT NULL,
   `userclass` varchar(45),
-  `isdisabled` tinyint(1) NOT NULL,
-  `isaccepted` tinyint(1) NOT NULL,
   PRIMARY KEY (`email`),
   UNIQUE KEY `username` (`username`),
   KEY `User_acceptedBy_5736f442_fk_User_email` (`acceptedBy`),
@@ -425,7 +465,7 @@ CREATE TABLE `User` (
 
 LOCK TABLES `User` WRITE;
 /*!40000 ALTER TABLE `User` DISABLE KEYS */;
-INSERT INTO `User` VALUES ('dextergui@gmail.com','dextergui','pbkdf2_sha256$100000$MfS05tzi2e5j$gTrK2GYr5vyuZrZkoBnz4bYqM7qfqVlhhzf20Xl7o4s=','Dexter Gui Zhang Yan','2018-07-06','2018-07-06','2018-07-06 05:14:14.756719',0,'karlkwan@gmail.com',0,'karlkwan@gmail.com','13:23:10.090459','Public',0,1),('joshualee@gmail.com','joshualee','pbkdf2_sha256$100000$iBTzRCRhCNKa$IoWGcT6HHNeWkIhyT/XQCMWLxLM0YbEwpzTDXsllOYg=','Joshua Lee','2018-07-05','2018-07-05','2018-07-12 07:07:56.392067',0,'karlkwan@gmail.com',0,'karlkwan@gmail.com','22:51:15.857256','Public',0,1),('karlkwan@gmail.com','karlkwan','pbkdf2_sha256$100000$DSALuUqOXFXz$rThfj7tZp3t+TjZCFjoHwZyfsGpMoNTNSygpQaf1Qis=','Karl Kwan','2018-07-05',NULL,'2018-07-12 06:44:45.735514',1,NULL,1,NULL,NULL,'Public',0,1),('wesleychiau@gmail.com','wesleychiau','pbkdf2_sha256$100000$rwohe0hLTBlZ$rH412j2Z3xtEAkvCGQELP9XgOLbUV4ZUFUkfwmfWX3I=','Wesley Chiau','2018-07-06','2018-07-06',NULL,0,'karlkwan@gmail.com',0,'karlkwan@gmail.com','12:37:42.278187','Public',0,1);
+INSERT INTO `User` VALUES ('dextergui@gmail.com','dextergui','pbkdf2_sha256$100000$rYCO6BVoPmrI$o3wd3WVudZrpHflXxOPdFEQ9PB6ZEEi1u4/9Vvv4DiQ=','Dexter Gui Zhang Yan','2018-07-15','2018-07-15',NULL,0,'karlkwan@gmail.com',0,1,0,'karlkwan@gmail.com','16:29:04.550277','Public'),('jonathanau@gmail.com','jonau','pbkdf2_sha256$100000$S2lwaR3enxPn$WQsPhZ95T47dBNyVK3U77RPHuLz4BBXKMJeiZnCPd98=','Jonathan Au','2018-07-15','2018-07-15',NULL,0,'karlkwan@gmail.com',0,1,0,'karlkwan@gmail.com','16:29:44.935513','Public'),('joshualee@gmail.com','joshualee','pbkdf2_sha256$100000$38fDHZzeo0Hv$rFl2tqpXxoOpL7p17IfcXZ3CUCg5f10Iwv0sw3x1F3I=','Joshua Lee','2018-07-15','2018-07-15','2018-07-18 05:31:46.862031',0,'karlkwan@gmail.com',0,1,0,'joshualee@gmail.com','21:44:38.501836','Public'),('karlkwan@gmail.com','karlkwan','pbkdf2_sha256$100000$iic6JCibU7qU$KB4lGeYoPnx07FslGm1dLkdXZBDDxmEB9ToknJW7gN4=','Karl Kwan','2018-07-15',NULL,'2018-07-18 05:37:55.571416',1,'karlkwan@gmail.com',0,1,0,NULL,NULL,'Public');
 /*!40000 ALTER TABLE `User` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -576,7 +616,7 @@ CREATE TABLE `auth_permission` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `auth_permission_content_type_id_codename_01ab375a_uniq` (`content_type_id`,`codename`),
   CONSTRAINT `auth_permission_content_type_id_2f476e4b_fk_django_co` FOREIGN KEY (`content_type_id`) REFERENCES `django_content_type` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=61 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=64 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -585,7 +625,7 @@ CREATE TABLE `auth_permission` (
 
 LOCK TABLES `auth_permission` WRITE;
 /*!40000 ALTER TABLE `auth_permission` DISABLE KEYS */;
-INSERT INTO `auth_permission` VALUES (1,'Can add group',1,'add_group'),(2,'Can change group',1,'change_group'),(3,'Can delete group',1,'delete_group'),(4,'Can add user class',2,'add_userclass'),(5,'Can change user class',2,'change_userclass'),(6,'Can delete user class',2,'delete_userclass'),(7,'Can add group range',3,'add_grouprange'),(8,'Can change group range',3,'change_grouprange'),(9,'Can delete group range',3,'delete_grouprange'),(10,'Can add student group',4,'add_studentgroup'),(11,'Can change student group',4,'change_studentgroup'),(12,'Can delete student group',4,'delete_studentgroup'),(13,'Can add user',5,'add_user'),(14,'Can change user',5,'change_user'),(15,'Can delete user',5,'delete_user'),(16,'Can add student questions',6,'add_studentquestions'),(17,'Can change student questions',6,'change_studentquestions'),(18,'Can delete student questions',6,'delete_studentquestions'),(19,'Can add mcq options',7,'add_mcqoptions'),(20,'Can change mcq options',7,'change_mcqoptions'),(21,'Can delete mcq options',7,'delete_mcqoptions'),(22,'Can add range students',8,'add_rangestudents'),(23,'Can change range students',8,'change_rangestudents'),(24,'Can delete range students',8,'delete_rangestudents'),(25,'Can add questions',9,'add_questions'),(26,'Can change questions',9,'change_questions'),(27,'Can delete questions',9,'delete_questions'),(28,'Can add range',10,'add_range'),(29,'Can change range',10,'change_range'),(30,'Can delete range',10,'delete_range'),(31,'Can add question topic',11,'add_questiontopic'),(32,'Can change question topic',11,'change_questiontopic'),(33,'Can delete question topic',11,'delete_questiontopic'),(34,'Can add unavailable ports',12,'add_unavailableports'),(35,'Can change unavailable ports',12,'change_unavailableports'),(36,'Can delete unavailable ports',12,'delete_unavailableports'),(37,'Can add range questions',13,'add_rangequestions'),(38,'Can change range questions',13,'change_rangequestions'),(39,'Can delete range questions',13,'delete_rangequestions'),(40,'Can add log entry',14,'add_logentry'),(41,'Can change log entry',14,'change_logentry'),(42,'Can delete log entry',14,'delete_logentry'),(43,'Can add permission',15,'add_permission'),(44,'Can change permission',15,'change_permission'),(45,'Can delete permission',15,'delete_permission'),(46,'Can add group',16,'add_group'),(47,'Can change group',16,'change_group'),(48,'Can delete group',16,'delete_group'),(49,'Can add content type',17,'add_contenttype'),(50,'Can change content type',17,'change_contenttype'),(51,'Can delete content type',17,'delete_contenttype'),(52,'Can add session',18,'add_session'),(53,'Can change session',18,'change_session'),(54,'Can delete session',18,'delete_session'),(55,'Can add fake student group',19,'add_fakestudentgroup'),(56,'Can change fake student group',19,'change_fakestudentgroup'),(57,'Can delete fake student group',19,'delete_fakestudentgroup'),(58,'Can add fake range',20,'add_fakerange'),(59,'Can change fake range',20,'change_fakerange'),(60,'Can delete fake range',20,'delete_fakerange');
+INSERT INTO `auth_permission` VALUES (1,'Can add student group',1,'add_studentgroup'),(2,'Can change student group',1,'change_studentgroup'),(3,'Can delete student group',1,'delete_studentgroup'),(4,'Can add user',2,'add_user'),(5,'Can change user',2,'change_user'),(6,'Can delete user',2,'delete_user'),(7,'Can add fake student group',3,'add_fakestudentgroup'),(8,'Can change fake student group',3,'change_fakestudentgroup'),(9,'Can delete fake student group',3,'delete_fakestudentgroup'),(10,'Can add group',4,'add_group'),(11,'Can change group',4,'change_group'),(12,'Can delete group',4,'delete_group'),(13,'Can add group range',5,'add_grouprange'),(14,'Can change group range',5,'change_grouprange'),(15,'Can delete group range',5,'delete_grouprange'),(16,'Can add user class',6,'add_userclass'),(17,'Can change user class',6,'change_userclass'),(18,'Can delete user class',6,'delete_userclass'),(19,'Can add questions',7,'add_questions'),(20,'Can change questions',7,'change_questions'),(21,'Can delete questions',7,'delete_questions'),(22,'Can add student questions',8,'add_studentquestions'),(23,'Can change student questions',8,'change_studentquestions'),(24,'Can delete student questions',8,'delete_studentquestions'),(25,'Can add fake range',9,'add_fakerange'),(26,'Can change fake range',9,'change_fakerange'),(27,'Can delete fake range',9,'delete_fakerange'),(28,'Can add mcq options',10,'add_mcqoptions'),(29,'Can change mcq options',10,'change_mcqoptions'),(30,'Can delete mcq options',10,'delete_mcqoptions'),(31,'Can add question topic',11,'add_questiontopic'),(32,'Can change question topic',11,'change_questiontopic'),(33,'Can delete question topic',11,'delete_questiontopic'),(34,'Can add unavailable ports',12,'add_unavailableports'),(35,'Can change unavailable ports',12,'change_unavailableports'),(36,'Can delete unavailable ports',12,'delete_unavailableports'),(37,'Can add range',13,'add_range'),(38,'Can change range',13,'change_range'),(39,'Can delete range',13,'delete_range'),(40,'Can add range students',14,'add_rangestudents'),(41,'Can change range students',14,'change_rangestudents'),(42,'Can delete range students',14,'delete_rangestudents'),(43,'Can add range questions',15,'add_rangequestions'),(44,'Can change range questions',15,'change_rangequestions'),(45,'Can delete range questions',15,'delete_rangequestions'),(46,'Can add log entry',16,'add_logentry'),(47,'Can change log entry',16,'change_logentry'),(48,'Can delete log entry',16,'delete_logentry'),(49,'Can add group',17,'add_group'),(50,'Can change group',17,'change_group'),(51,'Can delete group',17,'delete_group'),(52,'Can add permission',18,'add_permission'),(53,'Can change permission',18,'change_permission'),(54,'Can delete permission',18,'delete_permission'),(55,'Can add content type',19,'add_contenttype'),(56,'Can change content type',19,'change_contenttype'),(57,'Can delete content type',19,'delete_contenttype'),(58,'Can add session',20,'add_session'),(59,'Can change session',20,'change_session'),(60,'Can delete session',20,'delete_session'),(61,'Can add student hints',21,'add_studenthints'),(62,'Can change student hints',21,'change_studenthints'),(63,'Can delete student hints',21,'delete_studenthints');
 /*!40000 ALTER TABLE `auth_permission` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -635,7 +675,7 @@ CREATE TABLE `django_content_type` (
   `model` varchar(100) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `django_content_type_app_label_model_76bd3d3b_uniq` (`app_label`,`model`)
-) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -644,7 +684,7 @@ CREATE TABLE `django_content_type` (
 
 LOCK TABLES `django_content_type` WRITE;
 /*!40000 ALTER TABLE `django_content_type` DISABLE KEYS */;
-INSERT INTO `django_content_type` VALUES (19,'accounts','fakestudentgroup'),(1,'accounts','group'),(3,'accounts','grouprange'),(4,'accounts','studentgroup'),(5,'accounts','user'),(2,'accounts','userclass'),(14,'admin','logentry'),(16,'auth','group'),(15,'auth','permission'),(17,'contenttypes','contenttype'),(20,'ranges','fakerange'),(7,'ranges','mcqoptions'),(9,'ranges','questions'),(11,'ranges','questiontopic'),(10,'ranges','range'),(13,'ranges','rangequestions'),(8,'ranges','rangestudents'),(6,'ranges','studentquestions'),(12,'ranges','unavailableports'),(18,'sessions','session');
+INSERT INTO `django_content_type` VALUES (3,'accounts','fakestudentgroup'),(4,'accounts','group'),(5,'accounts','grouprange'),(1,'accounts','studentgroup'),(2,'accounts','user'),(6,'accounts','userclass'),(16,'admin','logentry'),(17,'auth','group'),(18,'auth','permission'),(19,'contenttypes','contenttype'),(9,'ranges','fakerange'),(10,'ranges','mcqoptions'),(7,'ranges','questions'),(11,'ranges','questiontopic'),(13,'ranges','range'),(15,'ranges','rangequestions'),(14,'ranges','rangestudents'),(21,'ranges','studenthints'),(8,'ranges','studentquestions'),(12,'ranges','unavailableports'),(20,'sessions','session');
 /*!40000 ALTER TABLE `django_content_type` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -661,7 +701,7 @@ CREATE TABLE `django_migrations` (
   `name` varchar(255) NOT NULL,
   `applied` datetime(6) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -670,7 +710,7 @@ CREATE TABLE `django_migrations` (
 
 LOCK TABLES `django_migrations` WRITE;
 /*!40000 ALTER TABLE `django_migrations` DISABLE KEYS */;
-INSERT INTO `django_migrations` VALUES (1,'ranges','0001_initial','2018-07-05 14:45:02.594428'),(2,'accounts','0001_initial','2018-07-05 14:45:03.050258'),(3,'ranges','0002_auto_20180705_2244','2018-07-05 14:45:08.151200'),(4,'contenttypes','0001_initial','2018-07-05 14:45:08.281130'),(5,'contenttypes','0002_remove_content_type_name','2018-07-05 14:45:08.530976'),(6,'auth','0001_initial','2018-07-05 14:45:09.383131'),(7,'auth','0002_alter_permission_name_max_length','2018-07-05 14:45:09.411344'),(8,'auth','0003_alter_user_email_max_length','2018-07-05 14:45:09.425036'),(9,'auth','0004_alter_user_username_opts','2018-07-05 14:45:09.433132'),(10,'auth','0005_alter_user_last_login_null','2018-07-05 14:45:09.442356'),(11,'auth','0006_require_contenttypes_0002','2018-07-05 14:45:09.447065'),(12,'auth','0007_alter_validators_add_error_messages','2018-07-05 14:45:09.462764'),(13,'auth','0008_alter_user_username_max_length','2018-07-05 14:45:09.470970'),(14,'auth','0009_alter_user_last_name_max_length','2018-07-05 14:45:09.479321'),(15,'accounts','0002_auto_20180705_2244','2018-07-05 14:45:13.987903'),(16,'admin','0001_initial','2018-07-05 14:45:14.412967'),(17,'admin','0002_logentry_remove_auto_add','2018-07-05 14:45:14.433704'),(18,'sessions','0001_initial','2018-07-05 14:45:14.555054'),(19,'accounts','0003_fakestudentgroup','2018-07-05 15:22:34.206076'),(20,'ranges','0003_auto_20180705_2322','2018-07-05 15:22:34.386395'),(21,'accounts','0004_user_archived','2018-07-05 15:31:47.121887'),(22,'accounts','0005_auto_20180705_2332','2018-07-05 15:32:22.468573'),(23,'accounts','0006_auto_20180706_1147','2018-07-06 03:47:37.060231'),(24,'accounts','0007_user_isaccepted','2018-07-06 04:25:45.944440'),(25,'ranges','0004_rangequestions_isdisabled','2018-07-08 08:27:46.725975'),(26,'ranges','0005_auto_20180709_1154','2018-07-09 03:54:48.351614'),(27,'ranges','0006_auto_20180709_1209','2018-07-09 04:09:23.598867'),(28,'ranges','0007_auto_20180710_1410','2018-07-10 06:10:45.008643'),(29,'ranges','0008_auto_20180710_1517','2018-07-10 07:17:45.953089'),(30,'ranges','0009_rangequestions_registryid','2018-07-10 07:36:09.578222'),(31,'ranges','0010_auto_20180710_1809','2018-07-10 10:09:34.677136'),(32,'ranges','0011_fakerange','2018-07-11 05:48:00.292468'),(33,'ranges','0012_auto_20180711_1524','2018-07-11 07:24:15.692338'),(34,'ranges','0013_auto_20180711_1637','2018-07-11 08:38:01.214427'),(35,'ranges','0014_auto_20180711_1644','2018-07-11 08:44:37.161629'),(36,'ranges','0015_auto_20180712_1442','2018-07-12 06:42:32.260040');
+INSERT INTO `django_migrations` VALUES (1,'ranges','0001_initial','2018-07-15 02:33:53.566956'),(2,'contenttypes','0001_initial','2018-07-15 02:33:53.714820'),(3,'contenttypes','0002_remove_content_type_name','2018-07-15 02:33:54.000682'),(4,'auth','0001_initial','2018-07-15 02:33:55.049033'),(5,'auth','0002_alter_permission_name_max_length','2018-07-15 02:33:55.147572'),(6,'auth','0003_alter_user_email_max_length','2018-07-15 02:33:55.220016'),(7,'auth','0004_alter_user_username_opts','2018-07-15 02:33:55.243131'),(8,'auth','0005_alter_user_last_login_null','2018-07-15 02:33:55.270137'),(9,'auth','0006_require_contenttypes_0002','2018-07-15 02:33:55.276653'),(10,'auth','0007_alter_validators_add_error_messages','2018-07-15 02:33:55.312024'),(11,'auth','0008_alter_user_username_max_length','2018-07-15 02:33:55.338163'),(12,'auth','0009_alter_user_last_name_max_length','2018-07-15 02:33:55.364254'),(13,'accounts','0001_initial','2018-07-15 02:33:55.896874'),(14,'accounts','0002_auto_20180715_1033','2018-07-15 02:34:02.859651'),(15,'admin','0001_initial','2018-07-15 02:34:03.564040'),(16,'admin','0002_logentry_remove_auto_add','2018-07-15 02:34:03.672763'),(17,'ranges','0002_auto_20180715_1033','2018-07-15 02:34:13.697314'),(18,'sessions','0001_initial','2018-07-15 02:34:13.851369'),(19,'ranges','0003_questions_registryid','2018-07-15 09:26:03.039278'),(20,'ranges','0004_questions_isarchived','2018-07-15 09:26:48.488275'),(21,'accounts','0003_auto_20180715_1825','2018-07-15 10:26:01.138142'),(22,'ranges','0005_auto_20180715_1825','2018-07-15 10:26:01.476908'),(23,'ranges','0006_auto_20180716_1143','2018-07-16 03:43:19.710905'),(24,'ranges','0007_auto_20180716_1259','2018-07-16 04:59:51.454084'),(25,'ranges','0008_auto_20180716_1641','2018-07-16 08:41:26.547119'),(26,'ranges','0009_auto_20180717_0833','2018-07-17 00:33:44.117620'),(27,'ranges','0010_auto_20180717_1024','2018-07-17 02:24:55.883293'),(28,'ranges','0011_auto_20180717_1252','2018-07-17 04:52:14.895431');
 /*!40000 ALTER TABLE `django_migrations` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -696,7 +736,7 @@ CREATE TABLE `django_session` (
 
 LOCK TABLES `django_session` WRITE;
 /*!40000 ALTER TABLE `django_session` DISABLE KEYS */;
-INSERT INTO `django_session` VALUES ('aug5h2klzoqq5o826huteuzsdp2mawjo','N2RmMDFkZmM3YjI1MGMwMjRlNzY4NmI3N2MzNDQ3ZjQ3NmM1NzE5NDp7Il9hdXRoX3VzZXJfYmFja2VuZCI6ImFjY291bnRzLmZvcm1zLkVtYWlsQmFja2VuZCIsIl9hdXRoX3VzZXJfaWQiOiJrYXJsa3dhbkBnbWFpbC5jb20iLCJfYXV0aF91c2VyX2hhc2giOiI1NWYwMDE1ZTJhM2E2MjA3ODFiNjlkMjczMWUyYzEyZTVmOTAxMzI3In0=','2018-07-22 09:16:33.353898'),('bfyt98q3755lffwaa27mm8v3g0n2a58o','Y2I4MmQzOGY1YjZhMTI2NzQxMDc5NTQ0YTM5OTk3OGZiMmU4YzE5ZDp7Il9hdXRoX3VzZXJfaGFzaCI6IjU1ZjAwMTVlMmEzYTYyMDc4MWI2OWQyNzMxZTJjMTJlNWY5MDEzMjciLCJfYXV0aF91c2VyX2JhY2tlbmQiOiJhY2NvdW50cy5mb3Jtcy5FbWFpbEJhY2tlbmQiLCJfYXV0aF91c2VyX2lkIjoia2FybGt3YW5AZ21haWwuY29tIn0=','2018-07-20 09:12:42.878602'),('h0rfg21o99cxa6sio64qw1nltcg2i7b0','NDZjY2UzNmY2NmNmMWI3MzUyYTkyMzIyZmIwMTVmZTEyZjE5M2QwYjp7Il9hdXRoX3VzZXJfYmFja2VuZCI6ImFjY291bnRzLmZvcm1zLkVtYWlsQmFja2VuZCIsIl9hdXRoX3VzZXJfaGFzaCI6IjYwYzA1YTZiY2ViOTUwYzBjN2FkNGRlYWI4MjJlMGY1NzcwNjk3YjYiLCJfYXV0aF91c2VyX2lkIjoiam9zaHVhbGVlQGdtYWlsLmNvbSJ9','2018-07-20 08:16:58.751493');
+INSERT INTO `django_session` VALUES ('pl2k7wt7461nd5zuq4mbrqpjha04txdm','MTkzMzFhNmEzZGQ3OWQyMzc4NTZmZjE4YWEwNmE1NDc3M2FjZDI2Zjp7Il9hdXRoX3VzZXJfaGFzaCI6IjFiZTIzOTA4NGFmMzQ5NmYzNWU3NzQ0MTIxYTM4NGMwMzYyMzNmMGYiLCJfYXV0aF91c2VyX2JhY2tlbmQiOiJhY2NvdW50cy5mb3Jtcy5FbWFpbEJhY2tlbmQiLCJfYXV0aF91c2VyX2lkIjoiam9zaHVhbGVlQGdtYWlsLmNvbSJ9','2018-07-29 10:40:07.908453'),('rrfw4a02wlyuwb0wbhbtcvclgcaagldq','Y2IwNDk4ZDgxZDczNzYxMjExMzgzZWRkM2Y4ZWYxNzU2MWFkMjU0NDp7Il9hdXRoX3VzZXJfaWQiOiJqb3NodWFsZWVAZ21haWwuY29tIiwiX2F1dGhfdXNlcl9iYWNrZW5kIjoiYWNjb3VudHMuZm9ybXMuRW1haWxCYWNrZW5kIiwiX2F1dGhfdXNlcl9oYXNoIjoiMWJlMjM5MDg0YWYzNDk2ZjM1ZTc3NDQxMjFhMzg0YzAzNjIzM2YwZiJ9','2018-07-29 15:32:30.922176'),('w9quubnbqjvqd1hmtx73bb3vw129pr8s','ODhkYmE3ZmRiMmE2NGQyNzNiZWU4NTBhOWY3NjViYzg3Yjg0NDRhNDp7Il9hdXRoX3VzZXJfYmFja2VuZCI6ImFjY291bnRzLmZvcm1zLkVtYWlsQmFja2VuZCIsIl9hdXRoX3VzZXJfaWQiOiJqb3NodWFsZWVAZ21haWwuY29tIiwiX2F1dGhfdXNlcl9oYXNoIjoiMWJlMjM5MDg0YWYzNDk2ZjM1ZTc3NDQxMjFhMzg0YzAzNjIzM2YwZiJ9','2018-07-29 09:55:02.791822'),('z79idl21ey7lzxolguimhonpow4nbq50','NmMzNGUyM2QzZDI2YzkzZDIyNTJhODAxYWU2ZDUzZWM3Y2Q1OWYzMTp7Il9hdXRoX3VzZXJfYmFja2VuZCI6ImFjY291bnRzLmZvcm1zLkVtYWlsQmFja2VuZCIsIl9hdXRoX3VzZXJfaWQiOiJrYXJsa3dhbkBnbWFpbC5jb20iLCJURiI6ZmFsc2UsIl9hdXRoX3VzZXJfaGFzaCI6Ijc1ZDFkNTU3MjU3MTBiOWUyODgzZTAyODc4MzJhNzFhNTAwNzkxMDMiLCJxdWVzdGlvbmlkIjoyM30=','2018-08-01 06:18:48.600126');
 /*!40000 ALTER TABLE `django_session` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -709,4 +749,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-07-12 15:22:26
+-- Dump completed on 2018-07-18 14:55:19

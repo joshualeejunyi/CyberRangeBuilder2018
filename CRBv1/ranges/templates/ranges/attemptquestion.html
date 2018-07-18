@@ -14,6 +14,218 @@
 {% block content %}
 <section class="content">
 	<div class="float-left">
+		{% if correct is True %}
+			{% for question in question %}
+			{% for answer in result %}
+				{% if question.questiontype == 'FL' %}
+					<div class="row">
+						<div class="col-md-5">
+							<div class="box box-solid box-primary">
+								<div class="box-header with-border">
+									<h3 class="box-title">{{ question.title}}</h3>
+									<div class="box-tools pull-right">
+										<button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+									</div>
+								</div>
+								<div class="box-body">
+									<p>{{question.text | safe | cut:"<p>" | cut:"</p>"}}</p>
+									<div class="pull-right" style="width: 50%">
+										<form method="post">
+											Your Answer:
+											<input type="text" class="form-control" placeholder="{{answer.answergiven}}" disabled>
+											{% if answer.answercorrect %}
+												Correct!
+												<span class="glyphicon glyphicon-ok"></span>
+											{% else %}
+												Wrong! 
+												<span class="glyphicon glyphicon-remove"></span>
+											{% endif %}
+										</form>
+									</div>
+								</div>
+								<div class="box-footer">
+									<p class="pull-right">{{ questionpoints }} points</p>
+								</div>
+							</div>
+							<div style="width: 100px">
+								<a href="../" class="btn btn-block btn-primary">Back</a>
+							</div>
+						</div>
+						{% if siab is not False %}
+							<div class="float-right">
+								<div>
+									<iframe id ='siab' width="50%" height="700px" src="https://{{ siab }}" frameborder="0"></iframe>
+								</div>
+							</div>
+						{% endif %}
+					</div>
+				{% elif question.questiontype == 'SA' %}
+					<div class="row">
+						<div class="col-md-5">
+							<div class="box box-solid box-primary">
+								<div class="box-header with-border">
+									<h3 class="box-title">{{ question.title}}</h3>
+									<div class="box-tools pull-right">
+										<button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+									</div>
+								</div>
+								<div class="box-body">
+									<p>{{question.text | safe | cut:"<p>" | cut:"</p>"}}</p>
+									<div class="pull-right" style="width: 50%">
+										<form method="post">
+										Your Answer:
+										<input type="text" class="form-control" placeholder="{{answer.answergiven}}" disabled>
+										{% if answer.answercorrect %}
+											Correct!
+											<span class="glyphicon glyphicon-ok"></span>
+										{% else %}
+											Wrong! 
+											<span class="glyphicon glyphicon-remove"></span>
+										{% endif %}
+										</form>
+									</div>
+								</div>
+								<div class="box-footer">
+									<p class="pull-right">{{ questionpoints }} points</p>
+								</div>
+							</div>
+							<div style="width: 100px">
+								<a href="../" class="btn btn-block btn-primary">Back</a>
+							</div>
+						</div>
+						{% if siab is not False %}
+							<div class="float-right">
+								<div>
+									<iframe id ='siab' width="50%" height="700px" src="https://{{ siab }}" frameborder="0"></iframe>
+								</div>
+							</div>
+						{% endif %}
+					</div>
+				{% elif question.questiontype == 'TF' %}
+					<div class="row">
+						<div class="col-md-5">
+							<div class="box box-solid box-primary">
+								<div class="box-header with-border">
+									<h3 class="box-title">{{ question.title}}</h3>
+									<div class="box-tools pull-right">
+										<button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+									</div>
+								</div>
+								<div class="box-body">
+									<p>{{question.text | safe | cut:"<p>" | cut:"</p>"}}</p>
+									<div class="pull-right" style="width: 50%">
+										<form method="post">
+											Your Answer:
+											<input type="text" class="form-control" placeholder="{{answer.answergiven}}" disabled>
+											{% if answer.answercorrect %}
+												Correct!
+												<span class="glyphicon glyphicon-ok"></span>
+											{% else %}
+												Wrong! 
+												<span class="glyphicon glyphicon-remove"></span>
+											{% endif %}
+										</form>
+									</div>
+								</div>
+								<div class="box-footer">
+									<p class="pull-right">{{ questionpoints }} points</p>
+								</div>
+							</div>
+							<div style="width: 100px">
+								<a href="../" class="btn btn-block btn-primary">Back</a>
+							</div>
+						</div>
+						{% if siab is not False %}
+							<div class="float-right">
+								<div>
+									<iframe id ='siab' width="50%" height="700px" src="https://{{ siab }}" frameborder="0"></iframe>
+								</div>
+							</div>
+						{% endif %}
+					</div>
+				{% elif question.questiontype == 'MCQ' %}
+					<div class="row">
+						<div class="col-md-5">
+							<div class="box box-solid box-primary">
+								<div class="box-header with-border">
+									<h3 class="box-title">{{ question.title}}</h3>
+									<div class="box-tools pull-right">
+										<button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+									</div>
+								</div>
+								<div class="box-body">
+									<p>{{question.text | safe | cut:"<p>" | cut:"</p>"}}</p>
+									<div class="pull-right" style="width: 30%">
+										<form method="post">
+											Your Answer:
+											<input type="text" class="form-control" placeholder="{{answer.answergiven}}" disabled>
+											{% if answer.answercorrect %}
+												Correct!
+												<span class="glyphicon glyphicon-ok"></span>
+											{% else %}
+												Wrong! 
+												<span class="glyphicon glyphicon-remove"></span>
+											{% endif %}
+										</form>
+									</div>
+								</div>
+								<div class="box-footer">
+									<p class="pull-right">{{ questionpoints }} points</p>
+								</div>
+							</div>
+							<div style="width: 100px">
+								<a href="../../" class="btn btn-block btn-primary">Back</a>
+							</div>
+						</div>
+						{% if siab is not False %}
+							<div class="float-right">
+								<div>
+									<iframe id ='siab' width="50%" height="700px" src="https://{{ siab }}" frameborder="0"></iframe>
+								</div>
+							</div>
+						{% endif %}
+					</div>
+				{% elif question.questiontype == 'OE' %}
+					<div class="row">
+						<div class="col-md-5">
+							<div class="box box-solid box-primary">
+								<div class="box-header with-border">
+									<h3 class="box-title">{{ question.title}}</h3>
+									<div class="box-tools pull-right">
+										<button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+									</div>
+								</div>
+								<div class="box-body">
+									<p>{{question.text | safe | cut:"<p>" | cut:"</p>"}}</p>
+									<div class="pull-right" style="width: 50%">
+										<form method="post">
+											Your Answer:
+											<textarea class="form-control" placeholder="{{answer.answergiven}}" disabled style="max-width: 100%"></textarea>
+											Marking Pending!
+											<span class="glyphicon glyphicon-exclamation-sign"></span>
+										</form>
+									</div>
+								</div>
+								<div class="box-footer">
+									<p class="pull-right">{{ questionpoints }} points</p>
+								</div>
+							</div>
+							<div style="width: 100px">
+								<a href="../" class="btn btn-block btn-primary">Back</a>
+							</div>
+						</div>
+						{% if siab is not False %}
+							<div class="float-right">
+								<div>
+									<iframe id ='siab' width="50%" height="700px" src="https://{{ siab }}" frameborder="0"></iframe>
+								</div>
+							</div>
+						{% endif %}
+					</div>
+				{% endif %}
+			{% endfor %}
+		{% endfor %}
+	{% else %}
 		{% if not attempted %}
 			{% for question in question %}
 				{% if question.questiontype == 'FL'%}
@@ -250,7 +462,8 @@
 					</div>
 				{% endif %}
 			{% endfor %}
-		{% else %}
+		{% else %} 
+		<!-- should be for attempted but not correct -->
 			{% for question in question %}
 				{% for answer in result %}
 					{% if question.questiontype == 'FL' %}
@@ -461,6 +674,7 @@
 				{% endif %}
 			{% endfor %}
 		{% endfor %}
+	{% endif %}
 	{% endif %}
 </section>
 {% endblock %}

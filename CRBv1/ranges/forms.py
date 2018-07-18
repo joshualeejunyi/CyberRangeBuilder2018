@@ -61,9 +61,14 @@ class AnswerForm(forms.ModelForm):
                 studentobject.save()
 
         else:
-            studentobject = StudentQuestions.objects.get(studentid = user, rangeid = rangeinstance, questionid = questioninstance)
+            studentobject = StudentQuestions()
+            studentobject.studentid = user
+            studentobject.rangeid = rangeinstance
+            studentobject.questionid = questioninstance
+            studentobject.answergiven = answergiven
             studentobject.answercorrect = check
-            studentobject.attempts += 1
+            studentobject.answercorrect = check
+            studentobject.attempts = len(repeatedcheck)
 
             if check is True:
                 pointsobject = RangeStudents.objects.get(rangeID = rangeinstance, studentID = user)

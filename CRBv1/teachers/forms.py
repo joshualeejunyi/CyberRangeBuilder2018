@@ -141,19 +141,13 @@ class QuestionForm(ModelForm):
         self.rangeinstance = kwargs.pop("rangeinstance")
         super(QuestionForm, self).__init__(*args, **kwargs)
 
-    def clean(self):
-        cleaned_data = super(QuestionForm, self).clean()
-        usedocker = cleaned_data.get("usedocker")
-        registryid = self.request.POST.get('registryid','')
-        print(usedocker)
-        print(registryid)
-
-        if usedocker == "Yes" and registryid == "":
-            msg = u"Please enter the Registry ID!"
-            self._errors["registryid"] = self.error_class([msg])
-
     def save(self, commit=True):
         question = super().save(commit=False)
+        usedocker = self.request.POST.get("usedocker")
+        registryid = self.request.POST.get('registryid','')
+        if usedocker == "yes" and registryid == "":
+            msg = u"Please enter the Registry ID!"
+            self._errors["registryid"] = self.error_class([msg])
         topicname = self.request.POST.get('topicname','')
         topicid = QuestionTopic.objects.get(topicname = topicname)
         question.topicid = topicid
