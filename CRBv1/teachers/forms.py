@@ -145,7 +145,7 @@ class QuestionForm(ModelForm):
         question = super().save(commit=False)
         usedocker = self.request.POST.get("usedocker")
         registryid = self.request.POST.get('registryid','')
-        if usedocker == "yes" and registryid == "":
+        if usedocker == "True" and registryid == "":
             msg = u"Please enter the Registry ID!"
             self._errors["registryid"] = self.error_class([msg])
         topicname = self.request.POST.get('topicname','')
@@ -178,7 +178,7 @@ class ModifyQuestionForm(ModelForm):
         usedocker = cleaned_data.get("usedocker")
         registryid = self.request.POST.get('registryid','')
 
-        if usedocker == "Yes" and registryid == "":
+        if usedocker == "True" and registryid == "":
             msg = u"Please enter the Registry ID!"
             self._errors["registryid"] = self.error_class([msg])
 

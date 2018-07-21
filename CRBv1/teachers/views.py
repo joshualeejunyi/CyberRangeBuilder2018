@@ -33,9 +33,10 @@ class CreateImage(View):
         serverip = ['192.168.100.42', '192.168.100.43']
         
         for ip in serverip:
-            endpoint1 = 'http://' + ip + '/images/create?fromImage=dmit2.bulletplus.com:9100/{conid}'
+            endpoint1 = 'https://' + ip + '/images/create?fromImage=dmit2.bulletplus.com:9100/{conid}'
+            header1 = {"X-Registry-Auth": "eyAidXNlcm5hbWUiOiAiYWRtaW4iLCAicGFzc3dvcmQiOiAicGFzc3dvcmQiLCAic2VydmVyYWRkcmVzcyI6ICJkbWl0Mi5idWxsZXRwbHVzLmNvbTo5MTAwIiB9Cg=="}
             url1 = endpoint1.format(conid=imageid)
-            response = requests.post(url1)
+            response = requests.post(url1, headers=header1)
             if response.status_code != 200:
                 pass
                 # data['Id'] = id
@@ -53,7 +54,7 @@ class CreateImage(View):
             #IMAGE NAME CANNOT HAVE CAPITAL LETTERS!!!!!!!!!!!!!!!!!!!!!!!!!
             reference = {}
             imagename = rangeurl + '.' + questionid
-            endpoint2 = 'http://' + ip + '/images/dmit2.bulletplus.com:9100/{0}/tag?repo={1}'
+            endpoint2 = 'https://' + ip + '/images/dmit2.bulletplus.com:9100/{0}/tag?repo={1}'
             url2 = endpoint2.format(id, range)
             response = requests.post(url2)
             
@@ -86,7 +87,7 @@ class TeacherDashboard(ListView, PermissionRequiredMixin):
     filterset_class = StudentFilter
 
     def get_queryset(self):
-        unacceptedstudents = User.objects.filter(is_superuser = False, is_staff = False, isdisabled=False, isaccepted=False).order_by('-lastmodifieddate', '-lastmodifiedtime')
+        unacceptedstudents = User.objects.filter(is_superuser = False, is_staff = False, isdisabled=True, isaccepted=False).order_by('-lastmodifieddate', '-lastmodifiedtime')
         print(unacceptedstudents)
         return unacceptedstudents
     
@@ -103,7 +104,7 @@ class UserManagement(FilterView, ListView):
     filterset_class = StudentFilter
 
     def get_queryset(self):
-        allstudents = User.objects.filter(is_superuser = False, is_staff = False, isdisabled=False).order_by('-lastmodifieddate', '-lastmodifiedtime')
+        allstudents = User.objects.filter(is_superuser = False, is_staff = False, isdisabled=False, isaccepted=True).order_by('-lastmodifieddate', '-lastmodifiedtime')
         return allstudents
     
     def get_context_data(self, **kwargs):
@@ -118,7 +119,7 @@ class DisabledUserManagement(FilterView, ListView):
     filterset_class = StudentFilter
 
     def get_queryset(self):
-        allstudents = User.objects.filter(is_superuser = False, is_staff = False, isdisabled=True).order_by('-lastmodifieddate')
+        allstudents = User.objects.filter(is_superuser = False, is_staff = False, isdisabled=True, isaccepted=True).order_by('-lastmodifieddate')
         print(allstudents)
         return allstudents
     
@@ -202,7 +203,7 @@ class DisableUser(View):
         selecteduser.isdisabled = True
         selecteduser.save()
 
-        return redirect('/teachers/usermanagement')
+        return redirect('/teachers/')
 
 class AcceptUser(View):
     def get(self, request, username):
@@ -215,6 +216,12 @@ class AcceptUser(View):
         selecteduser.acceptedby = User.objects.get(username = admin)
         selecteduser.save()
 
+        return redirect('/teachers/usermanagement/')
+
+class RejectUser(View):
+    def get(self, request, username):
+        selecteduser = User.objects.get(username = username)
+        selecteduser.delete()
         return redirect('/teachers/usermanagement/')
 
 class EnableUser(View):
@@ -371,6 +378,34 @@ class UserGroupCommit(View):
         del request.session['usercart']
         return redirect(url)
 
+class RemoveStudentFromRange(View):
+    def get(self, request, rangeurl, username):
+        studentid = User.objects.get(username = username)
+        rangeinstance = Range.objects.get(rangeurl = rangeurl)
+        selecteduser = RangeStudents.objects.get(rangeID = rangeinstance, studentID = studentid)
+        selecteduser.delete()
+        url = '/teachers/rangemanagement/view/' + rangeurl
+        return redirect(url)
+
+class RemoveGroupFromRange(View):
+    def get(self, request, rangeurl, groupname):
+        group = Group.objects.get(groupname = groupname)
+        selectedgroupmembers = StudentGroup.objects.filter(groupid = group).values_list('studentid')
+        rangeinstance = Range.objects.get(rangeurl = rangeurl)
+        rangestudents = RangeStudents.objects.filter(rangeID = rangeinstance, groupid = group).values_list('studentID')
+        studentlist = []
+        for student in rangestudents:
+            student = student[0]
+            studentlist.append(student)
+
+        for student in selectedgroupmembers:
+            student = student[0]
+            if student in studentlist:
+                selecteduser = RangeStudents.objects.get(rangeID = rangeinstance, studentID = student, groupid = group)
+                selecteduser.delete()
+        url = '/teachers/rangemanagement/view/' + rangeurl
+        return redirect(url)
+
 class RemoveStudentFromGroup(DeleteView):
     template_name = 'teachers/confirmdeletestudentfromgroup.html'
     success_url = '../'
@@ -465,17 +500,6 @@ class RangeView(ListView, FilterView):
         selectedrangeid = selectedrange.rangeid
         #print(selectedrangeid)
         result = Questions.objects.filter(rangeid = selectedrangeid, isarchived = False)
-        #questions = RangeQuestions.objects.filter(rangeid = selectedrangeid, isdisabled = False).values_list('questionid')
-        # print(len(questions))
-        # if len(questions) != 0:
-        #     result = Questions.objects.filter(questionid=(questions[0][0]))
-        #     for x in range(1, len(questions)):
-        #         currentquestion= Questions.objects.filter(questionid=(questions[x][0]))
-                
-        #         result = result | currentquestion # if i didn't get the first object just now python will scold me
-        # else:
-        #     result = None
-        # print(result)
         if len(result) == 0:
             return None
         return result
@@ -484,36 +508,25 @@ class RangeView(ListView, FilterView):
         context = super().get_context_data(**kwargs)
         selectedrange = Range.objects.get(rangeurl= self.kwargs['rangeurl'])
         selectedrangeid = selectedrange.rangeid
-        # questions = RangeQuestions.objects.filter(rangeid = selectedrangeid, isdisabled = False).values_list('questionid')
-        # if len(questions) != 0:
-        #     result = RangeQuestions.objects.filter(questionid=(questions[0][0]))
-        #     for x in range(1, len(questions)):
-        #         currentquestion= RangeQuestions.objects.filter(questionid=(questions[x][0]))
-        #         result = result | currentquestion # if i didn't get the first object just now python will scold me
-        # else:
-        #     result = None
-        
-        # context['answer'] = result
+
         context['isopen'] = selectedrange.isopen
         context['rangename'] = Range.objects.filter(rangeurl= self.kwargs['rangeurl']).values_list('rangename')[0][0]
         context['range'] = Range.objects.filter(rangeurl = self.kwargs['rangeurl'])
         context['rangeurl'] = self.kwargs['rangeurl']
         context['topics'] = QuestionTopic.objects.all()
-        # context['marks'] = RangeQuestions.objects.filter(rangeid = selectedrangeid)
         context['activated'] = Range.objects.filter(rangeurl= self.kwargs['rangeurl']).values_list('rangeactive')[0][0]
         rangeid = Range.objects.filter(rangeurl = self.kwargs['rangeurl']).values_list('rangeid')[0][0]
         studentsinrange = RangeStudents.objects.filter(rangeID = rangeid).values_list('studentID')
-        #print(studentsinrange)
         if len(studentsinrange) != 0:
             result = User.objects.filter(email = (studentsinrange[0][0]))
-            #print(result)
             for x in range(1, len(studentsinrange)):
                 currentuser = User.objects.filter(email = studentsinrange[x][0])
-                #print(currentuser)
                 result = result | currentuser # if i didn't get the first object just now python will scold me
-                #print(result)
         else:
             result = None
+
+        groupstudent = RangeStudents.objects.filter(rangeID = rangeid, groupid__isnull = False)
+        context['groupstudent'] = groupstudent
 
         context['students'] = result
 
@@ -526,7 +539,6 @@ class RangeView(ListView, FilterView):
         else:
             groups = None
         context['groups'] = groups
-        paginator = Paginator(context['students'], 1)
         return context
 
 class ArchivedRangeQuestions(ListView, FilterView):
@@ -573,7 +585,7 @@ class ArchivedRangeQuestions(ListView, FilterView):
         # context['marks'] = RangeQuestions.objects.filter(rangeid = selectedrangeid)
         return context
 
-class AddQuestioninRange(ListView, FilterView):
+class AddQuestioninRange(FilterView, ListView):
     template_name = 'teachers/addquestionsinrange.html'
     context_object_name = 'questions'
     filterset_class = QuestionFilter
@@ -597,7 +609,62 @@ class AddQuestioninRange(ListView, FilterView):
         context = super().get_context_data(**kwargs)
         context['rangename'] = Range.objects.filter(rangeurl= self.kwargs['rangeurl']).values_list('rangename')[0][0]
         context['topics'] = QuestionTopic.objects.all()
+
+        questionslist = []
+        if 'questionscart' in self.request.session:
+            cart = self.request.session.get('questionscart', {})
+            print(cart)
+            context['cart'] = cart
+
         return context
+
+class AddQuestionToCart(View):
+    def get(self, request, questionid, rangeurl):
+        get_object_or_404(Questions, questionid = questionid)
+        get_object_or_404(Range, rangeurl = rangeurl)
+        #questiontitle = Questions.objects.filter(questionid=questionid).values_list('title')[0][0]
+        questionslist = []
+        if 'questionscart' in request.session:
+            questionslist = request.session['questionscart']
+        if questionid not in questionslist:
+            questionslist.append(questionid)
+        request.session['questionscart'] = questionslist
+
+        url = '/teachers/rangemanagement/view/' + rangeurl + '/import/'
+        return redirect(url)
+
+
+class RemoveQuestionFromCart(View):
+    def get(self, request, questionid, rangeurl):
+        get_object_or_404(Questions, questionid = questionid)
+        get_object_or_404(Range, rangeurl = rangeurl)
+        #questiontitle = Questions.objects.filter(questionid=questionid).values_list('title')[0][0]
+        questionslist = []
+        if 'questionscart' in request.session:
+            questionslist = request.session['questionscart']
+        if questionid in questionslist:
+            questionslist.remove(questionid)
+        request.session['questionscart'] = questionslist
+
+        url = '/teachers/rangemanagement/view/' + rangeurl + '/import/'
+        return redirect(url)
+
+class AddQuestioninRangeCommit(View):
+    def get(self, request, rangeurl):
+        rangeobj = Range.objects.get(rangeurl=rangeurl)
+
+        if 'questionscart' in request.session:
+            questionslist = request.session['questionscart']
+
+        for questionid in questionslist:
+            questionobj = Questions.objects.get(questionid = questionid)
+            questionobj.pk = None
+            questionobj.rangeid = rangeobj
+            questionobj.save()
+        
+        url = '/teachers/rangemanagement/view/' + rangeurl
+        del request.session['questionscart']
+        return redirect(url)
 
 # class AddQuestionAnswer(View):
 #     def get(self, request, rangeurl, questionid):
@@ -736,12 +803,12 @@ class ArchiveQuestion(View):
         questionid = self.kwargs['questionid']
         rangeinstance = Range.objects.get(rangeurl = rangeurl)
         selectedquestioninstance = Questions.objects.get(questionid = questionid)
-        selectedrangequestion = Questions.objects.get(rangeid=rangeinstance, questionid=selectedquestioninstance)
+        selectedrangequestion = Questions.objects.get(rangeid=rangeinstance, questionid=questionid)
         selectedrangequestion.isarchived = 1
         selectedrangequestion.save()
 
         # questionmarks = RangeQuestions.objects.filter(rangeid=rangeinstance, questionid = selectedquestioninstance).values_list('points')[0][0]
-        updatedscore = rangeinstance.maxscore - selectedrangequestion.marks
+        updatedscore = rangeinstance.maxscore - selectedrangequestion.points
         rangeinstance.maxscore = updatedscore
         rangeinstance.save()
         return redirect(previousurl)
@@ -792,8 +859,6 @@ class AssignUser(ListView, FilterView):
 
         if "userrangecart" in self.request.session:
             cart = self.request.session.get('userrangecart', {})
-            print("HI")
-            print(cart)
             context['cart'] = cart
 
         return context
@@ -956,7 +1021,7 @@ class CreateQuestion(ListView, ModelFormMixin):
             request.session['TF'] = False
 
             rangeurl = self.kwargs['rangeurl']
-            if (request.POST.get('usedocker') == 'yes'):
+            if (request.POST.get('usedocker') == 'True'):
 
                 print("YAY it works")
                 imageid = request.POST.get('registryid')
@@ -1082,7 +1147,7 @@ class DeactivateRange(View):
         rangeobject.save()
         return redirect('./')
 
-class QuestionManagement(ListView, FilterView):
+class QuestionManagement(FilterView, ListView):
     template_name = 'teachers/questionmanagement.html'
     context_object_name = 'questions'
     paginate_by = 10

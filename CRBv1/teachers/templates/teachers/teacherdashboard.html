@@ -84,6 +84,7 @@
                             <td>{{ user.lastmodifiedtime }}</td>
                             <td>
                                 <a class="btn btn-block btn-success" href="usermanagement/acceptuser/{{ user.username }}">Accept User</a>
+                                <a class="btn btn-block btn-danger" href="usermanagement/rejectuser/{{ user.username }}">Reject User</a>
                             </td>
                         </tr>
                     {% endfor %}

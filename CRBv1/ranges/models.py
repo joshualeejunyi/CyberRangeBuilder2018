@@ -98,7 +98,6 @@ class Questions(models.Model):
     registryid = models.CharField(db_column='registryID', max_length=255, null=True)
     isarchived = models.BooleanField(db_column='isArchived', default=False)
 
-
     class Meta:
         db_table = 'Questions'
         verbose_name_plural = 'Questions'
@@ -113,19 +112,6 @@ class MCQOptions(models.Model):
     class Meta:
         db_table = 'MCQOptions'
         verbose_name_plural = 'MCQOptions'
-
-class RangeQuestions(models.Model):
-    rangequestionsid = models.AutoField(db_column='id', primary_key=True)
-    rangeid = models.ForeignKey(Range, models.DO_NOTHING, db_column='rangeID', unique=False)
-    questionid = models.ForeignKey(Questions, models.DO_NOTHING, db_column='questionID', unique=False)
-    answer = models.CharField(db_column='answer', max_length=255, null=True)
-    points = models.PositiveIntegerField(db_column='points', default=0)
-    isdisabled = models.BooleanField(db_column='isDisabled', default=False)
-    registryid = models.CharField(db_column='registryID', max_length=255, null=True)
-
-    class Meta:
-        db_table = 'RangeQuestions'
-        verbose_name_plural = 'RangeQuestions'
 
 class StudentQuestions(models.Model):
     studentid = models.ForeignKey('accounts.User', models.DO_NOTHING, db_column='email', unique=False)

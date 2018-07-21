@@ -275,7 +275,7 @@
                                 <td>{{ group.groupleader }}</td>
                                 <td>{{ group.datejoined }}</td>
                                 <td>
-                                    <a class="btn btn-block btn-danger" href="remove/{{ user.username }}">Remove</a>
+                                    <a class="btn btn-block btn-danger" href="removegroup/{{ group.groupname }}">Remove</a>
                                 </td>
                             </tr>
                         {% endfor %}
@@ -328,7 +328,11 @@
                                 <td>{{ user.username }}</td>
                                 <td>{{ user.userclass }}</td>
                                 <td>
-
+                                    {% for student in groupstudent %}
+                                        {% if student.studentID.username == user.username %}
+                                            {{ student.groupid.groupname }}
+                                        {% endif %}
+                                    {% endfor %}
                                 </td>
                                 <td>
                                     <a class="btn btn-block btn-success" href="report/{{ user.username }}">User Report</a>

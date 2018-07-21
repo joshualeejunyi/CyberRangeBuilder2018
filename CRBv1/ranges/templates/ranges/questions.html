@@ -21,89 +21,99 @@
 
 {% block content %}
 	<section class="content">
-		<div class="row" style="margin: 0 auto;">
-			<div class="box box-widget" style="box-shadow: 1px 2px 5px grey;">
-				<div class="box-header with-border">
-					<span style="font-size: 22px;">
-						<b>{{ rangename }}</b>
-					</span>
-				</div>
-				<div class="box-solid" style="box-shadow: 1px 2px 5px grey; margin: 1%;">
-					<div class="box-body">
-						<h4 style="font-size: 20px;">
-							Range Mastery
-							<span class="progress-number" style="font-size: 20px;">({{ userscored }}/{{ maxscore}} points):</span>
-						</h4>
-						<div class="progress-group">
-							<div class="progress lg">
-								<div class="progress-bar progress-bar-green" style="width: {{ percent }}%;"></div>
+			<div class="row" style="margin: 0 auto;">
+					<div class="box box-widget" style="box-shadow: 1px 2px 5px grey;">
+						<div class="box-header with-border">
+							<span style="font-size: 22px;">
+								<b>{{ rangename }}</b>
+							</span>
+						</div>
+						<div class="box-body" style="font-size: 18px;">
+							{{ rangeinfo | safe | cut:"<p>" | cut:"</p>" }}
+						</div>
+						<div class="box-solid" style="margin-top: 1%; margin-bottom: 1%;">
+							<div class="box-body">
+								<h4 style="font-size: 18px;">
+									<b>Range Mastery</b>
+									<span class="progress-number" style="font-size: 18px;">({{ userscored }}/{{ maxscore}} points):</span>
+								</h4>
+								<div class="progress-group">
+									<div class="progress lg">
+										<div class="progress-bar progress-bar-green" style="width: {{ percent }}%;"></div>
+									</div>
+								</div>
 							</div>
+						</div>
+
+						<div class="box-footer">
+							<p style="font-size: 18px;">
+								Attempts per Question: 
+								{% if attempts == 0 %}
+									Unlimited
+								{% else %}
+									{{ attempts }} 
+								{% endif %}
+								<span class="pull-right" style="font-size: 18px;">
+									Posted by: {{ rangeadmin }}
+								</span>
+							</p>
+							
 						</div>
 					</div>
 				</div>
-				<div class="box-solid" style="box-shadow: 1px 2px 5px grey; margin:1%;">
-					<div class="box-header with-border">
-						<span style="font-size: 20px;">Range Info:</span>
-					</div>
-					<div class="box-body" style="font-size: 18px;">
-						{{ rangeinfo | safe | cut:"<p>" | cut:"</p>" }}
-					</div>
-					<div class="box-footer">
-						<span class="pull-right" style="font-size: 18px;">
-							Posted by: {{ rangeadmin }}
-						</span>
-					</div>
-				</div>
-				<div class="box-footer">
-					<p style="font-size: 18px;">
-						Attempts per Question: 
-						{% if attempts == 0 %}
-							Unlimited
-						{% else %}
-							{{ attempts }} 
-						{% endif %}
-					</p>
-					
-				</div>
-			</div>
-		</div>
 	{% for topic in topics %}
-	<div class="box box-solid box-primary" style="box-shadow: 1px 2px 5px grey; font-size: 20px;">
+	<div class="box box-solid box-primary" style="box-shadow: 1px 2px 5px grey;">
         <div class="box-header with-border">
-          <h3 class="box-title" style="font-size: 22px;">{{ topic.topicname }}</h3>
+          <h3 class="box-title">{{ topic.topicname }}</h3>
           <div class="box-tools pull-right">
             <button type="button" class="btn btn-box-tool" data-widget="collapse" data-toggle="tooltip" title="" data-original-title="Collapse">
               <i class="fa fa-minus"></i></button>
           </div>
         </div>
-        <div class="box-body">
+        <div class="box-body" style="font-size: 18px;">
 				{% for question in questionobject %}
 					{% if topic.topicid is question.topicid.topicid %}
 						{% for attempted in attemptedquestions %}
-							{% if attempted.questionid.questionid is question.questionid %}
+							{% if attempted.questionid is question.questionid %}
 								{% if question.questiontype == 'MCQ' %}
-
 								<a href="Question{{ question.questionid }}/MCQ" style="color:black;">
 				    				<div class="col-md-4 col-sm-6 col-xs-5">
 					      				<div class="info-box" style="box-shadow: 1px 2px 5px grey;">
-						        			<span class="info-box-icon bg-yellow"><span class="glyphicon glyphicon-question-sign"></span></span>
+												<span class="info-box-icon bg-yellow"><span class="glyphicon glyphicon-question-sign"></span></span>
 						        				<div class="info-box-content">
-						          					<span class="info-box-text" style="font-size: 20px;">{{ question.title }}</span>
-						          					<span class="info-box-number"  style="font-size: 20px;">
-														{{ question.points }} points
+						          					<span class="info-box-text" style="font-size: 18px;">
+														<b>
+															{% if question.questiontype == 'FL' %}
+																[Flag]
+															{% elif question.questiontype == 'MCQ' %}
+																[MCQ]
+															{% elif question.questiontype == 'SA' %}
+																[Short Answer]
+															{% elif question.questiontype == 'OE' %}
+																[Open Ended]
+															{% elif question.questiontype == 'TF' %}
+																[True/False]
+															{% endif %}
+														</b>
+														{{ question.title }}
 													</span>
-													<span class="info-box-text"  style="font-size: 18px; margin-bottom: -1%;">
-														Attempts:
-														{% for x in studentattempted %}
+						          					<span class="info-box-number" style="font-size: 18px;">
+														{% for x in studentattempts %}
 															{% if x.questionid.questionid == question.questionid %}
-																{{ x.attempts }}
-															{% else %}
-																0
+																{{ x.marksawarded }}
 															{% endif %}
 														{% endfor %}
-														{% if attempts is not 0 %}
-														/
-														{{ attempts}}
+														/ {{ question.points }} points
+													</span>
+													<span class="info-box-number" style="font-size: 18px;">
+														Attempts:
+														{% for x in studentattempts %}
+															{% if x.questionid.questionid == question.questionid %}
+																{{ x.attempts}}
+															{% endif %}
+														{% endfor %}
+														{% if attempts != 0 %}
+															/ {{attempts}}
 														{% endif %}
 													</span>
 							        			</div>
@@ -114,24 +124,41 @@
 								<a href="Question{{ question.questionid }}" style="color:black;">
 				    				<div class="col-md-4 col-sm-6 col-xs-5">
 					      				<div class="info-box" style="box-shadow: 1px 2px 5px grey;">
-						        			<span class="info-box-icon bg-yellow"><span class="glyphicon glyphicon-question-sign"></span></span>
-						        				<div class="info-box-content">
-						          					<span class="info-box-text" style="font-size: 20px;">{{ question.title }}</span>
-						          					<span class="info-box-number" style="font-size: 20px;">
-														{{ question.points }} points
-													</span>
-													<span class="info-box-text"  style="font-size: 18px; margin-bottom: -1%;">
-														Attempts:
-														{% for x in studentattempted %}
+												<span class="info-box-icon bg-yellow"><span class="glyphicon glyphicon-question-sign"></span></span>
+												<div class="info-box-content">
+														<span class="info-box-text" style="font-size: 18px;">
+															<b>
+																{% if question.questiontype == 'FL' %}
+																	[Flag]
+																{% elif question.questiontype == 'MCQ' %}
+																	[MCQ]
+																{% elif question.questiontype == 'SA' %}
+																	[Short Answer]
+																{% elif question.questiontype == 'OE' %}
+																	[Open Ended]
+																{% elif question.questiontype == 'TF' %}
+																	[True/False]
+																{% endif %}
+															</b>
+															{{ question.title }}
+														</span>
+													<span class="info-box-number" style="font-size: 18px;">
+														{% for x in studentattempts %}
 															{% if x.questionid.questionid == question.questionid %}
-																{{ x.attempts }}
-															{% else %}
-																0
+																{{ x.marksawarded }}
 															{% endif %}
 														{% endfor %}
-														{% if attempts is not 0 %}
-														/
-														{{ attempts}}
+															/ {{ question.points }} points
+													</span>
+													<span class="info-box-number" style="font-size: 18px;">
+														Attempts:
+														{% for x in studentattempts %}
+															{% if x.questionid.questionid == question.questionid %}
+																{{ x.attempts}}
+															{% endif %}
+														{% endfor %}
+														{% if attempts != 0 %}
+															/ {{attempts}}
 														{% endif %}
 													</span>
 							        			</div>
@@ -141,6 +168,103 @@
 								{% endif %}
 							{% endif %}
 						{% endfor %}
+
+						{% for correct in correct %}
+								{% if correct.questionid.questionid is question.questionid %}
+								{% if question.questiontype == 'MCQ' %}
+								<a href="Question{{ question.questionid }}/MCQ" style="color:black;">
+				    				<div class="col-md-4 col-sm-6 col-xs-5">
+					      				<div class="info-box" style="box-shadow: 1px 2px 5px grey;">
+												<span class="info-box-icon bg-green"><span class="glyphicon glyphicon-question-sign"></span></span>
+						        				<div class="info-box-content">
+														<span class="info-box-text" style="font-size: 18px;">
+															<b>
+																{% if question.questiontype == 'FL' %}
+																	[Flag]
+																{% elif question.questiontype == 'MCQ' %}
+																	[MCQ]
+																{% elif question.questiontype == 'SA' %}
+																	[Short Answer]
+																{% elif question.questiontype == 'OE' %}
+																	[Open Ended]
+																{% elif question.questiontype == 'TF' %}
+																	[True/False]
+																{% endif %}
+															</b>
+															{{ question.title }}
+														</span>
+														<span class="info-box-number" style="font-size: 18px;">
+															{% for x in studentattempts %}
+																{% if x.questionid.questionid == question.questionid %}
+																	{{ x.marksawarded }}
+																{% endif %}
+															{% endfor %}
+															/ {{ question.points }} points
+														</span>
+													<span class="info-box-number" style="font-size: 18px;">
+														Attempts:
+														{% for x in studentattempts %}
+															{% if x.questionid.questionid == question.questionid %}
+																{{ x.attempts}}
+															{% endif %}
+														{% endfor %}
+														{% if attempts != 0 %}
+															/ {{attempts}}
+														{% endif %}
+													</span>
+							        			</div>
+					      				</div>
+				    				</div>
+								</a>
+								{% else %}
+								<a href="Question{{ question.questionid }}" style="color:black;">
+				    				<div class="col-md-4 col-sm-6 col-xs-5">
+					      				<div class="info-box" style="box-shadow: 1px 2px 5px grey;">
+													<span class="info-box-icon bg-green"><span class="glyphicon glyphicon-question-sign"></span></span>
+						        				<div class="info-box-content">
+														<span class="info-box-text" style="font-size: 18px;">
+															<b>
+																{% if question.questiontype == 'FL' %}
+																	[Flag]
+																{% elif question.questiontype == 'MCQ' %}
+																	[MCQ]
+																{% elif question.questiontype == 'SA' %}
+																	[Short Answer]
+																{% elif question.questiontype == 'OE' %}
+																	[Open Ended]
+																{% elif question.questiontype == 'TF' %}
+																	[True/False]
+																{% endif %}
+															</b>
+															{{ question.title }}
+														</span>
+														<span class="info-box-number" style="font-size: 18px;">
+															{% for x in studentattempts %}
+																{% if x.questionid.questionid == question.questionid %}
+																	{{ x.marksawarded }}
+																{% endif %}
+															{% endfor %}
+															/ {{ question.points }} points
+														</span>
+													<span class="info-box-number" style="font-size: 18px;">
+														Attempts:
+														{% for x in studentattempts %}
+															{% if x.questionid.questionid == question.questionid %}
+																{{ x.attempts}}
+															{% endif %}
+														{% endfor %}
+														{% if attempts != 0 %}
+															/ {{attempts}}
+														{% endif %}
+													</span>
+							        			</div>
+					      				</div>
+				    				</div>
+								</a>
+								{% endif %}
+								{% endif %}
+						{% endfor %}
+
 						
 						{% for unattempted in unattemptedquestions %}
 							{% if unattempted.questionid is question.questionid %}
@@ -148,32 +272,35 @@
 								<a href="Question{{ question.questionid }}/MCQ" style="color:black;">
 				    				<div class="col-md-4 col-sm-6 col-xs-5">
 					      				<div class="info-box" style="box-shadow: 1px 2px 5px grey;">
-						        			<span class="info-box-icon bg-red">
-												<span class="glyphicon glyphicon-question-sign">													
-												</span>
-											</span>
-											<div class="info-box-content">
-												<span class="info-box-text" style="font-size: 20px;">
-													{{ question.title }}
-												</span>
-												<span class="info-box-number" style="font-size: 20px;">
-													{{ question.points }} points
-												</span>
-												<span class="info-box-text"  style="font-size: 18px; margin-bottom: -1%;">
-													Attempts:
-													{% for x in studentattempted %}
-														{% if x.questionid.questionid == question.questionid %}
-															{{ x.attempts }}
-														{% else %}
-															0
+						        			<span class="info-box-icon bg-red"><span class="glyphicon glyphicon-question-sign"></span></span>
+						        				<div class="info-box-content">
+													<span class="info-box-text" style="font-size: 18px;">
+														<b>
+															{% if question.questiontype == 'FL' %}
+																[Flag]
+															{% elif question.questiontype == 'MCQ' %}
+																[MCQ]
+															{% elif question.questiontype == 'SA' %}
+																[Short Answer]
+															{% elif question.questiontype == 'OE' %}
+																[Open Ended]
+															{% elif question.questiontype == 'TF' %}
+																[True/False]
+															{% endif %}
+														</b>
+														{{ question.title }}
+													</span>
+													<span class="info-box-number" style="font-size: 18px;">
+														0 / {{ question.points }} points
+													</span>
+													<span class="info-box-number" style="font-size: 18px;">
+														Attempts: 
+														0
+														{% if attempts != 0 %}
+															/ {{attempts}}
 														{% endif %}
-													{% endfor %}
-													{% if attempts is not 0 %}
-													/
-													{{ attempts}}
-													{% endif %}
-												</span>
-							        		</div>
+													</span>
+							        			</div>
 					      				</div>
 				    				</div>
 								</a>
@@ -183,22 +310,30 @@
 					      				<div class="info-box" style="box-shadow: 1px 2px 5px grey;">
 						        			<span class="info-box-icon bg-red"><span class="glyphicon glyphicon-question-sign"></span></span>
 						        				<div class="info-box-content">
-						          					<span class="info-box-text" style="font-size: 20px;">{{ question.title }}</span>
-						          					<span class="info-box-number" style="font-size: 20px;">
-														{{ question.points }} points
-													</span>
-													<span class="info-box-text"  style="font-size: 18px; margin-bottom: -1%;">
-														Attempts:
-														{% for x in studentattempted %}
-															{% if x.questionid.questionid == question.questionid %}
-																{{ x.attempts }}
-															{% else %}
-																0
+													<span class="info-box-text" style="font-size: 18px;">
+														<b>
+															{% if question.questiontype == 'FL' %}
+																[Flag]
+															{% elif question.questiontype == 'MCQ' %}
+																[MCQ]
+															{% elif question.questiontype == 'SA' %}
+																[Short Answer]
+															{% elif question.questiontype == 'OE' %}
+																[Open Ended]
+															{% elif question.questiontype == 'TF' %}
+																[True/False]
 															{% endif %}
-														{% endfor %}
-														{% if attempts is not 0 %}
-														/
-														{{ attempts}}
+														</b>
+														{{ question.title }}
+													</span>
+													<span class="info-box-number" style="font-size: 18px;">
+														0 / {{ question.points }} points
+													</span>
+													<span class="info-box-number" style="font-size: 18px;">
+														Attempts: 
+														0
+														{% if attempts != 0 %}
+															/ {{attempts}}
 														{% endif %}
 													</span>
 							        			</div>
@@ -208,68 +343,6 @@
 							{% endif %}
 							{% endif %}
 						{% endfor %}
-
-						{% for right in correct %}
-							{% if right.questionid.questionid is question.questionid %}
-								{% if question.questiontype == 'MCQ' %}
-									<a href="Question{{ question.questionid }}/MCQ" style="color:black;">
-										<div class="col-md-4 col-sm-6 col-xs-5">
-											<div class="info-box" style="box-shadow: 1px 2px 5px grey;">
-												<span class="info-box-icon bg-green"><span class="glyphicon glyphicon-question-sign"></span></span>
-													<div class="info-box-content">
-														<span class="info-box-text" style="font-size: 20px;">{{ question.title }}</span>
-														<span class="info-box-number" style="font-size: 20px;">
-															{{ question.points }} points
-														</span>
-														<span class="info-box-text"  style="font-size: 18px; margin-bottom: -1%;">
-															Attempts:
-															{% for x in studentattempted %}
-																{% if x.questionid.questionid == question.questionid %}
-																	{{ x.attempts }}
-																{% else %}
-																	0
-																{% endif %}
-															{% endfor %}
-															{% if attempts is not 0 %}
-															/
-															{{ attempts}}
-															{% endif %}
-														</span>
-													</div>
-											</div>
-										</div>
-									</a>
-								{% else %}
-								<a href="Question{{ question.questionid }}" style="color:black;">
-										<div class="col-md-4 col-sm-6 col-xs-5">
-											<div class="info-box" style="box-shadow: 1px 2px 5px grey;">
-												<span class="info-box-icon bg-green"><span class="glyphicon glyphicon-question-sign"></span></span>
-													<div class="info-box-content">
-														<span class="info-box-text" style="font-size: 20px;">{{ question.title }}</span>
-														<span class="info-box-number" style="font-size: 20px;">
-															{{ question.points }} points
-														</span>
-														<span class="info-box-text"  style="font-size: 18px; margin-bottom: -1%;">
-															Attempts:
-															{% for x in studentattempted %}
-																{% if x.questionid.questionid == question.questionid %}
-																	{{ x.attempts }}
-																{% else %}
-																	0
-																{% endif %}
-															{% endfor %}
-															{% if attempts is not 0 %}
-															/
-															{{ attempts}}
-															{% endif %}
-														</span>
-													</div>
-											</div>
-										</div>
-									</a>
-								{% endif %}
-								{% endif %}
-							{% endfor %}
 					{% endif %}
 				{% endfor %}
         </div>
@@ -284,7 +357,7 @@
 	</div>
     {% endif %}
    	<div style="width: 100px; box-shadow: 1px 2px 5px grey;">
-		<a href="../../" class="btn btn-block btn-primary" style="font-size: 20px;">Back</a>
+		<a href="../../" class="btn btn-block btn-primary">Back</a>
 	</div>
 	</section>
 {% endblock %}

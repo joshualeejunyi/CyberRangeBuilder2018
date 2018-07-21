@@ -86,6 +86,7 @@ class UserCreationForm(forms.ModelForm):
         user = super().save(commit=False)
         user.set_password(self.cleaned_data["password1"])
         user.isdisabled = True
+        user.isaccepted = False
         if commit:
             user.save()
         return user

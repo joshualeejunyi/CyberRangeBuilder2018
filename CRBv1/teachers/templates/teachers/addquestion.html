@@ -81,12 +81,12 @@
     <div class="form-group has-feedback">
         <label for="usedocker">Use shell-in-a-box?</label>
         <select name="usedocker" class="form-control">
-            <option value="no" selected>No</option>
-            <option value="yes">Yes</option>
+            <option value="False" selected>No</option>
+            <option value="True">Yes</option>
         </select>
     </div>
     <div class="form-group has-feedback">
-        <label for="registryid">Registry Image Name (if using shell-in-a-box):</label>
+        <label for="registryid">Registry Image Name (if using shell-in-a-box): <p style="color:#dd4b39;"><i>(Warning: will not work if the wrong image name is entered)</i></p></label>
     {% if form.registryid.errors %}
         <input type="text" name="registryid" class="form-control" style="border-color: #dd4b39;">
         <ul style="color: #dd4b39">
