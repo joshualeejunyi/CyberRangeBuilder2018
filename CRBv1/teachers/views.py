@@ -31,13 +31,14 @@ class CreateImage(View):
         #PULL FROM REGSITRY FROM IP ADDRESS 192.168.40.134:5000
         data = {}
         serverip = ['192.168.100.42:8051', '192.168.100.43:8051']
+        imageid = imageid.lower()
         
         for ip in serverip:
-            endpoint1 = 'https://' + ip + '/images/create?fromImage=dmit2.bulletplus.com:9100/{conid}'
+            endpoint1 = 'http://' + ip + '/images/create?fromImage=dmit2.bulletplus.com:9100/{conid}'
             header1 = {"X-Registry-Auth": "eyAidXNlcm5hbWUiOiAiYWRtaW4iLCAicGFzc3dvcmQiOiAicGFzc3dvcmQiLCAic2VydmVyYWRkcmVzcyI6ICJkbWl0Mi5idWxsZXRwbHVzLmNvbTo5MTAwIiB9Cg=="}
             url1 = endpoint1.format(conid=imageid)
             response = requests.post(url1, headers=header1)
-            if response.status_code != 200:
+            if response.status_code == 200:
                 pass
                 # data['Id'] = id
                 # data['message'] = 'success'
@@ -53,10 +54,9 @@ class CreateImage(View):
             #RENAME THE IMAGE NAME
             #IMAGE NAME CANNOT HAVE CAPITAL LETTERS!!!!!!!!!!!!!!!!!!!!!!!!!
             reference = {}
-            imagename = rangeurl + '.' + questionid
-            endpoint2 = 'https://' + ip + '/images/dmit2.bulletplus.com:9100/{0}/tag?repo={1}'
-            url2 = endpoint2.format(id, range)
-            response = requests.post(url2)
+            imagename = str(rangeurl) + '.' + str(questionid)
+            endpoint2 = 'http://' + ip + '/images/dmit2.bulletplus.com:9100/' + imageid + '/tag?repo=' + imagename
+            response = requests.post(endpoint2)
             
             if response.status_code == 201:
                 # reference['Id'] = range

@@ -56,7 +56,7 @@ class DockerKill(View):
             #print("HI")
             port = previousport[0][0]
             containername = UnavailablePorts.objects.filter(studentid = self.request.user).values_list('containername')[0][0]
-            if int(port) >= 9052:
+            if int(port) >= 9051:
                 serverip = '192.168.100.42'
             elif int(port) <= 9050:
                 serverip = '192.168.100.43'
@@ -193,7 +193,7 @@ class AttemptQuestionView(ListView, ModelFormMixin):
             portsdb = UnavailablePorts(portnumber = int(port), studentid = self.request.user, containername = containerid, datetimecreated = timezone.now())
             portsdb.save()
             # for testing
-            finalsiaburl = serverip+':'+port
+            finalsiaburl = 'dmit2.bulletplus.com:' + port
             #print(finalsiaburl)
             return finalsiaburl
 
@@ -411,7 +411,7 @@ class AttemptMCQQuestionView(ListView, ModelFormMixin):
             portsdb = UnavailablePorts(portnumber = int(port), studentid = self.request.user, containername = containerid, datetimecreated = timezone.now())
             portsdb.save()
             # for testing
-            finalsiaburl = serverip+':'+port
+            finalsiaburl = 'dmit2.bulletplus.com:' + port
             #print(finalsiaburl)
             return finalsiaburl
 
