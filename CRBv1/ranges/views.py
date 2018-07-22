@@ -61,7 +61,7 @@ class DockerKill(View):
             elif int(port) <= 9050:
                 serverip = '192.168.100.43'
             #serverip = 'localhost'
-            endpoint = 'http://' + serverip + ':3125/containers/{conid}?force=True'
+            endpoint = 'http://' + serverip + ':8051/containers/{conid}?force=True'
             url = endpoint.format(conid=containername)
             #print(url)
             response = requests.delete(url)
@@ -83,7 +83,7 @@ class DockerKill(View):
                     elif int(port) <= 9050:
                         serverip = '192.168.100.43'
                     #serverip = 'localhost'
-                    endpoint = 'http://' + serverip + ':3125/containers/{conid}?force=True'
+                    endpoint = 'http://' + serverip + ':8051/containers/{conid}?force=True'
                     url = endpoint.format(conid=containername)
                     response = requests.delete(url)
                     
@@ -179,7 +179,7 @@ class AttemptQuestionView(ListView, ModelFormMixin):
             }
         }
         #serverip = 'localhost'
-        url = 'http://' + serverip + ':3125/containers/create'
+        url = 'http://' + serverip + ':8051/containers/create'
         response = requests.post(url, json=payload)
         #print('HI IM HERE')
         #print(response.status_code)
@@ -187,7 +187,7 @@ class AttemptQuestionView(ListView, ModelFormMixin):
             test = True
             data = response.json()
             containerid = data['Id']
-            starturl = 'http://' + serverip + ':3125/containers/%s/start' % containerid
+            starturl = 'http://' + serverip + ':8051/containers/%s/start' % containerid
             response = requests.post(starturl)
 
             portsdb = UnavailablePorts(portnumber = int(port), studentid = self.request.user, containername = containerid, datetimecreated = timezone.now())
@@ -397,7 +397,7 @@ class AttemptMCQQuestionView(ListView, ModelFormMixin):
             }
         }
         #serverip = 'localhost'
-        url = 'http://' + serverip + ':3125/containers/create'
+        url = 'http://' + serverip + ':8051/containers/create'
         response = requests.post(url, json=payload)
         #print('HI IM HERE')
         #print(response.status_code)
@@ -405,7 +405,7 @@ class AttemptMCQQuestionView(ListView, ModelFormMixin):
             test = True
             data = response.json()
             containerid = data['Id']
-            starturl = 'http://' + serverip + ':3125/containers/%s/start' % containerid
+            starturl = 'http://' + serverip + ':8051/containers/%s/start' % containerid
             response = requests.post(starturl)
 
             portsdb = UnavailablePorts(portnumber = int(port), studentid = self.request.user, containername = containerid, datetimecreated = timezone.now())

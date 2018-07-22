@@ -30,7 +30,7 @@ class CreateImage(View):
     def get(self, request, rangeurl, questionid, imageid):
         #PULL FROM REGSITRY FROM IP ADDRESS 192.168.40.134:5000
         data = {}
-        serverip = ['192.168.100.42', '192.168.100.43']
+        serverip = ['192.168.100.42:8051', '192.168.100.43:8051']
         
         for ip in serverip:
             endpoint1 = 'https://' + ip + '/images/create?fromImage=dmit2.bulletplus.com:9100/{conid}'
