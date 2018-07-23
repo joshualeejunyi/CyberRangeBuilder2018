@@ -12,6 +12,19 @@ import requests
 from django.views.generic import View
 from django.contrib import messages
 from accounts.models import User
+import string
+import random
+import paramiko
+
+# class ShellRandomPassword(View):
+#     def get(self):
+#         randompass = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+#         client = paramiko.SSHClient()
+#         client.connect('dmit2.bulletplus.com:' + portnumber, username='guest', password='root')
+#         stdin, stdout, stderr = client.exec_command('passwd %s' % randompass)
+#         for line in stdout:
+#             print('... ' + line.strip('\n'))
+#         client.close()
 
 class EnterCode(View):
     def get(self, request, *args, **kwargs):
