@@ -16,15 +16,17 @@ import string
 import random
 import paramiko
 
-# class ShellRandomPassword(View):
-#     def get(self):
-#         randompass = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
-#         client = paramiko.SSHClient()
-#         client.connect('dmit2.bulletplus.com:' + portnumber, username='guest', password='root')
-#         stdin, stdout, stderr = client.exec_command('passwd %s' % randompass)
-#         for line in stdout:
-#             print('... ' + line.strip('\n'))
-#         client.close()
+class ShellRandomPassword(View):
+    def get(self, request, portnumber):
+        randompass = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+        client = paramiko.SSHClient()
+        client.connect('dmit2.bulletplus.com:' + portnumber, username='guest', password='root')
+        stdin, stdout, stderr = client.exec_command('passwd %s' % randompass)
+        for line in stdout:
+            print('... ' + line.strip('\n'))
+        client.close()
+
+        return randompass
 
 class EnterCode(View):
     def get(self, request, *args, **kwargs):
@@ -207,8 +209,8 @@ class AttemptQuestionView(ListView, ModelFormMixin):
             portsdb.save()
             # for testing
             finalsiaburl = 'dmit2.bulletplus.com:' + port
-            #print(finalsiaburl)
-            return finalsiaburl
+            randompassword = ShellRandomPassword.get(self, request, portnumber = port)
+            return randompassword, finalsiaburl
 
         elif response.status_code == 400:
             return redirect('/error')
@@ -279,10 +281,12 @@ class AttemptQuestionView(ListView, ModelFormMixin):
         rangeid = Range.objects.filter(rangeurl = self.kwargs['rangeurl']).values_list('rangeid')[0][0]
         usedocker = Questions.objects.filter(questionid = questionid).values_list('usedocker')[0][0]
         if usedocker is True:
-            siab = self.dockerContainerStart()
+            password, siab = self.dockerContainerStart()
             context['siab'] = siab
+            context['password'] = password
         else:
             context['siab'] = False
+            context['password'] = False
 
         context['hitmaxattempts'] = self.checkattemptlimit()
         print('----------------------------------')
@@ -425,8 +429,8 @@ class AttemptMCQQuestionView(ListView, ModelFormMixin):
             portsdb.save()
             # for testing
             finalsiaburl = 'dmit2.bulletplus.com:' + port
-            #print(finalsiaburl)
-            return finalsiaburl
+            randompassword = ShellRandomPassword.get(self, request, portnumber = port)
+            return randompassword, finalsiaburl
 
         elif response.status_code == 400:
             return redirect('/error')
@@ -510,10 +514,12 @@ class AttemptMCQQuestionView(ListView, ModelFormMixin):
         rangeid = Range.objects.filter(rangeurl = self.kwargs['rangeurl']).values_list('rangeid')[0][0]
         usedocker = Questions.objects.filter(questionid = questionid).values_list('usedocker')[0][0]
         if usedocker is True:
-            siab = self.dockerContainerStart()
+            password, siab = self.dockerContainerStart()
             context['siab'] = siab
+            context['password'] = password
         else:
             context['siab'] = False
+            context['password'] = False
 
         context['hitmaxattempts'] = self.checkattemptlimit()
         context['latestanswer'] = self.latestanswer()
