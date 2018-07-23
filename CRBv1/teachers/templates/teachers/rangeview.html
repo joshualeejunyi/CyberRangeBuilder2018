@@ -55,6 +55,18 @@
                             <i class="fa fa-users"></i>
                             <b>Assign Groups to Range</b>
                         </a>
+
+                        {% if isopen is False %}
+                        <a class="btn btn-app" href="./isopen" style="height: 70px; font-size: 1em; min-width: 15%;">
+                            <i class="fa fa-barcode"></i>
+                            <b>Enable Code For Range</b>
+                        </a>
+                        {% else %}
+                        <a class="btn btn-app" href="./isclose" style="height: 70px; font-size: 1em; min-width: 15%;">
+                            <i class="fa fa-close"></i>
+                            <b>Disable Code For Range</b>
+                        </a>
+                        {% endif %}
                     </div>
                     <table class="table table-bordered table-hover dataTable">
                         
@@ -189,6 +201,12 @@
                                     Hint Penalty
                                 </th>
                                 <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Use Docker
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Docker Image Name
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
                                     Actions
                                 </th>
                         </thead>
@@ -224,6 +242,12 @@
                                         {{x.points}}
                                     </td>
                                     <td>{{x.hintpenalty}}</td>
+                                    <td>
+                                        {{x.usedocker}}
+                                    </td>
+                                    <td>
+                                        {{x.registryid}}
+                                    </td>
                                     <td style="text-align: center">
                                         <a class="btn btn-block btn-primary" href="edit/{{ x.questionid }}">Edit</a>
                                         <a class="btn btn-block btn-primary" href="archive/{{ x.questionid }}">Archive</a>

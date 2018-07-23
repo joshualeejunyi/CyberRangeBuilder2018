@@ -1,0 +1,51 @@
+{% extends 'teachers/teacherbase.html' %}
+
+{% block content %}
+    <div class="row">
+            {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                <b type="hidden" ></b>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        <div class="col-md-10 col-md-offset-1">
+            <div class="col-md-6 col-md-offset-3">
+                <div class="register-box-body">
+                        <p class="login-box-msg">Create Class</p>
+                        <form method="post">
+                            {% csrf_token %}	
+                            <div class="form-group has-feedback">
+                                <div class="box box-danger">
+                                    <div class="box-header with-border">
+                                      <h3 class="box-title">Class Info</h3>
+                                    </div>
+                                    <div class="box-body">
+                                      <div class="row">
+                                        <div class="col-xs-3">
+                                          <input name='course' type="text" class="form-control" placeholder="DISM">
+                                        </div>
+                                        <div class="col-xs-3">
+                                          <input name='time' type="text" class="form-control" placeholder="FT">
+                                        </div>
+                                        <div class="col-xs-3">
+                                            <input name='yearsem' type="text" class="form-control" placeholder="3A">
+                                          </div>
+                                        <div class="col-xs-3">
+                                          <input name='classnumber' type="text" class="form-control" placeholder="64">
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <!-- /.box-body -->
+                                  </div>
+                                
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block btn-flat pull-right" style="width: 100px">Submit</button>
+                            <a href="./" class="btn btn-primary btn-block btn-flat" style="width: 100px">Back</a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+   
+{% endblock %}

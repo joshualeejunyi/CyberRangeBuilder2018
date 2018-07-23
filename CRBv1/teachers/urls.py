@@ -69,17 +69,25 @@ urlpatterns = [
     path('rangemanagement/archived/', login_required(views.ArchivedRangeManagement.as_view()), name='archivedrangemanagement'),
     path('rangemanagement/archived/unarchive/<rangeurl>/', login_required(views.UnarchiveRange.as_view()), name='unarchiverange'),
     path('rangemanagement/archived/delete/<rangeurl>/', login_required(views.DeleteRange.as_view()), name='deleterange'),
-    path('rangemanagement/view/<rangeid>/edit/<questionid>/', login_required(views.EditQuestion.as_view()), name="editquestion"),
+    path('rangemanagement/view/<rangeurl>/edit/<questionid>/', login_required(views.EditQuestion.as_view()), name="editquestion"),
     path('rangemanagement/view/<rangeurl>/importcsv', views.ImportCSV.as_view(), name='importcsv'),
     path('rangemanagement/view/<rangeurl>/exportcsv', views.ExportCSV.as_view(), name='exportcsv'),
+    path('rangemanagement/view/<rangeurl>/isopen', views.IsOpen.as_view(), name='isopen'),
+    path('rangemanagement/view/<rangeurl>/isclose', views.IsClose.as_view(), name='isopen'),
+
+    #QUESTION MANAGEMENT
     path('questionmanagement/', login_required(views.QuestionManagement.as_view()), name='questionmanagement'),
 
+    #DOCKER MANAGEMENT
     path('dockermanagement/', login_required(views.DockerManagement.as_view()), name='dockermanagement'),
     path('dockermanagement/kill/<containername>', login_required(views.AdminDockerKill.as_view()), name='killdocker'),
 
+    #TEACHER MANAGEMENT
     path('teachermanagement/', views.TeacherView.as_view(), name='teacherview'),
     path('teachermanagement/addteacher', views.AddTeacher.as_view(), name='addteacher'),
 
-    
+    #CLASS MANAGEMENT
+    path('classmanagement/', views.ClassView.as_view(), name='classview'),
+    path('classmanagement/addclass', views.AddClass.as_view(), name='addclass'),
 
 ]  

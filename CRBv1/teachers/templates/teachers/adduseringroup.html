@@ -107,7 +107,7 @@
                             <td>{{ user.userclass }}</td>
                             <td>
                                 {% if user.email in cart %}
-                                <a class="btn btn-block btn-primary" href="addusers/remove/{{ user.username }}">Remove</a>
+                                <a class="btn btn-block btn-danger" href="addusers/remove/{{ user.username }}">Remove</a>
                                 {% else %}
                                 <a class="btn btn-block btn-primary" href="addusers/{{ user.username }}">Add</a>
                                 {% endif %}

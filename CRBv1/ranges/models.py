@@ -23,6 +23,8 @@ class Range(models.Model):
     isopen = models.BooleanField(db_column='isOpen', default=False)
     rangeinfo = HTMLField(db_column='rangeInfo', default="")
     attempts = models.PositiveIntegerField(db_column='attempts', default=0)
+    manualactive = models.BooleanField(db_column = 'manualactive', default=0)
+    manualdeactive = models.BooleanField(db_column = 'manualdeactive', default=0)
     
     class Meta:
         db_table = 'Range'

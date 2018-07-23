@@ -41,10 +41,16 @@
                                     <label for="title">Question Title:</label>
                                     {% render_field filter.form.title class="form-control" %}
                                 </div>
+                                <div class="form-group col-sm-4 col-md-3">
+                                        <label for="title">Range Active:</label>
+                                        {% render_field filter.form.rangeid__isdisabled class="form-control" %}
+                                    </div>
+                                <div>
                                     <button type="submit" class="btn btn-primary btn-flat" style="width: 200px; display: inline-block">
                                         <span class="glyphicon glyphicon-search"></span> Search
                                     </button>
-                                    <a href="{{ rangeurl }}" class="btn btn-primary btn-block btn-flat" style="width: 200px;  display: inline-block;" >Reset Filters</a>
+                                    <a href="." class="btn btn-primary btn-block btn-flat" style="width: 200px;  display: inline-block;" >Reset Filters</a>
+                                </div>
                             </div>
                         </div>
                     </form>
@@ -53,23 +59,38 @@
         <thead>
             <tr role="row">
                 <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                    Question Type
-                </th>
-                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                    Question Topic
-                </th>
-                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                    Question Title
-                </th>
-                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                    Question Text
-                </th>
-                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                    Question Hint
-                </th>
-                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                    Question Marks
-                </th>
+                        Question Type
+                    </th>
+                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                        Question Topic
+                    </th>
+                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                        Question Title
+                    </th>
+                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                        Question Text
+                    </th>
+                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                        Question Hint
+                    </th>
+                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                        Answer
+                    </th>
+                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                        Question Marks
+                    </th>
+                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                        Hint Penalty
+                    </th>
+                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                        Use Docker
+                    </th>
+                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                        Docker Image Name
+                    </th>
+                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                        Actions
+                    </th>
         </thead>
         {% for x in questions %}
             <tr role="row">
@@ -94,9 +115,21 @@
                     {% endfor %}
                 </td>
                 <td> {{x.title }} </td>
-                <td> {{x.text }} </td>
+                <td> {{x.text | safe | cut:"<p>" | cut:"</p>" }} </td>
                 <td> {{x.hint }} </td>
-                <td> {{x.marks }} </td>
+                <td>
+                    {{x.answer}}
+                </td>
+                <td> 
+                    {{x.points}}
+                </td>
+                <td>{{x.hintpenalty}}</td>
+                <td>
+                    {{x.usedocker}}
+                </td>
+                <td>
+                    {{x.registryid}}
+                </td>
                 <td style="text-align: center">
                     <a style="width: 100px;" class="btn btn-block btn-primary" href="{{ rangeurl }}/edit/{{ x.questionid }}">Edit</a>
                     <a style="width: 100px;" class="btn btn-block btn-danger" href="{{ rangeurl }}/delete/{{ x.questionid }}">Delete</a>

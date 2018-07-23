@@ -30,7 +30,28 @@ class RangeFilter(django_filters.FilterSet):
 class QuestionFilter(django_filters.FilterSet):
     title = django_filters.CharFilter(lookup_expr='istartswith')
     topicid__topicname = django_filters.CharFilter(lookup_expr='istartswith')
+    
     class Meta:
         model = Questions
-        fields = ['questiontype', 'topicid__topicname', 'title']
+        fields = ['questiontype', 'topicid__topicname', 'title', 'rangeid__isdisabled']
         
+
+class TeacherFilter(django_filters.FilterSet):
+    username = django_filters.CharFilter(lookup_expr='icontains')
+    name = django_filters.CharFilter(lookup_expr='icontains')
+    email = django_filters.CharFilter(lookup_expr='icontains')
+    class Meta:
+        model = User
+        fields = ['email', 'name', 'username']
+
+class BigQuestionFilter(django_filters.FilterSet):
+    text = django_filters.CharFilter(lookup_expr='icontains')
+    hint = django_filters.CharFilter(lookup_expr='icontains')
+    answer = django_filters.CharFilter(lookup_expr='icontains')
+    title = django_filters.CharFilter(lookup_expr='icontains')
+    questiontype = django_filters.CharFilter(lookup_expr='icontains')
+    topicid__topicname = django_filters.CharFilter(lookup_expr='icontains')
+
+    class Meta:
+        model = Questions
+        fields = ['questiontype', 'text', 'hint','answer', 'title']

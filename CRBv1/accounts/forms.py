@@ -9,16 +9,17 @@ from django.contrib.auth.forms import AuthenticationForm
 
 class CheckUserDisabled(AuthenticationForm):
     def confirm_login_allowed(self, user):
-        if user.isdisabled == True :
-            raise forms.ValidationError(
-                ("Your account has disabled. Please contact your administrator."),
-                code='inactive',
-            )
-        if user.isaccepted == False:
-            raise forms.ValidationError(
-                ("Your account has not yet been accepted. Please contact your administrator."),
-                code='inactive',
-            )
+        if user.is_staff == False:
+            if user.isdisabled == True :
+                raise forms.ValidationError(
+                    ("Your account has disabled. Please contact your administrator."),
+                    code='inactive',
+                )
+            if user.isaccepted == False:
+                raise forms.ValidationError(
+                    ("Your account has not yet been accepted. Please contact your administrator."),
+                    code='inactive',
+                )
 
 class EmailBackend(ModelBackend):
     def authenticate(self, username=None, password=None, **kwargs):
@@ -239,3 +240,23 @@ class AdminModifyForm(AdminModifyModelForm):
     class Meta:
         model = User
         fields = ('name', 'username', 'userclass')
+
+class TeacherRegisterForm(UserCreationForm):
+    def __init__(self, *args, **kwargs):
+        super(TeacherRegisterForm, self).__init__(*args, **kwargs)
+
+    def save(self, request, commit=True):
+        user = super().save(commit=False)
+        password = 'dmitr@nger'
+        user.set_password(password)
+        user.datejoined = datetime.date.today()
+        user.lastmodifieddate = datetime.date.today()
+        user.lastmodifiedtime = datetime.datetime.now().time()
+        user.is_staff = 1
+        if commit:
+            user.save()
+        return user
+
+    class Meta:
+        model = User
+        fields = ('email', 'name', 'username')

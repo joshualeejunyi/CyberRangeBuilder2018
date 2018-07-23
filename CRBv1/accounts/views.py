@@ -12,8 +12,6 @@ class LoginRedirect():
     def loginsuccess(request):
         if request.user.is_staff:
             return redirect("/teachers")    
-        elif request.user.is_superuser:
-            return redirect("/admin")
         else:
             return redirect("/dashboard")
 

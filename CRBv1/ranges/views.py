@@ -166,9 +166,9 @@ class AttemptQuestionView(ListView, ModelFormMixin):
         rangename = self.kwargs['rangeurl']
         questionnumber = self.kwargs['questionid']
         imagename = str(rangename + '.' + questionnumber)
-        image = 'siab_server'
+        #image = 'siab_server'
         payload = {
-            'Image':image,
+            'Image':imagename,
             'HostConfig': {
                 "PortBindings": {
                 "4200/tcp": [{
@@ -384,9 +384,9 @@ class AttemptMCQQuestionView(ListView, ModelFormMixin):
         rangename = self.kwargs['rangeurl']
         questionnumber = self.kwargs['questionid']
         imagename = str(rangename + '.' + questionnumber)
-        image = 'siab_server'
+        #image = 'siab_server'
         payload = {
-            'Image':image,
+            'Image':imagename,
             'HostConfig': {
                 "PortBindings": {
                 "4200/tcp": [{
@@ -746,6 +746,41 @@ class RangesView(ListView):
                             rangeobject = Range.objects.get(rangeid = x[0])
                             rangeobject.rangeactive = 0
                             rangeobject.save()
+                            
+    def checkrangeactive(self, ranges):
+        for x in ranges:
+            datestart = Range.objects.filter(rangeid = x[0]).values_list('datestart')[0][0]
+            timestart = Range.objects.filter(rangeid = x[0]).values_list('timestart')[0][0]
+
+            if datestart != None:
+                datecheck = datetime.date.today() > datestart
+                if datecheck:
+                    timecheck = datetime.time.now() > timestart
+                    if timecheck:
+                        checkifalreadyactive = Range.objects.filter(rangeid = x[0]).values_list("rangeactive")[0][0]
+                        if checkifalreadyactive == 0:
+                            rangeobject = Range.objects.get(rangeid = x[0])
+                            rangeobject.rangeactive = 1
+                            rangeobject.save()
+
+    def checkmanualstart(self, ranges):
+        for x in ranges:
+            manualstart = Range.objects.filter(rangeid = x[0]).values_list('manualactive')[0][0]
+            if manualstart is 1:
+                rangeobject = Range.objects.get(rangeid = x[0])
+                rangeobject.manualdeactive = 0
+                rangeobject.rangeactive = 1
+                rangeobject.save()
+
+    def checkmanualstop(self, ranges):
+        for x in ranges:
+            manualstop = Range.objects.filter(rangeid = x[0]).values_list('manualdeactive')[0][0]
+            if manualstop is 1:
+                rangeobject = Range.objects.get(rangeid = x[0])
+                rangeobject.manualactive = 0
+                rangeobject.rangeactive = 0
+                rangeobject.save()
+
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -780,6 +815,9 @@ class RangesView(ListView):
         currentranges = RangeStudents.objects.filter(studentID = user).values_list('rangeID')
 
         self.checkrangeexpiry(currentranges)
+        self.checkrangeactive(currentranges)
+        self.checkmanualstart(currentranges)
+        self.checkmanualstop(currentranges)
         #print('1 --> ' + str(currentranges))
         # check if there are no assigned ranges
         if len(currentranges) != 0:

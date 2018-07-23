@@ -9,6 +9,7 @@ from django.utils.translation import gettext_lazy as _
 from random import randint
 import re
 from tinymce import TinyMCE
+from teachers import views as teachersview
 
 class AddGroup(ModelForm):
     groupname = forms.CharField(label = "Group Name", widget=forms.TextInput(attrs={'class' : 'form-group has-feedback'})),
@@ -51,12 +52,10 @@ class RangeForm(ModelForm):
 
         self.startdate = startdate
         self.enddate = enddate
+        self.timestart = timestart
+        self.timeend = timeend
 
         if startdate is not None or enddate is not None:
-            if startdate < datetime.date.today():
-                msg = u"Please choose a Start Date starting from today!"
-                self._errors["datestart"] = self.error_class([msg])
-
             if enddate < startdate:
                 msg = u"End Date should be after Start Date!"
                 self._errors["dateend"] = self.error_class([msg])
@@ -65,14 +64,19 @@ class RangeForm(ModelForm):
                 if timeend < timestart:
                     msg = u"End Time should be after Start Time for a one day range!"
                     self._errors["timeend"] = self.error_class([msg])
+
+        if timestart is None and timeend is not None:
+            msg = u"Please enter a Start Time!"
+            self._errors["timestart"] = self.error_class([msg])
         
+        if timeend is None and timestart is not None:
+            msg = u"Please enter a End Time!"
+            self._errors["timeend"] = self.error_class([msg])
 
         rangeurl = cleaned_data.get("rangeurl")
         if not re.match("^[A-Za-z0-9_-]*$", rangeurl):
             msg = u"Range URL should only contain letters, numbers, dashes or underscore!"
             self._errors["rangeurl"] = self.error_class([msg])
-
-        
 
     def save(self, commit=True):
         createdrange = super().save(commit=False)
@@ -82,9 +86,10 @@ class RangeForm(ModelForm):
         email = User.objects.get(username = admin)
         createdrange.createdbyusername = email
 
-        if self.startdate is not None or self.enddate is not None:
-            createdrange.timestart = '08:30:AM'
-            createdrange.timeend = '11:59:PM'
+        if self.startdate is not None and self.enddate is not None:
+            if self.timestart is None and self.timeend is None:
+                createdrange.timestart = '08:30:AM'
+                createdrange.timeend = '11:59:PM'
 
         if commit:
             createdrange.save()
@@ -107,11 +112,12 @@ class ModifyRangeForm(ModelForm):
         timeend = cleaned_data.get("timeend")
         isopen = cleaned_data.get("isopen")
 
-        if startdate is not None or enddate is not None:
-            if startdate < datetime.date.today():
-                msg = u"Please choose a Start Date starting from today!"
-                self._errors["datestart"] = self.error_class([msg])
+        self.startdate = startdate
+        self.enddate = enddate
+        self.timestart = timestart
+        self.timeend = timeend
 
+        if startdate is not None or enddate is not None:
             if enddate < startdate:
                 msg = u"End Date should be after Start Date!"
                 self._errors["dateend"] = self.error_class([msg])
@@ -120,6 +126,14 @@ class ModifyRangeForm(ModelForm):
                 if timeend < timestart:
                     msg = u"End Time should be after Start Time for a one day range!"
                     self._errors["timeend"] = self.error_class([msg])
+
+        if timestart is None and timeend is not None:
+            msg = u"Please enter a Start Time!"
+            self._errors["timestart"] = self.error_class([msg])
+        
+        if timeend is None and timestart is not None:
+            msg = u"Please enter a End Time!"
+            self._errors["timeend"] = self.error_class([msg])
         
     def save(self, commit=True):
         modifyrange = super().save(commit=False)
@@ -141,13 +155,29 @@ class QuestionForm(ModelForm):
         self.rangeinstance = kwargs.pop("rangeinstance")
         super(QuestionForm, self).__init__(*args, **kwargs)
 
+    def clean(self):
+        cleaned_data = super(QuestionForm, self).clean()
+        usedocker = cleaned_data.get('usedocker')
+        imagename = cleaned_data.get('registryid')
+        registryid = self.request.POST.get('registryid','')
+        points = cleaned_data.get('points')
+        hintpenalty = cleaned_data.get('hintpenalty')
+        
+
+        if usedocker is True and registryid == "":
+            msg = u"Please enter the Registry Image Name!"
+            self._errors["usedocker"] = self.error_class([msg])
+        
+        if hintpenalty is not None or points is not None:
+            if int(hintpenalty) > int(points):
+                msg = u"Hint Penalty should not be more than Points awarded!"
+                self._errors["hintpenalty"] = self.error_class([msg])
+
+        
+
     def save(self, commit=True):
         question = super().save(commit=False)
-        usedocker = self.request.POST.get("usedocker")
         registryid = self.request.POST.get('registryid','')
-        if usedocker == "True" and registryid == "":
-            msg = u"Please enter the Registry ID!"
-            self._errors["registryid"] = self.error_class([msg])
         topicname = self.request.POST.get('topicname','')
         topicid = QuestionTopic.objects.get(topicname = topicname)
         question.topicid = topicid
@@ -156,6 +186,7 @@ class QuestionForm(ModelForm):
         question.createdby = email
         question.datecreated = datetime.date.today()
         question.timecreated = datetime.datetime.now().time()
+        question.registryid = registryid
         rangeid = self.rangeinstance.rangeid
         question.rangeid = self.rangeinstance
 
@@ -171,26 +202,74 @@ class ModifyQuestionForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop("request")
+        self.rangeurl = kwargs.pop("rangeurl")
+        self.questionid = kwargs.pop("questionid")
         super(ModifyQuestionForm, self).__init__(*args, **kwargs)
     
     def clean(self):
         cleaned_data = super(ModifyQuestionForm, self).clean()
-        usedocker = cleaned_data.get("usedocker")
+        usedocker = cleaned_data.get('usedocker')
+        imagename = cleaned_data.get('registryid')
         registryid = self.request.POST.get('registryid','')
+        points = cleaned_data.get('points')
+        hintpenalty = cleaned_data.get('hintpenalty')
+        
 
-        if usedocker == "True" and registryid == "":
-            msg = u"Please enter the Registry ID!"
-            self._errors["registryid"] = self.error_class([msg])
+        if usedocker is True and registryid == "":
+            msg = u"Please enter the Registry Image Name!"
+            self._errors["usedocker"] = self.error_class([msg])
+        
+        if hintpenalty is not None or points is not None:
+            if int(hintpenalty) > int(points):
+                msg = u"Hint Penalty should not be more than Points awarded!"
+                self._errors["hintpenalty"] = self.error_class([msg])
+
 
     def save(self, commit=True):
         question = super().save(commit=False)
         topicname = self.request.POST.get('topicname',' ')
+        registryid = self.request.POST.get('registryid','')
+        print('----------------------------------')
+        print(registryid)
+        print('----------------------------------')
+
         topicid = QuestionTopic.objects.get(topicname = topicname)
         question.topicid = topicid
+        question.registryid = registryid
+
+        imageid = registryid
+        error = teachersview.CreateImage.get(self, self.request, self.rangeurl, self.questionid, imageid)
+        if error is not 0:
+            return HttpResponse('ERROR')
+
         if commit:
             question.save()
         return question
 
     class Meta:
         model = Questions
-        fields = ('title', 'text', 'hint', 'hintpenalty',)
+        fields = ('title', 'text', 'hint', 'hintpenalty', 'answer', 'usedocker', 'points',)
+
+
+
+class ClassForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop("request")
+        super(ClassForm, self).__init__(*args, **kwargs)
+    
+    def save(self, commit=True):
+        newclass = super().save(commit=False)
+        course = self.request.POST.get('course')
+        time = self.request.POST.get('time')
+        yearsem = self.request.POST.get('yearsem')
+        classnumber = self.request.POST.get('classnumber')
+        fullclass = course+'/'+time+'/'+yearsem+'/'+classnumber
+        newclass.userclass = fullclass
+        print(fullclass)
+        if commit:
+            newclass.save()
+        return newclass
+
+    class Meta:
+        model = UserClass
+        fields = ()
