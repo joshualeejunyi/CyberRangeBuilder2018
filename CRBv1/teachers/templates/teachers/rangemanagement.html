@@ -153,7 +153,7 @@
                 <td> {{e.rangecode }}</td>
                 <td style="text-align: center">
                     <a class="btn btn-block btn-primary" href="view/{{ e.rangeurl }}">View Range</a>
-                    <a class="btn btn-block btn-danger" href="archive/{{ e.rangeurl }}">Archive</a>
+                    <a class="btn btn-block btn-danger" onclick="return confirm('Archive {{e.rangename}}?')" href="archive/{{ e.rangeurl }}">Archive</a>
                 </td>
             </tr>
 

@@ -33,7 +33,7 @@
                             <li><h4>{{users}}</h4></li>
                         {% endfor %}
                         </ul>
-                        <a href="assignusers/commit" class="btn btn-primary btn-block btn-flat" style="width: 100px; margin-top: 0.2%;">Submit</a>
+                        <a href="commit" class="btn btn-primary btn-block btn-flat" style="width: 100px; margin-top: 0.2%;">Submit</a>
                     </div>
                     {% endif %}
                         <form method="get">
@@ -107,9 +107,9 @@
                             <td>{{ user.userclass }}</td>
                             <td>
                                 {% if user.email in cart %}
-                                <a class="btn btn-block btn-primary" href="remove/{{ user.username }}">Remove</a>
+                                <a class="btn btn-block btn-danger" href="remove/{{ user.username }}">Remove</a>
                                 {% else %}
-                                <a class="btn btn-block btn-primary" href="assignusers/{{ user.username }}">Add</a>
+                                <a class="btn btn-block btn-primary" href="{{ user.username }}">Add</a>
                                 {% endif %}
                             </td>
                         </tr>

@@ -133,7 +133,7 @@
                                 <a class="btn btn-block btn-success" href="acceptuser/{{ user.username }}">Accept User</a>
                                 {% endif %}
                                 <a class="btn btn-block btn-primary" href="modifyuser/{{ user.username }}">Edit</a>
-                                <a class="btn btn-block btn-danger" href="disableuser/{{ user.username }}">Disable</a>
+                                <a class="btn btn-block btn-danger" onclick="return confirm('Disable {{user.username}}?')" href="disableuser/{{ user.username }}">Disable</a>
                             </td>
                         </tr>
                     {% endfor %}

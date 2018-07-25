@@ -70,21 +70,6 @@
 
 				<h4 class="text-center">Statistics:</h4>
 
-				<div class="info-box bg-light-blue">
-					<span class="info-box-icon"><i class="fa fa-trophy"></i></span>
-					<span class="info-box-icon pull-right"><i class="fa fa-trophy"></i></span>
-					<div class="info-box-content text-center">
-					  <span class="info-box-text">Total points achieved:</span>
-						{% if userquestionpoints %}
-					  <span class="info-box-number" style="font-size:34px">{{ userquestionpoints }}</span>
-						{% else %}
-						<span class="info-box-number" style="font-size:34px">0</span>
-						{% endif %}
-					</div>
-
-					<!-- /.info-box-content -->
-				</div>
-
 				<div class="info-box bg-green">
 					<span class="info-box-icon"><i class="fa fa-trophy"></i></span>
 					<span class="info-box-icon pull-right"><i class="fa fa-trophy"></i></span>
@@ -134,12 +119,14 @@
 					<div class="w-100"></div>
 
 					<div class="col-md-7" style="margin-left:5%">
+						{% if completedrangesnumber > 1 %}
 						{% if linegraphdata %}
 				<div class="box-body">
 				<h4 class="text-center">Past completed ranges progress:</h4>
 				<div id="linechart_material">
 				</div>
 				</div>
+						{% endif %}
 						{% endif %}
 			</div>
 

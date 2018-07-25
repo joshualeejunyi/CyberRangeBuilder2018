@@ -30,15 +30,8 @@ class ProgressView(generic.ListView):
                 userquestiontopic = Questions.objects.filter(questionid=userquestionid[x][0]).values_list('topicid')[0][0]
                 userquestiontopics.append(userquestiontopic)
 
-            userquestionpoints = 0
-
-            for x in userquestionid:
-                userquestionpoint = StudentQuestions.objects.filter(questionid=x).values_list('marksawarded')[0][0]
-                userquestionpoints = userquestionpoints+userquestionpoint
-            context['userquestionpoints'] = userquestionpoints
-
             completedrangesid = RangeStudents.objects.filter(studentID=user).order_by('-lastaccess').exclude(datecompleted=None)
-            context['completedrangesnumber'] = len(completedrangesid)
+            context['completedrangesnumber'] = int(len(completedrangesid))
 
             # For the line graph
             pastcompletedrangesid = list(reversed(RangeStudents.objects.filter(studentID=user).order_by('-datecompleted').exclude(datecompleted=None).values_list('rangeID', flat=True)[:10]))

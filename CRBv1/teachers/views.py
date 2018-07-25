@@ -43,11 +43,8 @@ class CreateImage(View):
             response = requests.post(url1, headers=header1)
             if response.status_code == 200:
                 pass
-                # data['Id'] = id
-                # data['message'] = 'success'
             elif response.status_code == 404:
                 return -1 # no container
-                # data['message'] = 'no such container'
             elif response.status_code == 500:
                 return -2 # server error
             else:
@@ -62,8 +59,6 @@ class CreateImage(View):
             response = requests.post(endpoint2)
             
             if response.status_code == 201:
-                # reference['Id'] = range
-                # reference['message'] = 'success'
                 pass
             elif response.status_code == 400:
                 return -3
@@ -212,13 +207,14 @@ class DisableUser(View):
         selecteduser.isdisabled = True
         selecteduser.save()
 
-        return redirect('/teachers/')
+        return redirect('/teachers/usermanagement/')
 
 @method_decorator(user_is_staff, name='dispatch')
 class AcceptUser(View):
     def get(self, request, username):
         selecteduser = User.objects.get(username = username)
         selecteduser.isaccepted = True
+        selecteduser.isdisabled = False
         selecteduser.lastmodifieddate = datetime.date.today()
         selecteduser.lastmodifiedtime = datetime.datetime.now().time()
         admin = self.request.user
@@ -233,7 +229,7 @@ class RejectUser(View):
     def get(self, request, username):
         selecteduser = User.objects.get(username = username)
         selecteduser.delete()
-        return redirect('/teachers/usermanagement/')
+        return redirect('/teachers/')
 
 @method_decorator(user_is_staff, name='dispatch')
 class EnableUser(View):
@@ -245,12 +241,13 @@ class EnableUser(View):
         return redirect('/teachers/usermanagement/disabled')
 
 @method_decorator(user_is_staff, name='dispatch')
-class DeleteUser(DeleteView):
-    template_name = 'teachers/confirmdelete.html'
-    success_url = '/teachers/usermanagement'
-    def get_object(self, queryset = None):
+class DeleteUser(View):
+    def get(self, request, username):
         selecteduser = User.objects.get(username = self.kwargs['username'])
-        return selecteduser
+        selecteduser.delete()
+        url = '/teachers/usermanagement/disabled'
+
+        return redirect(url)
 
 @method_decorator(user_is_staff, name='dispatch')
 class GroupManagement(FilterView, ListView):
@@ -430,15 +427,16 @@ class RemoveGroupFromRange(View):
         return redirect(url)
 
 @method_decorator(user_is_staff, name='dispatch')
-class RemoveStudentFromGroup(DeleteView):
-    template_name = 'teachers/confirmdeletestudentfromgroup.html'
-    success_url = '../'
-    def get_object(self, queryset = None):
+class RemoveStudentFromGroup(View):
+    def get(self, request, groupname, username):
         studentid = User.objects.get(username = self.kwargs['username'])
         groupname = self.kwargs['groupname']
         groupid = Group.objects.get(groupname = groupname)
         selecteduser = StudentGroup.objects.get(studentid = studentid, groupid = groupid)
-        return selecteduser
+        selecteduser.delete()
+
+        url = '/teachers/groupmanagement/' + groupname
+        return redirect(url)
 
 @method_decorator(user_is_staff, name='dispatch')
 class DeleteGroup(View):
@@ -476,7 +474,7 @@ class RangeManagement(FilterView, ListView):
     def get_queryset(self):
         user = self.request.user
         print(user)
-        ranges = Range.objects.all().filter(isdisabled = False, createdbyusername=user)
+        ranges = Range.objects.all().filter(isdisabled = False, createdbyusername=user).order_by('-lastmodifieddate', '-datecreated')
         return ranges
 
 @method_decorator(user_is_staff, name='dispatch')
@@ -697,28 +695,14 @@ class AddQuestioninRangeCommit(View):
             questionobj.pk = None
             questionobj.rangeid = rangeobj
             questionobj.save()
+
+            error = CreateImage.get(self, request, rangeurl, questionid, imageid)
+            if error is not 0:
+                return HttpResponse('ERROR')
         
         url = '/teachers/rangemanagement/view/' + rangeurl
         del request.session['questionscart']
         return redirect(url)
-
-# class AddQuestionAnswer(View):
-#     def get(self, request, rangeurl, questionid):
-#         return render(request, template_name = 'teachers/addquestionanswer.html')
-
-#     def post(self, request, rangeurl, questionid):
-#         rqobject = RangeQuestions()
-#         currentrangeid = Range.objects.filter(rangeurl = rangeurl).values_list('rangeid')[0][0]
-#         rangeinstance = Range.objects.get(rangeid = currentrangeid)
-#         rqobject.rangeid = rangeinstance
-#         questioninstance = Questions.objects.get(questionid = questionid)
-#         rqobject.questionid = questioninstance
-#         rqobject.answer = request.POST.get('answer')
-#         print(request.POST.get('answer'))
-#         rqobject.isdisabled = False
-#         rqobject.save()
-
-#         return redirect('../../')
 
 @method_decorator(user_is_staff, name='dispatch')
 class EditQuestion (UpdateView):
@@ -1384,7 +1368,7 @@ class ExportCSV(View):
         writer = csv.writer(response)
         writer.writerow(['Question ID', 'QuestionType', 'Topic Name', 'Title', 'Text', 'Answer', 'Hint', 'Marks','Use Docker', 'Option One', 'Option Two', 'Option Three', 'Option Four'])
 
-        questions = Questions.objects.filter(rangeid = rangeinstance).values_list('questionid', 'questiontype', 'topicid', 'title', 'text', 'answer', 'hint', 'marks')
+        questions = Questions.objects.filter(rangeid = rangeinstance).values_list('questionid', 'questiontype', 'topicid', 'title', 'text', 'answer', 'hint', 'points')
         for qns in questions:
 
             if qns[1] == 'MCQ':
@@ -1423,7 +1407,12 @@ class ReportView(generic.ListView):
         context['rangename'] = Range.objects.filter(rangeurl=rangeurl).values_list('rangename')[0][0]
         context['maxscore'] = Range.objects.filter(rangeurl=rangeurl).values_list('maxscore')[0][0]
         context['totalscore'] = RangeStudents.objects.filter(studentID=useremail).values_list('points')[0][0]
-        context['useranswer'] = StudentQuestions.objects.filter(rangeid=rangeid, studentid=useremail).values_list('answergiven')[0][0]
+        useranswer = StudentQuestions.objects.filter(rangeid=rangeid, studentid=useremail).values_list('answergiven')
+        if len(useranswer) != 0:
+            context['useranswer'] = useranswer[0][0]
+        else:
+            context['useranswer'] = None
+        
         context['usermark'] = StudentQuestions.objects.filter(rangeid=rangeid, studentid=useremail).all()
         context['topic'] = QuestionTopic.objects.all()
 

@@ -1,4 +1,4 @@
-{% extends 'teachers/teacherbase.html' %}
+{% extends 'dashboard/base.html' %}
 
 {% block content %}
 {% if messages %}
@@ -15,10 +15,13 @@
                         {% csrf_token %}
                         <div class="form-group has-feedback">
                             <label for="rangecode">Range Code:</label>
-                            <input type="text" name="rangecode" class="form-control">
+                            <p style="color: #dd4b39">* Range Code is only numbers</p>
+                            <input type="text" pattern="\d*" maxlength="6" name="rangecode" class="form-control">
                         </div>
 
-                        <button type="submit" class="btn btn-primary btn-block btn-flat pull-right" style="width: 100px">Submit</button>
+                        <div>
+                            <button type="submit" class="btn btn-primary btn-block btn-flat pull-right" style="width: 100px">Submit</button>
+                        </div>
                     </form>
                     <br><br>
                 </div>

@@ -214,6 +214,7 @@ class ModifyQuestionForm(ModelForm):
         points = cleaned_data.get('points')
         hintpenalty = cleaned_data.get('hintpenalty')
         
+        self.usedocker = usedocker
 
         if usedocker is True and registryid == "":
             msg = u"Please enter the Registry Image Name!"
@@ -229,18 +230,21 @@ class ModifyQuestionForm(ModelForm):
         question = super().save(commit=False)
         topicname = self.request.POST.get('topicname',' ')
         registryid = self.request.POST.get('registryid','')
+
         print('----------------------------------')
         print(registryid)
+        print(self.usedocker)
         print('----------------------------------')
 
         topicid = QuestionTopic.objects.get(topicname = topicname)
         question.topicid = topicid
-        question.registryid = registryid
 
-        imageid = registryid
-        error = teachersview.CreateImage.get(self, self.request, self.rangeurl, self.questionid, imageid)
-        if error is not 0:
-            return HttpResponse('ERROR')
+        if self.usedocker is True:
+            question.registryid = registryid
+            imageid = registryid
+            error = teachersview.CreateImage.get(self, self.request, self.rangeurl, self.questionid, imageid)
+            if error is not 0:
+                return HttpResponse('ERROR')
 
         if commit:
             question.save()

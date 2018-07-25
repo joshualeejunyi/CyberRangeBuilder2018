@@ -122,8 +122,8 @@
                 <td> {{e.lastmodifieddate }}</td>
                 <td> {{e.rangecode }}</td>
                 <td style="text-align: center">
-                    <a class="btn btn-block btn-success" href="unarchive/{{ e.rangeurl }}">Unarchive</a>
-                    <a class="btn btn-block btn-danger" href="delete/{{ e.rangeurl }}">Permanently Delete</a>
+                    <a class="btn btn-block btn-success" onclick="return confirm('Unarchive {{e.rangename}}?')" href="unarchive/{{ e.rangeurl }}">Unarchive</a>
+                    <a class="btn btn-block btn-danger" onclick="return confirm('Permanently Delete {{e.rangename}}?')" href="delete/{{ e.rangeurl }}">Permanently Delete</a>
                 </td>
             </tr>
 

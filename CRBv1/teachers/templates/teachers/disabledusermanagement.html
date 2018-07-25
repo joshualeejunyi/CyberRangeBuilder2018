@@ -117,8 +117,8 @@
                             <td>{{ user.lastmodifieddate }}</td>
                             <td>{{ user.lastmodifiedtime }}</td>
                             <td>
-                                <a class="btn btn-block btn-success" href="enableuser/{{ user.username }}">Enable</a>
-                                <a class="btn btn-block btn-danger" href="deleteuser/{{ user.username }}">Permanently Delete</a>
+                                <a class="btn btn-block btn-success"  onclick="return confirm('Enable {{user.username}}?')"  href="enableuser/{{ user.username }}">Enable</a>
+                                <a class="btn btn-block btn-danger"  onclick="return confirm('Permanently Delete {{user.username}}?')" href="deleteuser/{{ user.username }}">Permanently Delete</a>
                             </td>
                         </tr>
                     {% endfor %}

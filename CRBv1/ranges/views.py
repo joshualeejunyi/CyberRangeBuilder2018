@@ -14,19 +14,20 @@ from django.contrib import messages
 from accounts.models import User
 import string
 import random
-import paramiko
+from pexpect import pxssh
 
 class ShellRandomPassword(View):
     def get(self, request, portnumber):
         randompass = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
-        client = paramiko.SSHClient()
-        client.connect('dmit2.bulletplus.com:' + portnumber, username='guest', password='root')
-        stdin, stdout, stderr = client.exec_command('passwd %s' % randompass)
-        for line in stdout:
-            print('... ' + line.strip('\n'))
-        client.close()
-
-        return randompass
+        s = pxssh.pxssh()
+        if not s.login ('192.168.100.42', port=portnumber, username='guest',password='root'):
+            return HttpResponse(s)
+        else:
+            s.sendline ('passwd %s' % randompass)
+            s.prompt()         # match the prompt
+            # print everything before the prompt.
+            s.logout()
+            return randompass
 
 class EnterCode(View):
     def get(self, request, *args, **kwargs):
@@ -62,6 +63,7 @@ class EnterCode(View):
         except Range.DoesNotExist:
             selectedrange = None
             messages.error(request, 'Invalid Range Code or Range Is Not Open')
+            return render(request, 'ranges/joinrange.html')
 
 class DockerKill(View):
     def get(self, request):
@@ -687,7 +689,7 @@ class QuestionsView(ListView):
 
         userscored = RangeStudents.objects.filter(rangeID = currentrangeid, studentID = user).values_list('points')[0][0]
         maxscore = Range.objects.filter(rangeurl = rangeurl).values_list('maxscore')[0][0]
-        if maxscore is None:
+        if maxscore is None or maxscore == 0:
             maxscore = 0
             percent = 0
         else:
@@ -743,18 +745,13 @@ class RangesView(ListView):
     context_object_name = 'rangeobject'
 
     def checkrangeexpiry(self, ranges):
-        #print(ranges)
-
         for x in ranges:
             dateend = Range.objects.filter(rangeid = x[0]).values_list("dateend")[0][0]
             timeend = Range.objects.filter(rangeid = x[0]).values_list("timeend")[0][0]
             if dateend != None:
-                #print('test')
-                #print(datetime.date.today())
-                #print(dateend)
                 datecheck = datetime.date.today() > dateend
                 if datecheck:
-                    timecheck = datetime.time.now() > timeend
+                    timecheck = datetime.datetime.now().time() > timeend
                     if timecheck:
                         checkifalreadyinactive = Range.objects.filter(rangeid = x[0]).values_list("rangeactive")[0][0]
                         if checkifalreadyinactive == 1:
@@ -774,7 +771,7 @@ class RangesView(ListView):
             if datestart != None:
                 datecheck = datetime.date.today() > datestart
                 if datecheck:
-                    timecheck = datetime.time.now() > timestart
+                    timecheck = datetime.datetime.now().time() > timestart
                     if timecheck:
                         checkifalreadyactive = Range.objects.filter(rangeid = x[0]).values_list("rangeactive")[0][0]
                         if checkifalreadyactive == 0:

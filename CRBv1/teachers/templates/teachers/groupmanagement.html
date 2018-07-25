@@ -96,7 +96,7 @@
                             <td>{{ group.grouppoints }}</td>
                             <td style="text-align: center">
                                 <a style="width: 100px;" class="btn btn-block btn-primary" href="{{ group.groupname }}">View Group</a>
-                                <a style="width: 100px;" class="btn btn-block btn-primary" href="deletegroup/{{ group.groupname }}">Delete</a>
+                                <a style="width: 100px;" class="btn btn-block btn-danger" onclick="return confirm('Delete {{group.groupname}}?')" href="deletegroup/{{ group.groupname }}">Delete</a>
                             </td>
                         </tr>
                     {% endfor %}
