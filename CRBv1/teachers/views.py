@@ -1068,8 +1068,6 @@ class CreateQuestion(ListView, ModelFormMixin):
 
             rangeurl = self.kwargs['rangeurl']
             if (request.POST.get('usedocker') == 'True'):
-
-                print("YAY it works")
                 imageid = request.POST.get('registryid')
                 error = CreateImage.get(self, request, rangeurl, questionid, imageid)
                 if error is not 0:
@@ -1245,6 +1243,18 @@ class AdminDockerKill(View):
         return redirect('/teachers/dockermanagement/')
 
 @method_decorator(user_is_staff, name='dispatch')
+class DownloadImportTemplate(View):
+    def get(self, request, *args, **kwargs):
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="template.csv"'
+
+        writer = csv.writer(response)
+        writer.writerow(['QuestionType', 'Topic Name', 'Title', 'Text', 'Answer', 'Hint', 'Marks', 'Hint Penalty', 'Use Docker', 'Registry ID', 'Option One', 'Option Two', 'Option Three', 'Option Four'])
+
+        return response
+
+
+@method_decorator(user_is_staff, name='dispatch')
 class ImportCSV(View):
     def get(self, request, *args, **kwargs):
         return render(request, 'teachers/importqns.html')
@@ -1270,6 +1280,7 @@ class ImportCSV(View):
             x = 0
             for line in lines:
                 if line and x > 0:
+                    marks=0
                     fields = line.split(",")
                     data_dict = {}
                     questiontype = fields[0]
@@ -1279,7 +1290,11 @@ class ImportCSV(View):
                     answer = fields[4]
                     hint = fields[5]
                     marks = fields[6]
-                    usedocker = fields[7]
+                    hintpenalty = fields[7]
+                    createdby = self.request.user
+                    usedocker = [8]
+                    registryid = [9]
+
 
                     docker = False
                     if usedocker == 1:
@@ -1307,35 +1322,36 @@ class ImportCSV(View):
                     userinstance = User.objects.get(username = username)
                     print(userinstance.email)
                     rangeinstance = Range.objects.get(rangeurl = rangeurl)
-                    questiontopicinstance = QuestionTopic.objects.get(topicname = topicname)
+
+                    try:
+                        questiontopicinstance = QuestionTopic.objects.get(topicname = topicname)
+                    except QuestionTopic.DoesNotExist:
+                        newquestiontopic = QuestionTopic(topicname = topicname)
+                        newquestiontopic.save()
+                        questiontopicinstance = QuestionTopic.objects.all().order_by('-topicid')[0]
+
                     question_obj = Questions(topicid = questiontopicinstance,
                                             questiontype = questiontype,
                                             title = title,
                                             text = text,
                                             hint = hint,
-                                            marks = marks,
+                                            points = marks,
                                             answer = answer,
                                             usedocker = docker,
                                             datecreated = datetimenow,
                                             createdby = userinstance,
-                                            rangeid = rangeinstance)
+                                            rangeid = rangeinstance,
+                                            hintpenalty = hintpenalty,
+                                            registryid = registryid,
+                                            isarchived = 0)
                     question_obj.save()
                     
-                    questioninstance = Questions.objects.all().order_by('-questionid')[0]
-                    print('range instance is ' + str(rangeinstance.rangeurl))
-                    rangequestion_obj = RangeQuestions(questionid = questioninstance,
-                                                        rangeid = rangeinstance,
-                                                        isdisabled = False,
-                                                        answer = answer,
-                                                        registryid = '?')
-                    rangequestion_obj.save()
-                    print('its all for the range ' + str(rangeinstance.rangeurl))
-
                     if str(questiontype) == 'MCQ':
-                        optionone = fields[8]
-                        optiontwo = fields[9]
-                        optionthree = fields[10]
-                        optionfour = fields[11]
+                        questioninstance = Questions.objects.all().order_by('-questionid')[0]
+                        optionone = fields[10]
+                        optiontwo = fields[11]
+                        optionthree = fields[12]
+                        optionfour = fields[13]
                         print(optionone)
                         print(optiontwo)
                         print(optionthree)
@@ -1346,12 +1362,18 @@ class ImportCSV(View):
                                                     optionfour = optionfour,
                                                     questionid = questioninstance)
                         mcqoptions_obj.save()
+                    
+                    rangeinstance = Range.objects.get(rangeurl = rangeurl)
+                    updatedmarks = rangeinstance.maxscore + int(marks)
+                    rangeinstance.maxscore = updatedmarks
+                    rangeinstance.save()
                 x = x + 1
 
         except Exception as e:
             logging.getLogger("error_logger").error("Unable to upload file. "+repr(e))
             messages.error(request,"Unable to upload file. "+repr(e))
-            
+
+        messages.success(request, 'Questions Successfully Imported From CSV File')    
         return render(request, 'teachers/importqns.html')
 
 
@@ -1366,23 +1388,52 @@ class ExportCSV(View):
         response['Content-Disposition'] = 'attachment; filename="questions.csv"'
 
         writer = csv.writer(response)
-        writer.writerow(['Question ID', 'QuestionType', 'Topic Name', 'Title', 'Text', 'Answer', 'Hint', 'Marks','Use Docker', 'Option One', 'Option Two', 'Option Three', 'Option Four'])
+        writer.writerow(['Question ID', 'QuestionType', 'Topic Name', 'Title', 'Text', 'Answer', 'Hint', 'Marks', 'Hint Penalty', 'Created By', 'Use Docker', 'Registry ID', 'Option One', 'Option Two', 'Option Three', 'Option Four'])
 
-        questions = Questions.objects.filter(rangeid = rangeinstance).values_list('questionid', 'questiontype', 'topicid', 'title', 'text', 'answer', 'hint', 'points')
+        questions = Questions.objects.filter(rangeid = rangeinstance).values_list('questionid', 'questiontype', 'topicid', 'title', 'text', 'answer', 'hint', 'points', 'hintpenalty', 'createdby', 'usedocker' ,'registryid')
         for qns in questions:
-
+            topicname = QuestionTopic.objects.get(topicid = qns[2])
             if qns[1] == 'MCQ':
                 print('got mcq')
                 questioninstance = Questions.objects.get(questionid = qns[0])
                 mcqoptionsinstance = MCQOptions.objects.get(questionid = questioninstance)
-                writer.writerow(qns, mcqoptionsinstance.optionone, mcqoptionsinstance.optiontwo, mcqoptionsinstance.optionthree, mcqoptionsinstance.optionfour)
+                writer.writerow([qns[0],
+                                qns[1],
+                                topicname.topicname,
+                                qns[3],
+                                qns[4],
+                                qns[5],
+                                qns[6],
+                                qns[7],
+                                qns[8],
+                                qns[9],
+                                qns[10],
+                                qns[11],
+                                mcqoptionsinstance.optionone,
+                                mcqoptionsinstance.optiontwo, 
+                                mcqoptionsinstance.optionthree, 
+                                mcqoptionsinstance.optionfour])
 
             else:
                 print('it tried')
-                writer.writerow(qns)
+                writer.writerow([qns[0],
+                                qns[1],
+                                topicname.topicname,
+                                qns[3],
+                                qns[4],
+                                qns[5],
+                                qns[6],
+                                qns[7],
+                                qns[8],
+                                qns[9],
+                                qns[10],
+                                qns[11],
+                                '-',
+                                '-',
+                                '-',
+                                '-'])
                 
         return response
-
 @method_decorator(user_is_staff, name='dispatch')
 class ReportView(generic.ListView):
     template_name='teachers/report.html'

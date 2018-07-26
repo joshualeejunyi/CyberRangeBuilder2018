@@ -76,6 +76,7 @@ urlpatterns = [
 
     #QUESTION MANAGEMENT
     path('questionmanagement/', login_required(views.QuestionManagement.as_view()), name='questionmanagement'),
+    path('questionmanagement/edit/<questionid>', login_required(views.EditQuestion.as_view()), name='editquestion'),
 
     #DOCKER MANAGEMENT
     path('dockermanagement/', login_required(views.DockerManagement.as_view()), name='dockermanagement'),

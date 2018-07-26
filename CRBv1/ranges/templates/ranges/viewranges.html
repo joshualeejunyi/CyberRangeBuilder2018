@@ -27,7 +27,7 @@
 					</div>
 				</div>
 				<div class="box-body">
-					{% if rangeobject and userrange %}
+					{% if rangeobject %}
 						<table class="table table-bordered table-hover dataTable" role="grid">
 							<thead>
 								<tr role="row">
@@ -55,22 +55,15 @@
 								</tr>
 							</thead>
 							<tbody>
-							{% for user in userrange %}
-								{% for range in rangeobject %}
-									{% if range.rangeactive %}
-										{% if user.rangeID.rangeid is range.rangeid %}
-											<tr role="row">
-												<td>{{ range.rangename }}</td>
-												<td>{{ range.datestart }}</td>
-												<td>{{ range.timestart }}</td>
-												<td>{{ range.dateend }}</td>
-												<td>{{ range.timeend  }}</td>
-												<td>{{ user.points }}</td>
-												<td><a style="width: 100px;" class="btn btn-block btn-primary" href="{{ range.rangeurl }}/play">Play Range</a></td>
-											</tr>
-										{% endif %}
-									{% endif %}
-								{% endfor %}
+							{% for range in rangeobject %}
+								<tr role="row"></tr>
+								<td>{{ range.rangeID.rangename }}</td>
+								<td>{{ range.rangeID.datestart }}</td>
+								<td>{{ range.rangeID.timestart }}</td>
+								<td>{{ range.rangeID.dateend }}</td>
+								<td>{{ range.rangeID.timeend }}</td>
+								<td>{{ range.points }}/{{range.rangeID.maxscore}}</td>
+								<td><a style="width: 100px;" class="btn btn-block btn-primary" href="{{ range.rangeID.rangeurl }}/play">Play Range</a></td>
 							{% endfor %}
 							</tbody>
 						</table>
@@ -114,26 +107,24 @@
 									<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
 										Final Score
 									</th>
+									<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+										Actions
+									</th>
 								</tr>
 							</thead>
 							<tbody>
-							{% for user in userrange %}
 								{% for range in inactive %}
-									{% if not range.rangeactive %}
-										{% if user.rangeID.rangeid is range.rangeid %}
-											<tr role="row">
-												<td>{{ range.rangename }}</td>
-												<td>{{ range.datestart }}</td>
-												<td>{{ range.timestart }}</td>
-												<td>{{ range.dateend }}</td>
-												<td>{{ range.timeend  }}</td>
-												<td>{{ user.points }}</td>
-											</tr>
-										{% endif %}
-									{% endif %}
+									<tr role="row">
+										<td>{{ range.rangeID.rangename }}</td>
+										<td>{{ range.rangeID.datestart }}</td>
+										<td>{{ range.rangeID.timestart }}</td>
+										<td>{{ range.rangeID.dateend }}</td>
+										<td>{{ range.rangeID.timeend }}</td>
+										<td>{{ range.points }}/{{range.rangeID.maxscore}}</td>
+										<td><a style="width: 150px;" class="btn btn-block btn-primary" href="progress/{{ range.rangeID.rangeurl }}/report">Range Report</a></td>
+									</tr>
 								{% endfor %}
-							{% endfor %}
-						</tbody>
+							</tbody>
 						</table>
 					{% else %}
 						<p>You have no past ranges</p>	

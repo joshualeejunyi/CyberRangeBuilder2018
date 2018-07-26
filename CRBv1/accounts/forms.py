@@ -247,12 +247,13 @@ class TeacherRegisterForm(UserCreationForm):
 
     def save(self, request, commit=True):
         user = super().save(commit=False)
-        password = 'dmitr@nger'
-        user.set_password(password)
+        user.set_password(self.cleaned_data['password1'])
         user.datejoined = datetime.date.today()
         user.lastmodifieddate = datetime.date.today()
         user.lastmodifiedtime = datetime.datetime.now().time()
         user.is_staff = 1
+        user.isdisabled = 0
+        user.isaccepted = 1
         if commit:
             user.save()
         return user

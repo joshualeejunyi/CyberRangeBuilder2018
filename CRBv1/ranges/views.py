@@ -195,7 +195,7 @@ class AttemptQuestionView(ListView, ModelFormMixin):
                 ],
                 "22/tcp": [{
                     "HostIp": "",
-                    "HostPort": port
+                    "HostPort": '9052'
                 }]
                 }
             }
@@ -216,7 +216,8 @@ class AttemptQuestionView(ListView, ModelFormMixin):
             portsdb.save()
             # for testing
             finalsiaburl = 'dmit2.bulletplus.com:' + port
-            randompassword = ShellRandomPassword.get(self, self.request, portnumber = port)
+            #randompassword = ShellRandomPassword.get(self, self.request, portnumber = port)
+            randompassword = False
             return randompassword, finalsiaburl
 
         elif response.status_code == 400:
@@ -420,7 +421,7 @@ class AttemptMCQQuestionView(ListView, ModelFormMixin):
                 ],
                 "22/tcp": [{
                     "HostIp": "",
-                    "HostPort": port
+                    "HostPort": '9052'
                 }]
                 }
             }
@@ -441,7 +442,8 @@ class AttemptMCQQuestionView(ListView, ModelFormMixin):
             portsdb.save()
             # for testing
             finalsiaburl = 'dmit2.bulletplus.com:' + port
-            randompassword = ShellRandomPassword.get(self, request, portnumber = port)
+            #randompassword = ShellRandomPassword.get(self, request, portnumber = port)
+            randompassword = False
             return randompassword, finalsiaburl
 
         elif response.status_code == 400:
@@ -815,24 +817,7 @@ class RangesView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
-        context['userrange'] = RangeStudents.objects.filter(studentID = user)
-        #print('HIHIHIHI -->' + str(context['userrange']))
-
-        currentranges = RangeStudents.objects.filter(studentID = user).values_list('rangeID')
-        #print('1 --> ' + str(currentranges))
-        # check if there are no assigned ranges
-        if len(currentranges) != 0:
-            # get the first object of assigned range (because need to declare var before our little concat trick later)
-            inactiveranges = Range.objects.filter(rangeid=(currentranges[0][0]), rangeactive = 0)
-            #print('2 --> ' + str(result))
-            for x in range(1, len(currentranges)):
-                #this for loop will concat all the assigned ranges together for our template to call
-                inactiveassignedranges= Range.objects.filter(rangeid=(currentranges[x][0]), rangeactive = 0)
-                inactiveranges = inactiveranges | inactiveassignedranges # if i didn't get the first object just now python will scold me
-            #print('3 -->' + str(inactiveranges))
-        
-        else:
-            inactiveranges = None
+        inactiveranges = RangeStudents.objects.filter(studentID=user, rangeID__rangeactive=0).order_by('-lastaccess', '-dateJoined', '-pk')
 
         context['inactive'] = inactiveranges
         return context
@@ -842,28 +827,12 @@ class RangesView(ListView):
         # get the email address of current user
         user = self.request.user
         # get the rangeIDs that are assigned to current user (in a queryset)
-        assignedranges = RangeStudents.objects.filter(studentID=user, rangeID__rangeactive=1).order_by('-lastaccess', '-dateJoined', '-pk')[:5]
+        assignedranges = RangeStudents.objects.filter(studentID=user, rangeID__rangeactive=1).order_by('-lastaccess', '-dateJoined', '-pk')
         currentranges = RangeStudents.objects.filter(studentID = user).values_list('rangeID')
 
         self.checkrangeexpiry(currentranges)
         self.checkrangeactive(currentranges)
         self.checkmanualstart(currentranges)
         self.checkmanualstop(currentranges)
-        #print('1 --> ' + str(currentranges))
-        # check if there are no assigned ranges
-        if len(currentranges) != 0:
-            # get the first object of assigned range (because need to declare var before our little concat trick later)
-            activeranges = Range.objects.filter(rangeid=(currentranges[0][0]), rangeactive = 1)
-            #print('2 --> ' + str(result))
-            for x in range(1, len(currentranges)):
-                #this for loop will concat all the assigned ranges together for our template to call
-                activeassignedranges= Range.objects.filter(rangeid=(currentranges[x][0]), rangeactive = 1)
-                activeranges = activeranges | activeassignedranges # if i didn't get the first object just now python will scold me
-                #print('3 -->' + str(result))
-        else:
-            # if there are no assigned ranges return None if not rip
-            return None
 
-        # return the whole damn thing
-        #print(result[0])
-        return activeranges
+        return assignedranges

@@ -6,46 +6,40 @@
 			Cyber Range
 		{% endblock %}
 	</title>
-<head>
-	<input type="hidden" id="test" name="variable" value="{{linegraphdata|safe}}">
 
-    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+	<head>
+		<input type="hidden" id="test" name="variable" value="{{linegraphdata|safe}}">
+		<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+		<script>
+			google.charts.load('current', {'packages':['line']});
+			google.charts.setOnLoadCallback(drawChart);
 
-	<script>
+			function drawChart() {
+				var data = new google.visualization.DataTable();
+				var test = document.getElementById("test").value;
+				data.addColumn('string', 'Range Name');
+				data.addColumn('number', 'Score (%)');
+				data.addRows({{linegraphdata|safe}});
 
-	google.charts.load('current', {'packages':['line']});
-    google.charts.setOnLoadCallback(drawChart);
+				var options = {
+					'width': "100%",
+					'height': 380,
+					'backgroundColor': 'transparent',
+					vAxis: {
+						viewWindow: {
+							min:0
+						}
+					}
+				};
 
-    function drawChart() {
+				var chart = new google.charts.Line(document.getElementById('linechart_material'));
 
-      var data = new google.visualization.DataTable();
-      var test = document.getElementById("test").value;
-      data.addColumn('string', 'Range Name');
-      data.addColumn('number', 'Score (%)');
-
-      data.addRows(
-		{{linegraphdata|safe}}
-      );
-
-      var options = {
-        'width': "100%",
-        'height': 380,
-        'backgroundColor': 'transparent',
-    	vAxis: {
-        viewWindow: {
-            min:0
+				chart.draw(data, google.charts.Line.convertOptions(options));
 			}
-		}
-      };
 
-      var chart = new google.charts.Line(document.getElementById('linechart_material'));
+		</script>
 
-      chart.draw(data, google.charts.Line.convertOptions(options));
-    }
-
-	</script>
-
-  </head>
+	</head>
 {% endblock %}
 
 {% block content_header%}
@@ -55,107 +49,113 @@
 			<small>{% block page_description %}{% endblock %}</small>
 		</h1>
 		{% block breadcrumbs %}
-
 		{% endblock %}
 	</section>
 {% endblock%}
 
 {% block content %}
-
-				<div class="row">
-
-			<div class="col-md-4" style="margin-left:3%;">
-
+	<div class="row">
+		<div class="col-md-4" style="margin-left:3%;">
 			<div class="box-body ">
-
-				<h4 class="text-center">Statistics:</h4>
+				<h4 class="text-center">
+					Statistics:
+				</h4>
 
 				<div class="info-box bg-green">
-					<span class="info-box-icon"><i class="fa fa-trophy"></i></span>
-					<span class="info-box-icon pull-right"><i class="fa fa-trophy"></i></span>
+					<span class="info-box-icon">
+						<i class="fa fa-trophy"></i>
+					</span>
+					<span class="info-box-icon pull-right">
+						<i class="fa fa-trophy"></i>
+					</span>
 					<div class="info-box-content text-center">
 					  <span class="info-box-text">Total ranges completed:</span>
 						{% if completedrangesnumber %}
-					  	<span class="info-box-number" style="font-size:34px">{{ completedrangesnumber }}</span>
+					  	<span class="info-box-number" style="font-size:34px">
+								{{ completedrangesnumber }}
+							</span>
 						{% else %}
-						<span class="info-box-number" style="font-size:34px">0</span>
+							<span class="info-box-number" style="font-size:34px">0</span>
 						{% endif %}
 					</div>
-					<!-- /.info-box-content -->
 				</div>
 
 				<div class="info-box bg-orange">
-					<span class="info-box-icon"><i class="fa fa-trophy"></i></span>
-					<span class="info-box-icon pull-right"><i class="fa fa-trophy"></i></span>
+					<span class="info-box-icon">
+						<i class="fa fa-trophy"></i>
+					</span>
+					<span class="info-box-icon pull-right">
+						<i class="fa fa-trophy"></i>
+					</span>
 					<div class="info-box-content text-center">
-					  	<span class="info-box-text">Average score percentage:</span>
+					  <span class="info-box-text">
+							Average score percentage:
+						</span>
+						
 						{% if useraveragescore %}
 					  	<span class="info-box-number" style="font-size:34px">{{ useraveragescore }}%</span>
 						{% else %}
-						<span class="info-box-number" style="font-size:34px">-</span>
+							<span class="info-box-number" style="font-size:34px">-</span>
 						{% endif %}
 					</div>
-					<!-- /.info-box-content -->
 				</div>
 
 				<div class="info-box bg-red">
-					<span class="info-box-icon"><i class="fa fa-trophy"></i></span>
-					<span class="info-box-icon pull-right"><i class="fa fa-trophy"></i></span>
+					<span class="info-box-icon">
+						<i class="fa fa-trophy"></i>
+					</span>
+					<span class="info-box-icon pull-right">
+						<i class="fa fa-trophy"></i>
+					</span>
 					<div class="info-box-content text-center">
-					  	<span class="info-box-text">Number of times you reached top 5:</span>
+					  <span class="info-box-text">
+							Number of times you reached top 5:
+						</span>
 						{% if frequencyoftop5  %}
 					  	<span class="info-box-number" style="font-size:34px">{{ frequencyoftop5 }}</span>
 						{% else %}
-						<span class="info-box-number" style="font-size:34px">0</span>
+							<span class="info-box-number" style="font-size:34px">0</span>
 						{% endif %}
 					</div>
-					<!-- /.info-box-content -->
 				</div>
-
 			</div>
-
 		</div>
-
-					<div class="w-100"></div>
-
-					<div class="col-md-7" style="margin-left:5%">
-						{% if completedrangesnumber > 1 %}
-						{% if linegraphdata %}
-				<div class="box-body">
-				<h4 class="text-center">Past completed ranges progress:</h4>
-				<div id="linechart_material">
-				</div>
-				</div>
-						{% endif %}
-						{% endif %}
-			</div>
-
-
+		
+		<div class="col-md-7" style="margin-left:5%">
+			{% if completedrangesnumber > 1 %}
+				{% if linegraphdata %}
+					<div class="box-body">
+						<h4 class="text-center">Past completed ranges progress:</h4>
+						<div id="linechart_material"></div>
+					</div>
+				{% endif %}
+			{% endif %}
 		</div>
-
-
-		<div class="row">
-
-			<div class="col" style="width: 70%; margin-left: 15%; margin-top: 3%">
-				<div class="box box-solid box-primary" style="box-shadow: 1px 2px 5px grey;">
+	</div>
+	
+	<div class="row">
+		<div class="col" style="width: 70%; margin-left: 15%; margin-top: 3%">
+			<div class="box box-solid box-primary" style="box-shadow: 1px 2px 5px grey;">
 				<div class="box-header with-border">
-                    <h3 class="box-title" style="font-size:22px;">Completed Ranges</h3>
-                    <div class="box-tools pull-right">
-					<button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
-				</div>
-                </div>
-                <div class="box-body">
+          <h3 class="box-title" style="font-size:22px;">Completed Ranges</h3>
+					
+					<div class="box-tools pull-right">
+						<button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+					</div>
+        </div>
+				
+				<div class="box-body">
 					<table class="table table-hover dataTable" role="grid">
 					  <thead>
 						<tr role="row">
 						  <th class="sorting_asc text-center" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-							Range Name
+								Range Name
 						  </th>
 							<th class="sorting_asc text-center" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-							Score
+								Score
 						  </th>
 						  <th class="sorting_asc text-center" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-							Action
+								Action
 						  </th>
 						</tr>
 					  </thead>
@@ -177,18 +177,4 @@
 
 		</div>
 		</div>
-
-
-
-
-
-
-
-			<!--<div class="col-md-5" style="margin-left:5%">-->
-					<!--<h4> Past range's score: <strong> {{total_score}} / {{max_score}} </strong> </h4>-->
-					<!--<h4> Range name: <strong>{{range_name}}</strong> </h4>-->
-					<!--<div id="chart_div"></div>-->
-				<!--</div>-->
-<!-- class="embed-responsive embed-responsive-16by9" -->
-
 {% endblock %}

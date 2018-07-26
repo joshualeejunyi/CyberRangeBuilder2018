@@ -8,10 +8,10 @@ from django.utils.dateparse import parse_date
 
 class ProgressView(generic.ListView):
     template_name='progress/progress.html'
-    context_object_name = 'progress_ranges'
+    context_object_name = 'rangesobject'
     def get_queryset(self):
         user = self.request.user
-        completedranges = RangeStudents.objects.filter(studentID=user).exclude(datecompleted=None)
+        completedranges = RangeStudents.objects.filter(studentID=user)
 
         return completedranges
 

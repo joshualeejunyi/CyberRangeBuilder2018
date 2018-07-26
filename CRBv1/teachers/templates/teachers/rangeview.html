@@ -6,54 +6,77 @@
                 
             <div class="box">
                 <div class="box-header with-border">
-                        <h3 class="box-title">{{ rangename }} </h3>
+                        <h1 class="box-title">{{ rangename }} </h1>
+
+                        {% if activated is True %}
+                        <div class="bg-green color-palette" style="text-align: center; height:5px;"></div>
+                        {% endif %}
+
+                        {% if activated is False %}
+                        <div class="bg-red color-palette" style="text-align: center; height:5px;"></div>
+                        {% endif %}
+
                         <div class="box-tools pull-right">
                             <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
                         </div>
                 </div>
                 
+                
                 <div class="box-body">
                     <div style="margin-bottom: 1%; margin-top: 1%; text-align: center;">
+                        {% if activated is False %}
                         <a class="btn btn-app" href="edit" style="height: 70px; font-size: 1em; min-width: 15%;">
                             <i class="fa fa-eraser"></i>
                             <b>Edit Range Details</b>
                         </a>
+
                         <a class="btn btn-app" href="createquestion" style="height: 70px; font-size: 1em; min-width: 15%;">
                             <i class="fa fa-plus"></i>
                             <b>Create New Questions</b>
                         </a>
+
                         <a class="btn btn-app" href="import" style="height: 70px; font-size: 1em; min-width: 15%;">
                             <i class="fa fa-clipboard"></i>
                             <b>Import Questions from Database</b>
                         </a>
+
                         <a class="btn btn-app" href="./importcsv" style="height: 70px; font-size: 1em; min-width: 15%;">
                             <i class="fa fa-files-o"></i>
                             <b>Import Questions from CSV File</b>
                         </a>
-                        </div>
-                        <div style="margin-bottom: 1%; margin-top: 1%; text-align: center;">
-                        <a class="btn btn-app" href="./exportcsv" style="height: 70px; font-size: 1em; min-width: 15%;">
-                            <i class="fa fa-floppy-o"></i>
-                            <b>Export Current Questions</b>
-                        </a>
-                        {% if activated is False %}
+
                         <a class="btn btn-app" href="activate" style="height: 70px; font-size: 1em; min-width: 15%;">
-                            <i class="fa fa-thumbs-o-up"></i>
-                            <b>Activate Range</b>
+                                <i class="fa fa-thumbs-o-up"></i>
+                                <b>Activate Range</b>
                         </a>
-                        {% else %}
+
+                        <a class="btn btn-app" href="assignusers" style="height: 70px; font-size: 1em; min-width: 15%;">
+                                <i class="fa fa-user"></i>
+                                <b>Assign Users to Range</b>
+                        </a>
+
+                        <a class="btn btn-app" href="assigngroups" style="height: 70px; font-size: 1em; min-width: 15%;">
+                                <i class="fa fa-users"></i>
+                                <b>Assign Groups to Range</b>
+                        </a>
+
+                        {% endif %}
+                        
+                        {% if activated == True %}
                         <a class="btn btn-app" href="deactivate" style="height: 70px; font-size: 1em; min-width: 15%;">
                             <i class="fa fa-thumbs-o-down"></i>
                             <b>Deactivate Range</b>
                         </a>
                         {% endif %}
-                        <a class="btn btn-app" href="assignusers" style="height: 70px; font-size: 1em; min-width: 15%;">
-                            <i class="fa fa-user"></i>
-                            <b>Assign Users to Range</b>
+                        
+                        <a class="btn btn-app" href="./downloadimporttemplate" style="height: 70px; font-size: 1em; min-width: 15%;">
+                            <i class="fa fa-download"></i>
+                            <b>Download CSV Template For Import</b>
                         </a>
-                        <a class="btn btn-app" href="assigngroups" style="height: 70px; font-size: 1em; min-width: 15%;">
-                            <i class="fa fa-users"></i>
-                            <b>Assign Groups to Range</b>
+
+                        <a class="btn btn-app" href="./exportcsv" style="height: 70px; font-size: 1em; min-width: 15%;">
+                            <i class="fa fa-floppy-o"></i>
+                            <b>Export Current Questions</b>
                         </a>
 
                         {% if isopen is False %}
@@ -201,12 +224,6 @@
                                     Hint Penalty
                                 </th>
                                 <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                    Use Docker
-                                </th>
-                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                    Docker Image Name
-                                </th>
-                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
                                     Actions
                                 </th>
                         </thead>
@@ -242,15 +259,9 @@
                                         {{x.points}}
                                     </td>
                                     <td>{{x.hintpenalty}}</td>
-                                    <td>
-                                        {{x.usedocker}}
-                                    </td>
-                                    <td>
-                                        {{x.registryid}}
-                                    </td>
                                     <td style="text-align: center">
-                                        <a class="btn btn-block btn-success" href="edit/{{ x.questionid }}">Edit</a>
-                                        <a class="btn btn-block btn-danger" onclick="return confirm('Archive Question?')" href="archive/{{ x.questionid }}">Archive</a>
+                                        <a class="btn btn-block btn-primary" href="edit/{{ x.questionid }}">Edit</a>
+                                        <a class="btn btn-block btn-primary" href="archive/{{ x.questionid }}">Archive</a>
                                     </td>
                                 </tr>
                             {% endfor %}
@@ -263,7 +274,7 @@
                         {% endif %}
                     </table>
                     <br>
-                    <a class="btn btn-block btn-danger" style="width: 30%" href="archived">View Archived Questions</a>
+                    <a class="btn btn-block btn-danger" style="width: 30%" href="./archived">View Archived Questions</a>
                 </div>
             </div>
             <div class="box">
@@ -299,7 +310,7 @@
                                 <td>{{ group.groupleader }}</td>
                                 <td>{{ group.datejoined }}</td>
                                 <td>
-                                    <a class="btn btn-block btn-danger" onclick="return confirm('Remove {{group.groupname}} from {{rangename}}?')" href="removegroup/{{ group.groupname }}">Remove</a>
+                                    <a class="btn btn-block btn-danger" href="removegroup/{{ group.groupname }}">Remove</a>
                                 </td>
                             </tr>
                         {% endfor %}
@@ -360,7 +371,7 @@
                                 </td>
                                 <td>
                                     <a class="btn btn-block btn-success" href="report/{{ user.username }}">User Report</a>
-                                    <a class="btn btn-block btn-danger" onclick="return confirm('Remove {{user.username}} from {{rangename}}?')" href="remove/{{ user.username }}">Remove User</a>
+                                    <a class="btn btn-block btn-danger" href="remove/{{ user.username }}">Remove User</a>
                                 </td>
                             </tr>
                         {% endfor %}
