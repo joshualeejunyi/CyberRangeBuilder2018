@@ -18,7 +18,7 @@ from pexpect import pxssh
 
 class ShellRandomPassword(View):
     def get(self, request, portnumber):
-        randompass = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+        randompass = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(6))
         s = pxssh.pxssh()
         if not s.login ('192.168.100.42', port=portnumber, username='guest',password='root'):
             return HttpResponse(s)
@@ -192,7 +192,12 @@ class AttemptQuestionView(ListView, ModelFormMixin):
                     "HostIp": "",
                     "HostPort": port
                     }
-                ]}
+                ],
+                "22/tcp": [{
+                    "HostIp": "",
+                    "HostPort": port
+                }]
+                }
             }
         }
         #serverip = 'localhost'
@@ -211,7 +216,7 @@ class AttemptQuestionView(ListView, ModelFormMixin):
             portsdb.save()
             # for testing
             finalsiaburl = 'dmit2.bulletplus.com:' + port
-            randompassword = ShellRandomPassword.get(self, request, portnumber = port)
+            randompassword = ShellRandomPassword.get(self, self.request, portnumber = port)
             return randompassword, finalsiaburl
 
         elif response.status_code == 400:
@@ -412,7 +417,12 @@ class AttemptMCQQuestionView(ListView, ModelFormMixin):
                     "HostIp": "",
                     "HostPort": port
                     }
-                ]}
+                ],
+                "22/tcp": [{
+                    "HostIp": "",
+                    "HostPort": port
+                }]
+                }
             }
         }
         #serverip = 'localhost'
@@ -574,17 +584,21 @@ class QuestionsView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        # first i need to get the range id.
+        rangeurl = self.kwargs['rangeurl'] # get the rangename from the kwargs (url)
+        # another thing to get is the current range id using rangeurl we got above
+        currentrangeid = Range.objects.filter(rangeurl = rangeurl).values_list('rangeid')[0][0]
+        # get the email address of current user
+        username = self.request.user
+        email = User.objects.filter(username = username).values_list('email')[0][0]
+        # this is when the user opens the range
+        # we need to enter this time as the last access
+        rangestudentobj = RangeStudents.objects.get(rangeID = currentrangeid, studentID = email)
+        rangestudentobj.lastaccess = datetime.datetime.now()
+        rangestudentobj.save()
 
         # i need to find all the topics in a single range.
         # how do i do it?
-        # first i need to get the range id.
-        rangeurl = self.kwargs['rangeurl'] # get the rangename from the kwargs (url)
-        
-        # get the current range id using rangename we got above
-        currentrangeid = Range.objects.filter(rangeurl = rangeurl).values_list('rangeid')[0][0]
-        #print("rangeid ----->>>" + str(currentrangeid))
-
-        # now that i got the range id
         # what do i need?
         # i need to get the categories that appear in the range
         # how do i get that?
@@ -828,6 +842,7 @@ class RangesView(ListView):
         # get the email address of current user
         user = self.request.user
         # get the rangeIDs that are assigned to current user (in a queryset)
+        assignedranges = RangeStudents.objects.filter(studentID=user, rangeID__rangeactive=1).order_by('-lastaccess', '-dateJoined', '-pk')[:5]
         currentranges = RangeStudents.objects.filter(studentID = user).values_list('rangeID')
 
         self.checkrangeexpiry(currentranges)
@@ -852,6 +867,3 @@ class RangesView(ListView):
         # return the whole damn thing
         #print(result[0])
         return activeranges
-
-class ErrorMessage(generic.TemplateView):
-    template_name = 'ranges/error.html'

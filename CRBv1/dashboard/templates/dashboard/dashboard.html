@@ -1,74 +1,76 @@
 {% extends 'dashboard/base.html' %}
-{% block content_header%}
-	<section class="content-header">
-		<h1>
-			{% block page_name %}Dashboard{% endblock %}
-			<small>{% block page_description %}{% endblock %}</small>
-		</h1>
-		{% block breadcrumbs %}
 
-		{% endblock %}
-	</section>
+{% block content_header%}
+<section class="content-header">
+	<h1>
+		{% block page_name %}Dashboard{% endblock %}
+		<small>{% block page_description %}{% endblock %}</small>
+	</h1>
+  {% block breadcrumbs %}
+	{% endblock %}
+</section>
 {% endblock%}
 
 {% block content %}
 <div class="row">
-		<div class="col-md-6">
-			<div class="box box-solid box-primary" style="box-shadow: 1px 2px 5px grey;">
-                <div class="box-header with-border">
-                    <h3 class="box-title" style="font-size:22px;">Uncompleted Ranges</h3>
-                    <div class="box-tools pull-right">
-					<button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+	<div class="col-md-6">
+		<div class="box box-solid box-primary" style="box-shadow: 1px 2px 5px grey;">
+      <div class="box-header with-border">
+        <h3 class="box-title" style="font-size:22px;">Current Ranges</h3>
+        <div class="box-tools pull-right">
+	  			<button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
 				</div>
-                </div>
-                <div class="box-body">
-			     {% if assigned_ranges %}
-            <table class="table table-hover dataTable" role="grid">
-              <thead>
+      </div>
+    
+      <div class="box-body">
+        <table class="table table-hover dataTable" role="grid">
+          {% if assignedranges %}
+            <thead>
+              <tr role="row">
+                <th class="sorting_asc text-center" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                  Range Name
+                </th>
+                <th class="sorting_asc text-center" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                  Action
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for range in assignedranges %}
                 <tr role="row">
-                  <th class="sorting_asc text-center" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                    Range Name
-                  </th>
-                  <th class="sorting_asc text-center" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                    Action
-                  </th>
+                  <td class="text-center">{{ range.rangeID.rangename }}</td>
+                  <td ><a style="width: 100px;" class="btn btn-block btn-primary center-block" href="/ranges/{{ range.rangeID.rangeurl }}/play">Play Range</a></td>
                 </tr>
-              </thead>
-              <tbody>
-              {% for range in assigned_ranges %}
-                  {% if assigned_ranges %}
-                      <tr role="row">
-                        <td class="text-center">{{ range.rangename }}</td>
-                        <td ><a style="width: 100px;" class="btn btn-block btn-primary center-block" href="/ranges/{{ range.rangeurl }}/play">Play Range</a></td>
-                      </tr>
-                      {% endif %}
               {% endfor %}
-              </tbody>
-            </table>
+            </tbody>
           {% else %}
-            <p style="font-size:18px;">You do not have any pending ranges.</p>
-        {% endif %}
-				<div class="box-footer">
-					<a class="btn btn-primary   center-block" href="/ranges/">View All Ranges</a>
+            <tr role="row">
+              <th class="sorting_asc text-center" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                No Assigned Active Ranges 
+              </th>
+            </tr>
+          {% endif %}
+        </table>
+			  <div class="box-footer">
+					<a class="btn btn-primary center-block" href="/ranges/">View All Ranges</a>
 				</div>
 			</div>
-            </div>
-            </div>
-
-			<div class="w-100"></div>
-
-    	<div class="col-md-6">
-            <div class="box box-solid box-success" style="box-shadow: 1px 2px 5px grey;">
-            <div class="box-header with-border">
-                <h3 class="box-title">Last Completed Range Scoreboard<strong style="font-size: 22px"> {{range_name}}</strong> </h3>
-                <div class="box-tools pull-right">
-					<button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
-				</div>
-                </div>
-			<div class="box-body">
-			     {% if rankings %}
-
-            <table class="table table-hover dataTable" role="grid">
+    </div>
+  </div>
+  
+  <div class="w-100"></div>
+    <div class="col-md-6">
+      <div class="box box-solid box-success" style="box-shadow: 1px 2px 5px grey;">
+        <div class="box-header with-border">
+          <h3 class="box-title" style="font-size: 22px">Leaderboard for {{rangename}}</h3>
+          <div class="box-tools pull-right">
+					  <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+			    </div>
+        </div>
+        
+        <div class="box-body">
+          <table class="table table-hover dataTable" role="grid">
+			     {% if scoreboard %}  
               <thead>
                 <tr role="row">
                     <th class="sorting_asc text-center" tabindex="0" aria-controls="example2"  aria-sort="asceding">
@@ -83,37 +85,40 @@
                 </tr>
               </thead>
               <tbody>
-              {% if rankings %}
-              {% for score, username in zipranks %}
-              {% if username == currentusername %}
-              <p>You made it into the top 5!</p>
-              <tr role="row" class="bg-yellow">
-                          <td class="text-center" style="font-size:18px;"> #{{forloop.counter}} </td>
-                          <td class="text-center" style="font-size:18px;">{{score}}/{{ max_score }}</td>
-                  <td class="text-center" style="font-size:18px;"><strong>{{username}}</strong></td>
-              </tr>
-              {% else %}
-                      <tr role="row">
-                          <td class="text-center" style="font-size:18px;"> #{{forloop.counter}} </td>
-                          <td class="text-center" style="font-size:18px;">{{score}}/{{ max_score }}</td>
-                          <td class="text-center" style="font-size:18px;"><strong>{{username}}</strong></td>
-                      </tr>
-              {% endif %}
+              {% for students in topfive %}
+                {% if students.studentID == username %}
+                  <tr role="row" class="bg-yellow">
+                {% else %}
+                  <tr role="row">
+                {% endif %}
+                    <td class="text-center" style="font-size:18px;"> #{{forloop.counter}}</td>
+                    <td class="text-center" style="font-size:18px;">{{ students.points}}/{{ maxscore }}</td>
+                    <td class="text-center" style="font-size:18px;"><strong>{{ students.studentID }}</strong></td>
+                </tr>
               {% endfor %}
-              {% if userintop5 == False %}
-              <tr role="row" class="bg-gray">
-                          <td class="text-center" style="font-size:18px;"> #{{userrank}} </td>
-                          <td class="text-center" style="font-size:18px;">{{userscore}}/{{ max_score }}</td>
-                          <td class="text-center" style="font-size:18px;"><strong>{{currentusername}}</strong></td>
-                      </tr>
-              <p>You didn't make it in the top 5 of this range. Try again next time!</p>
-              {% endif %}
+              {% if madeit is False %}
+                {% for students in ranking %}
+                  {% if students.studentID == username %}
+                  <tr role="row">
+                    <td class="text-center" style="font-size: 18px; transform: rotate(90deg);" colspan="3">...</td>
+                  </tr>
+                  <tr role="row" class="bg-gray">
+                    <td class="text-center" style="font-size:18px;"> #{{forloop.counter}} </td>
+                    <td class="text-center" style="font-size:18px;">{{userscore}}/{{ maxscore }}</td>
+                    <td class="text-center" style="font-size:18px;"><strong>{{students.studentID}}</strong></td>
+                  </tr>
+                  {% endif %}
+                {% endfor %}
               {% endif %}
               </tbody>
-            </table>
           {% else %}
-            <p>You have not completed any ranges.</p>
+            <tr role="row">
+              <th class="sorting_asc text-center" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                No Assigned Active Ranges 
+              </th>
+            </tr>
         {% endif %}
+        </table>
 			</div>
             </div>
         </div>
@@ -121,146 +126,31 @@
 </div>
 
 <div class="row" style="padding-top:3%">
-
-    {% if zip4ranges %}
-
-    <h4 style="margin-left: 1.5%"> Your latest completed ranges </h4>
-
-        {% if lengthofranges == 1 %}
-        {% for rangename,score,maxscore,number,rangeurl in zip4ranges %}
-        <div class="col-lg-3 col-6">
-                <div class="small-box bg-light-blue">
-                  <div class="inner">
-                    <p style="font-size: 25px">{{score}}/{{maxscore}}</p>
-                    <p>{{rangename}}</p>
-                  </div>
-                  <a href="/progress/{{ rangeurl }}/report" class="small-box-footer" style="padding:3% 0">View report <i class="fa fa-arrow-circle-right"></i></a>
-                </div>
+  {% for range in reportboxes %}
+  <div class="col-lg-3 col-6">
+      {% if forloop.counter == 1%}
+        <div class="small-box bg-light-blue">
+      {% elif forloop.counter == 2 %}
+        <div class="small-box bg-green">
+      {% elif forloop.counter == 3 %}
+        <div class="small-box bg-orange">
+      {% else %}
+        <div class="small-box bg-red">
+      {% endif %}
+        <div class="inner">
+          <p style="font-size: 25px">
+            {% for things in latestranges %}
+              {% if things.rangeID.rangeid == range.rangeID.rangeid %}
+                {{things.points}}
+              {% endif %}
+            {% endfor %}
+            /{{range.rangeID.maxscore}}
+          </p>
+          <p>{{range.rangeID.rangename}}</p>
         </div>
-        {% endfor %}
-
-            {% elif lengthofranges == 2 %}
-
-            {% for rangename,score,maxscore,number,rangeurl in zip4ranges %}
-
-                {% if number == 1 %}
-                <div class="col-lg-3 col-6">
-                        <div class="small-box bg-light-blue">
-                          <div class="inner">
-                            <p style="font-size: 25px">{{score}}/{{maxscore}}</p>
-                            <p class="align-right">{{rangename}}</p>
-                          </div>
-                          <a href="/progress/{{ rangeurl }}/report" class="small-box-footer" style="padding:3% 0">View report <i class="fa fa-arrow-circle-right"></i></a>
-                        </div>
-                </div>
-                {% endif %}
-                {% if number == 2 %}
-                <div class="col-lg-3 col-6">
-                            <div class="small-box bg-green">
-                          <div class="inner">
-                            <p style="font-size: 25px">{{score}}/{{maxscore}}</p>
-                            <p>{{rangename}}</p>
-                          </div>
-                          <a href="/progress/{{ rangeurl }}/report" class="small-box-footer" style="padding:3% 0">View report <i class="fa fa-arrow-circle-right"></i></a>
-                        </div>
-                </div>
-                {% endif %}
-
-            {% endfor %}
-
-            {% elif lengthofranges == 3 %}
-
-            {% for rangename,score,maxscore,number,rangeurl in zip4ranges %}
-
-                {% if number == 1 %}
-                <div class="col-lg-3 col-6">
-                        <div class="small-box bg-light-blue">
-                          <div class="inner">
-                            <p style="font-size: 25px">{{score}}/{{maxscore}}</p>
-                            <p class="align-right">{{rangename}}</p>
-                          </div>
-                          <a href="/progress/{{ rangeurl }}/report" class="small-box-footer" style="padding:3% 0">View report <i class="fa fa-arrow-circle-right"></i></a>
-                        </div>
-                </div>
-                {% endif %}
-                {% if number == 2 %}
-                <div class="col-lg-3 col-6">
-                            <div class="small-box bg-green">
-                          <div class="inner">
-                            <p style="font-size: 25px">{{score}}/{{maxscore}}</p>
-                            <p>{{rangename}}</p>
-                          </div>
-                          <a href="/progress/{{ rangeurl }}/report" class="small-box-footer" style="padding:3% 0">View report <i class="fa fa-arrow-circle-right"></i></a>
-                        </div>
-                </div>
-                {% endif %}
-                    {% if number == 3 %}
-                <div class="col-lg-3 col-6">
-                        <div class="small-box bg-orange" style="background-color:#c4e89b; color=blue;">
-                          <div class="inner">
-                            <p style="font-size: 25px; color=blue;">{{score}}/{{maxscore}}</p>
-                            <p>{{rangename}}</p>
-                          </div>
-                          <a href="/progress/{{ rangeurl }}/report" class="small-box-footer" style="padding:3% 0">View report <i class="fa fa-arrow-circle-right"></i></a>
-                        </div>
-                </div>
-                {% endif %}
-
-            {% endfor %}
-
-        {% elif lengthofranges == 4 %}
-
-            {% for rangename,score,maxscore,number,rangeurl in zip4ranges %}
-
-                {% if number == 1 %}
-                <div class="col-lg-3 col-6">
-                        <div class="small-box bg-light-blue">
-                          <div class="inner">
-                            <p style="font-size: 25px">{{score}}/{{maxscore}}</p>
-                            <p class="align-right">{{rangename}}</p>
-                          </div>
-                          <a href="/progress/{{ rangeurl }}/report" class="small-box-footer" style="padding:3% 0">View report <i class="fa fa-arrow-circle-right"></i></a>
-                        </div>
-                </div>
-                {% endif %}
-                {% if number == 2 %}
-                <div class="col-lg-3 col-6">
-                            <div class="small-box bg-green">
-                          <div class="inner">
-                            <p style="font-size: 25px">{{score}}/{{maxscore}}</p>
-                            <p>{{rangename}}</p>
-                          </div>
-                          <a href="/progress/{{ rangeurl }}/report" class="small-box-footer" style="padding:3% 0">View report <i class="fa fa-arrow-circle-right"></i></a>
-                        </div>
-                </div>
-                {% endif %}
-                    {% if number == 3 %}
-                <div class="col-lg-3 col-6">
-                        <div class="small-box bg-orange" style="background-color:#c4e89b; color=blue;">
-                          <div class="inner">
-                            <p style="font-size: 25px; color=blue;">{{score}}/{{maxscore}}</p>
-                            <p>{{rangename}}</p>
-                          </div>
-                          <a href="/progress/{{ rangeurl }}/report" class="small-box-footer" style="padding:3% 0">View report <i class="fa fa-arrow-circle-right"></i></a>
-                        </div>
-                </div>
-                {% endif %}
-                    {% if number == 4 %}
-                <div class="col-lg-3 col-6">
-                        <div class="small-box bg-red">
-                          <div class="inner">
-                            <p style="font-size: 25px">{{score}}/{{maxscore}}</p>
-                            <p>{{rangename}}</p>
-                          </div>
-                          <a href="/progress/{{ rangeurl }}/report" class="small-box-footer" style="padding:3% 0">View report <i class="fa fa-arrow-circle-right"></i></a>
-                        </div>
-                </div>
-                {% endif %}
-
-            {% endfor %}
-
-        {% endif %}
-
-    {% endif %}
+        <a href="/progress/{{range.rangeID.rangeurl}}/report" class="small-box-footer" style="padding:3% 0%;">View report <i class="fa fa-arrow-circle-right"></i></a>
+      </div>
+    </div>
+  {% endfor %}
 </div>
 {% endblock %}

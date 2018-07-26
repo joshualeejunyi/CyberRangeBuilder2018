@@ -1187,7 +1187,7 @@ class ActivateRange(View):
         rangeobject.manualactive = True
         rangeobject.manualdeactive = False
         rangeobject.save()
-        return redirect('./')
+        return redirect('../')
 
 @method_decorator(user_is_staff, name='dispatch')
 class DeactivateRange(View):
@@ -1197,7 +1197,7 @@ class DeactivateRange(View):
         rangeobject.manualdeactive = True
         rangeobject.manualactive = False
         rangeobject.save()
-        return redirect('./')
+        return redirect('../')
 
 @method_decorator(user_is_staff, name='dispatch')
 class QuestionManagement(FilterView, ListView):
