@@ -1046,6 +1046,7 @@ class CreateQuestion(ListView, ModelFormMixin):
     def post(self, request, *args, **kwargs):
         self.object = None
         self.form = self.get_form(self.form_class)
+        request.session['TF'] = False
 
         if self.form.is_valid():
             rangeinstance = Range.objects.get(rangeurl = self.kwargs['rangeurl'])
@@ -1159,7 +1160,6 @@ class CreateQuestion(ListView, ModelFormMixin):
                 
                 return ListView.get(self, request, *args, **kwargs)
             else:
-                print("OMG")
                 return ListView.get(self, request, *args, **kwargs)
 
     def get_queryset(self):
