@@ -25,10 +25,8 @@ class EnterCode(View):
         try:
             selectedrange = Range.objects.get(rangecode = form_rangecode, isopen=1)
             user = self.request.user
-            #print(user)
             requestuser = User.objects.get(username = user)
-            requestemail = requestuser.email
-            #print(requestemail)
+            requestemail = requestuser.studentID
 
             try:
                 checkifstudentinrange = RangeStudents.objects.get(rangeid = selectedrange,
@@ -202,12 +200,13 @@ class AttemptQuestionView(ListView, ModelFormMixin):
             portsdb.save()
             finalsiaburl = 'dmit2.bulletplus.com:' + port
             randompassword = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(6))
+            changepassword = '["/bin/bash","-c","echo \"guest:pass\" | chpasswd"]'
             execcmd = {
                 "AttachStdin":"true", 
                 "AttachStdout":"true", 
                 "AttachStderr":"true", 
                 "Tty":"true", 
-                "Cmd":'["/bin/bash","-c","echo \"guest:'+ randompassword + '\" | chpasswd"]'
+                "Cmd":changepassword
             }
             execurl = 'http://'+serverip+':8051/containers/%s/exec' % containerid
             execresponse = requests.post(execurl, json=execcmd)
@@ -442,12 +441,13 @@ class AttemptMCQQuestionView(ListView, ModelFormMixin):
             # for testing
             finalsiaburl = 'dmit2.bulletplus.com:' + port
             randompassword = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(6))
+            changepassword = '["/bin/bash","-c","echo \"guest:pass\" | chpasswd"]'
             execcmd = {
                 "AttachStdin":"true", 
                 "AttachStdout":"true", 
                 "AttachStderr":"true", 
                 "Tty":"true", 
-                "Cmd":'["/bin/bash","-c","echo \"guest:'+ randompassword + '\" | chpasswd"]'
+                "Cmd":changepassword
             }
             execurl = 'http://'+serverip+':8051/containers/%s/exec' % containerid
             execresponse = requests.post(execurl, json=execcmd)

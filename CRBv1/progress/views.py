@@ -21,6 +21,8 @@ class ProgressView(generic.ListView):
         context['numberofcompletedranges'] = len(completedranges)
         empty = []
         empty2 = []
+        rangenameslist = []
+        percentlist = []
         if len(completedranges) != 0:
             # For the line graph
             pasttencompleted = completedranges.values_list('rangeID').order_by('-datecompleted')[:10]
@@ -31,8 +33,6 @@ class ProgressView(generic.ListView):
                 totalpoints = totalpoints + rangepoints[x][0]
             
             rangemaxscores = 0
-            percentlist = []
-            rangenameslist = []
             x = 0
             for rangeobject in completedranges:
                 rangemaxscores = rangemaxscores + rangeobject.rangeID.maxscore
