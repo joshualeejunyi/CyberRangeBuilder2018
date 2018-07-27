@@ -35,4 +35,5 @@ urlpatterns = [
     url(r'^progress/', include('progress.urls'), name='progress'),
     url(r'^settings/', include('settings.urls'), name='settings'),
     url(r'^tinymce/', include('tinymce.urls')),
+    url(r'^selfdirected/', include('SDL.urls'), name='SDL'),
 ]

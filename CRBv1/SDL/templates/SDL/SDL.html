@@ -1,0 +1,129 @@
+{% extends 'dashboard/base.html' %}
+
+{% load widget_tweaks %}
+
+{% block content_header%}
+	<section class="content-header">
+		<h1>
+			{% block page_name %}Self Directed Learning{% endblock %}
+			<small>{% block page_description %}{% endblock %}</small>
+		</h1>
+		{% block breadcrumbs %}
+
+		{% endblock %}
+	</section>
+{% endblock%}
+
+{% block title_outer %}
+	<title>
+		{%block title %}
+			Cyber Range
+		{% endblock %}
+	</title>
+
+{% endblock %}
+
+{% block content %}
+<div class="box">
+		<div class="box-body">
+				<form method="get">
+					<div class="well">
+						<h4 style="margin-top: 0">Filter</h4>
+						<div class="row">
+							<div class="form-group col-sm-4 col-md-3">
+								<label for="title">Title:</label>
+								{% render_field filter.form.title class="form-control" %}
+							</div>
+							<div class="form-group col-sm-4 col-md-3">
+								<label for="createdby">Created By:</label>
+							  <select name="postactive" class="form-control" placeholder="Post Status">
+								{% for name in teachers %}
+								<option value='{{ name }}'>{{ name }}</option>
+								{% endfor %}
+							  </select>
+							</div>
+						</div>
+
+						<br><br><br>
+						<div class="row text-center">
+							<button type="submit" class="btn btn-primary btn-flat" style="width: 200px; display: inline-block">
+								<span class="glyphicon glyphicon-search"></span> Search
+							</button>
+							<a href="." class="btn btn-primary btn-block btn-flat" style="width: 200px;  display: inline-block;" >Reset Filters</a>
+						</div>
+					</div>
+				</form>
+		</div>
+
+{% if posts %}
+{% for post in posts %}
+<div class="row">
+	<div class="col-md-6 col-md-offset-3">
+          <!-- Box Comment -->
+          <div class="box box-widget">
+            <div class="box-header bg-warning with-border">
+              <div class="user-block">
+				  <h4>Title: {{ post.title }}</h4>
+                <span> Created by: {{ post.createdby }}</span>
+              </div>
+              <!-- /.user-block -->
+              <div class="box-tools">
+                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                </button>
+                <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+              </div>
+              <!-- /.box-tools -->
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+              <!-- post text -->
+				<div style="max-height:100px; text-overflow:ellipsis; overflow:hidden;">
+				{{ post.text | safe }}
+					</div>
+				<br>
+				<div>
+				<a href="view/{{ post.postid }}" class="text-center"> View Post </a>
+					</div>
+            </div>
+            <!-- /.box-footer -->
+            <div class="box-footer">
+					  <span style="float:right;">Date Posted: {{ post.dateposted }} {{ post.timeposted }}
+            </span></div>
+            <!-- /.box-footer -->
+          </div>
+          <!-- /.box -->
+        </div>
+		</div>
+{% endfor %}
+
+	{% else %}
+	<h3 class="text-center" style="padding-bottom: 2%"> No records found.</h3>
+	{% endif %}
+
+{% if is_paginated %}
+<ul class="pagination">
+	{% if page_obj.has_previous %}
+		<li><a href="?page={{ page_obj.previous_page_number }}">&laquo;</a></li>
+	{% else %}
+		<li class="disabled"><span>&laquo;</span></li>
+	{% endif %}
+
+	{% for i in paginator.page_range %}
+		{% if page_obj.number == i %}
+			<li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+		{% else %}
+			<li><a href="?page={{ i }}">{{ i }}</a></li>
+		{% endif %}
+	{% endfor %}
+
+	{% if page_obj.has_next %}
+		<li><a href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>
+	{% else %}
+		<li class="disabled"><span>&raquo;</span></li>
+	{% endif %}
+</ul>
+{% endif %}
+
+</div>
+
+{% endblock %}

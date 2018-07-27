@@ -8,7 +8,6 @@
 	</title>
 
 	<head>
-		<input type="hidden" id="test" name="variable" value="{{linegraphdata|safe}}">
 		<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 		<script>
 			google.charts.load('current', {'packages':['line']});
@@ -16,18 +15,25 @@
 
 			function drawChart() {
 				var data = new google.visualization.DataTable();
-				var test = document.getElementById("test").value;
 				data.addColumn('string', 'Range Name');
 				data.addColumn('number', 'Score (%)');
-				data.addRows({{linegraphdata|safe}});
+
+				data.addRows({{graphdata|safe}});
 
 				var options = {
-					'width': "100%",
-					'height': 380,
+					chart: {
+					title: 'Past Five Range Scores',
+					subtitle: 'in percent (%)'
+					},
 					'backgroundColor': 'transparent',
+					'width': "100%",
+					'height': 500,
 					vAxis: {
+						minTextSpacing: 0,
+						viewWindowMode:'explicit',
 						viewWindow: {
-							min:0
+							min:0,
+							max:100,
 						}
 					}
 				};
@@ -54,49 +60,32 @@
 {% endblock%}
 
 {% block content %}
-	<div class="row">
-		<div class="col-md-4" style="margin-left:3%;">
+	<div class="row" style="width:90%; margin: 0 auto;">
+		<div class="col-md-4" >
 			<div class="box-body ">
-				<h4 class="text-center">
-					Statistics:
-				</h4>
-
 				<div class="info-box bg-green">
 					<span class="info-box-icon">
-						<i class="fa fa-trophy"></i>
-					</span>
-					<span class="info-box-icon pull-right">
-						<i class="fa fa-trophy"></i>
+						<i class="fa fa-rocket"></i>
 					</span>
 					<div class="info-box-content text-center">
-					  <span class="info-box-text">Total ranges completed:</span>
-						{% if completedrangesnumber %}
+					  <span class="info-box-text">Total Ranges Completed:</span>
 					  	<span class="info-box-number" style="font-size:34px">
-								{{ completedrangesnumber }}
-							</span>
-						{% else %}
-							<span class="info-box-number" style="font-size:34px">0</span>
-						{% endif %}
+							{{ numberofcompletedranges }}
+						</span>
 					</div>
 				</div>
 
 				<div class="info-box bg-orange">
 					<span class="info-box-icon">
-						<i class="fa fa-trophy"></i>
-					</span>
-					<span class="info-box-icon pull-right">
-						<i class="fa fa-trophy"></i>
+						<i class="fa fa-bar-chart-o"></i>
 					</span>
 					<div class="info-box-content text-center">
 					  <span class="info-box-text">
-							Average score percentage:
+							Average Score Percentage:
 						</span>
-						
-						{% if useraveragescore %}
-					  	<span class="info-box-number" style="font-size:34px">{{ useraveragescore }}%</span>
-						{% else %}
-							<span class="info-box-number" style="font-size:34px">-</span>
-						{% endif %}
+					  	<span class="info-box-number" style="font-size:34px">
+							  {{ averagepercent }}%
+						</span>
 					</div>
 				</div>
 
@@ -104,45 +93,34 @@
 					<span class="info-box-icon">
 						<i class="fa fa-trophy"></i>
 					</span>
-					<span class="info-box-icon pull-right">
-						<i class="fa fa-trophy"></i>
-					</span>
 					<div class="info-box-content text-center">
 					  <span class="info-box-text">
-							Number of times you reached top 5:
+							Top Fives:
 						</span>
-						{% if frequencyoftop5  %}
-					  	<span class="info-box-number" style="font-size:34px">{{ frequencyoftop5 }}</span>
-						{% else %}
-							<span class="info-box-number" style="font-size:34px">0</span>
-						{% endif %}
+					  	<span class="info-box-number" style="font-size:34px">
+							{{ topfive }}
+						</span>
 					</div>
 				</div>
 			</div>
 		</div>
 		
 		<div class="col-md-7" style="margin-left:5%">
-			{% if completedrangesnumber > 1 %}
-				{% if linegraphdata %}
-					<div class="box-body">
-						<h4 class="text-center">Past completed ranges progress:</h4>
-						<div id="linechart_material"></div>
-					</div>
-				{% endif %}
-			{% endif %}
+			<div class="box-body">
+				<div id="linechart_material"></div>
+			</div>
 		</div>
 	</div>
 	
 	<div class="row">
-		<div class="col" style="width: 70%; margin-left: 15%; margin-top: 3%">
+		<div class="col" style="width: 90%; margin: 0 auto;">
 			<div class="box box-solid box-primary" style="box-shadow: 1px 2px 5px grey;">
 				<div class="box-header with-border">
-          <h3 class="box-title" style="font-size:22px;">Completed Ranges</h3>
-					
+          			<h3 class="box-title" style="font-size:22px;">Ranges</h3>
 					<div class="box-tools pull-right">
 						<button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
 					</div>
-        </div>
+        		</div>
 				
 				<div class="box-body">
 					<table class="table table-hover dataTable" role="grid">
@@ -160,11 +138,11 @@
 						</tr>
 					  </thead>
 					  <tbody>
-					  {% for rangename, userscore, maxscore, rangeurl in rangetabledata %}
+					  {% for range in rangesobject %}
 						  <tr role="row">
-							<td class="text-center">{{ rangename }}</td>
-							  <td class="text-center">{{ userscore }}/{{maxscore}}</td>
-							<td ><a style="width: 100px;" class="btn btn-block btn-primary center-block" href="{{ rangeurl }}/report">View Report</a></td>
+							<td class="text-center">{{ range.rangeID.rangename }}</td>
+							  <td class="text-center">{{ range.points }}/{{ range.rangeID.maxscore}}</td>
+							<td ><a style="width: 100px;" class="btn btn-block btn-primary center-block" href="{{ range.rangeID.rangeurl }}/report">View Report</a></td>
 						  </tr>
 					  {% endfor %}
 					  </tbody>

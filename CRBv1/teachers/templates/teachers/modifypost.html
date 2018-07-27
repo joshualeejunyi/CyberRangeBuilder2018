@@ -1,0 +1,41 @@
+{% extends 'teachers/teacherbase.html' %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+            <div class="col-md-6 col-md-offset-3">
+                <div class="register-box-body">
+                    <p class="login-box-msg">Modify User Account</p>
+                    <form method="post">
+                        {{ form.media }}
+                        {% csrf_token %}
+
+                          <div class="form-group has-feedback">
+                                <label for="title">Post Title:</label>
+                                {% if form.title.errors %}
+                                <input type="text" name="title" class="form-control" value="{{ result.title }}" style="color: #dd4b39">
+                                <ul style="color: #dd4b39">
+                                    {% for error in form.title.errors %}
+                                    <li><strong>{{ error|escape }}</strong></li>
+                                    {% endfor %}
+                                </ul>
+                                {% else %}
+                                <input type="text" name="title" class="form-control" value="{{ result.title }}">
+                                {% endif %}
+                            </div>
+
+                            <div class="form-group has-feedback">
+                                <label for="text">Post Content:</label>
+                                <div class="box">
+                                    {{ form.text }}
+                                </div>
+                            </div>
+
+                        <button type="submit" class="btn btn-primary btn-block btn-flat pull-right" style="width: 100px">Submit</button>
+                        <a href="../" class="btn btn-primary btn-block btn-flat" style="width: 100px">Back</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

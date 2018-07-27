@@ -1,0 +1,124 @@
+{% extends 'dashboard/base.html' %}
+
+{% block content_header%}
+	<section class="content-header">
+		<h1>
+			{% block page_name %}Self Directed Learning{% endblock %}
+			<small>{% block page_description %}{% endblock %}</small>
+		</h1>
+		{% block breadcrumbs %}
+
+		{% endblock %}
+	</section>
+{% endblock%}
+
+{% block title_outer %}
+	<title>
+		{%block title %}
+			Cyber Range
+		{% endblock %}
+	</title>
+
+{% endblock %}
+
+{% block content %}
+
+ <!--The selected post-->
+{% for post in post %}
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+
+              <div class="box box-widget">
+                <div class="box-header bg-info with-border">
+                  <div class="user-block">
+                      <h4>Title: {{ post.title }}</h4>
+                    <span> Created by: {{ post.createdby }}</span>
+                  </div>
+                </div>
+                <div class="box-body">
+                  <!-- Post content -->
+                    {{ post.text | safe  }}
+                </div>
+                <!-- Footer -->
+                <div class="box-footer">
+                          <span style="float:right;">Date Posted: {{ post.dateposted }} {{ post.timeposted }}
+                </span></div>
+              </div>
+            </div>
+            </div>
+
+    <!--Adding comment form-->
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            <form method = "post">
+                {% csrf_token %}
+                <div class="well">
+                <div class="form-group has-feedback">
+                    <label for="comment">Add Comment:</label>
+                    <input type="text" name="comment" class="form-control">
+                    <div>
+                        <button type="submit" class="btn btn-primary btn-block btn-flat pull-right" style="width: 100px; margin-top: 2%;">Comment</button>
+                    </div>
+                </div>
+                <br>
+                <br>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+
+    <!--Comment Section-->
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            <div class="panel">
+            <div class="box-header"> Comments:</div>
+
+            <div class="box-footer box-comments">
+                          <!-- For loop to show all comments on the post -->
+                {% for commentid, comment, commenter, dateposted, timeposted, isuser, isteacher in comments %}
+
+                <!--Checks if commenter is a teacher, and thus will highlight comment.-->
+                {% if isteacher == 0 %}
+                <div class="box-comment"  style="padding: 1%">
+                            <div class="comment-text">
+                                  <span class="username">
+                                    {{ commenter }}
+                                    <span class="text-muted pull-right">{{ dateposted }} {{timeposted}}</span>
+                                  </span>
+                              {{ comment }}
+                                <span class="text-muted pull-right">
+                                    {% if isuser == 1 %}
+                                 <a href="deletecomment/{{ commentid }}" onclick="return confirm('Are you sure you want to delete this comment?')">Delete Comment</a>
+                                    {% endif %}
+                                    </span>
+                            </div>
+                          </div>
+
+                {% else %}
+                <div class="box-comment bg-success" style="padding: 1%">
+                    <div class="comment-text">
+                          <span class="username">
+                            {{ commenter }}
+                            <span class="text-muted pull-right">{{ dateposted }} {{timeposted}}</span>
+                          </span><!-- /.username -->
+                      {{ comment }}
+                        <span class="text-muted pull-right">
+                            {% if isuser == 1 %}
+                         <a href="deletecomment/{{ commentid }}" onclick="return confirm('Are you sure you want to delete this comment?')">Delete Comment</a>
+                            {% endif %}
+                            </span>
+                    </div>
+              </div>
+
+                {% endif %}
+                {% endfor %}
+
+            </div>
+        </div>
+
+    </div>
+{% endfor %}
+
+{% endblock %}

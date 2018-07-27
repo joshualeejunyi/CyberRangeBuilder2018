@@ -1,0 +1,173 @@
+{% extends 'teachers/teacherbase.html' %}
+{% load widget_tweaks %}
+{% block content_header%}
+	<section class="content-header">
+		<h1>
+			{% block page_name %}Self Directed Learning Management{% endblock %}
+		</h1>
+		{% block breadcrumbs %}
+        {% endblock %}
+    </section>
+{% endblock%}
+
+{% block content %}
+    <section class="content">
+        <div class="row">
+                <a class="btn btn-app" href="addpost" style="width: 150px;">
+                        <i class="fa fa-plus"></i>
+                        <b>Add New Post</b>
+                </a>
+            <div class="box">
+                <div class="box-header with-border">
+                        <h3 class="box-title">Posts</h3>
+                        <div class="box-tools pull-right">
+                            <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                        </div>
+                </div>
+                <div class="box-body">
+                        <form method="get">
+                            <div class="well">
+                                <h4 style="margin-top: 0">Filter</h4>
+                                <div class="row">
+                                    <div class="form-group col-sm-4 col-md-3">
+                                        <label for="title">Title:</label>
+                                        {% render_field filter.form.title class="form-control" %}
+                                    </div>
+                                    <div class="form-group col-sm-4 col-md-3">
+                                        <label for="createdby">Created By:</label>
+                                      <select name="postactive" class="form-control" placeholder="Post Status">
+                                        {% for name in teachers %}
+                                        <option value='{{ name }}'>{{ name }}</option>
+                                        {% endfor %}
+                                      </select>
+                                    </div>
+
+                                    <div class="form-group col-sm-4 col-md-3">
+                                        <label for="postactive">Post Status</label>
+                                        <select name="postactive" class="form-control" placeholder="Post Status">
+                                            <option value="">----</option>
+                                            <option value="True">Active</option>
+                                            <option value="False">Inactive</option>
+                                        </select>
+                                    </div>
+                                    </div>
+
+                                <br><br><br>
+                                <div class="row text-center">
+                                    <button type="submit" class="btn btn-primary btn-flat" style="width: 200px; display: inline-block">
+                                        <span class="glyphicon glyphicon-search"></span> Search
+                                    </button>
+                                    <a href="." class="btn btn-primary btn-block btn-flat" style="width: 200px;  display: inline-block;" >Reset Filters</a>
+                                </div>
+                            </div>
+                        </form>
+                </div>
+                    <table id="poststable" class="table table-bordered table-hover dataTable" role="grid">
+                    {% if posts %}
+                    <thead>
+                        <tr role="row">
+                            <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                Title
+                            </th>
+                            <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                Content
+                            </th>
+                            <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                Is Active
+                            </th>
+                            <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                Created By
+                            </th>
+                            <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                Date Created
+                            </th>
+                            <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                Time Created
+                            </th>
+                            <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                Date Posted
+                            </th>
+                            <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                Time Posted
+                            </th>
+                            <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                Last Modified Date
+                            </th>
+                            <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                Last Modified Time
+                            </th>
+                            <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for post in posts %}
+                        <tr role="row">
+                            <td>{{ post.title }}</td>
+                            <td>{{ post.text | safe}}</td>
+                            <td>{{ post.postactive }}</td>
+                            <td>{{ post.createdby }}</td>
+                            <td>{{ post.datecreated }}</td>
+                            <td>{{ post.timecreated }}</td>
+                            <td>{{ post.dateposted }}</td>
+                            <td>{{ post.timeposted }}</td>
+                            <td>{{ post.lastmodifieddate }}</td>
+                            <td>{{ post.lastmodifiedtime }}</td>
+                            <td>
+                                <a class="btn btn-block btn-primary" href="modifypost/{{ post.postid }}">Edit</a>
+                                {% if post.postactive == False %}
+                                <a class="btn btn-block btn-info" href="uppost/{{ post.postid }}">Post Online</a>
+                                {% else %}
+                                <a class="btn btn-block btn-warning" href="downpost/{{ post.postid }}">Take Down</a>
+                                {% endif %}
+                                <a class="btn btn-block btn-danger" href="deletepost/{{ post.postid }}" onclick="return confirm('Are you sure you want to delete this post?')">Delete Post</a>
+                                <a class="btn btn-block btn-default" href="viewpost/{{ post.postid }}" >View Post</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    {% else %}
+                    <thead>
+                        <th>
+                            <h4>No Records Found.</h4>
+                        </th>
+                    </thead>
+
+                    {% endif %}
+                    </tbody>
+                </table>
+
+                {% if is_paginated %}
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                        <li><a href="?page={{ page_obj.previous_page_number }}">&laquo;</a></li>
+                    {% else %}
+                        <li class="disabled"><span>&laquo;</span></li>
+                    {% endif %}
+                        
+                    {% for i in paginator.page_range %}
+                        {% if page_obj.number == i %}
+                            <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+                        {% else %}
+                            <li><a href="?page={{ i }}">{{ i }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                        <li><a href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>
+                    {% else %}
+                        <li class="disabled"><span>&raquo;</span></li>
+                    {% endif %}
+                </ul>
+                {% endif %}
+            </div>
+        </div>
+
+    </section>
+{% endblock %}
+
+<script>
+    $(function () {
+       $("#poststable").DataTable();
+    });
+</script>

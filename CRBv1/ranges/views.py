@@ -14,20 +14,6 @@ from django.contrib import messages
 from accounts.models import User
 import string
 import random
-from pexpect import pxssh
-
-class ShellRandomPassword(View):
-    def get(self, request, portnumber):
-        randompass = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(6))
-        s = pxssh.pxssh()
-        if not s.login ('192.168.100.42', port=portnumber, username='guest',password='root'):
-            return HttpResponse(s)
-        else:
-            s.sendline ('passwd %s' % randompass)
-            s.prompt()         # match the prompt
-            # print everything before the prompt.
-            s.logout()
-            return randompass
 
 class EnterCode(View):
     def get(self, request, *args, **kwargs):
@@ -214,10 +200,23 @@ class AttemptQuestionView(ListView, ModelFormMixin):
 
             portsdb = UnavailablePorts(portnumber = int(port), studentid = self.request.user, containername = containerid, datetimecreated = timezone.now())
             portsdb.save()
-            # for testing
             finalsiaburl = 'dmit2.bulletplus.com:' + port
-            #randompassword = ShellRandomPassword.get(self, self.request, portnumber = port)
-            randompassword = False
+            randompassword = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(6))
+            execcmd = {
+                "AttachStdin":"true", 
+                "AttachStdout":"true", 
+                "AttachStderr":"true", 
+                "Tty":"true", 
+                "Cmd":'["/bin/bash","-c","echo \"guest:'+ randompassword + '\" | chpasswd"]'
+            }
+            execurl = 'http://'+serverip+':8051/containers/%s/exec' % containerid
+            execresponse = requests.post(execurl, json=execcmd)
+            if response.status_code == 201:
+                execdata = response.json()
+                execconid = execdata['Id']
+                execstarturl = 'http://' + serverip + ':8051/exec/%s/start' % execconid
+                startexecres = requests.post(execstarturl)
+
             return randompassword, finalsiaburl
 
         elif response.status_code == 400:
@@ -442,8 +441,22 @@ class AttemptMCQQuestionView(ListView, ModelFormMixin):
             portsdb.save()
             # for testing
             finalsiaburl = 'dmit2.bulletplus.com:' + port
-            #randompassword = ShellRandomPassword.get(self, request, portnumber = port)
-            randompassword = False
+            randompassword = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(6))
+            execcmd = {
+                "AttachStdin":"true", 
+                "AttachStdout":"true", 
+                "AttachStderr":"true", 
+                "Tty":"true", 
+                "Cmd":'["/bin/bash","-c","echo \"guest:'+ randompassword + '\" | chpasswd"]'
+            }
+            execurl = 'http://'+serverip+':8051/containers/%s/exec' % containerid
+            execresponse = requests.post(execurl, json=execcmd)
+            if response.status_code == 201:
+                execdata = response.json()
+                execconid = execdata['Id']
+                execstarturl = 'http://' + serverip + ':8051/exec/%s/start' % execconid
+                startexecres = requests.post(execstarturl)
+
             return randompassword, finalsiaburl
 
         elif response.status_code == 400:
