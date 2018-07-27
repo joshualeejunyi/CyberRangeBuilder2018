@@ -55,7 +55,7 @@ class RangeForm(ModelForm):
         self.timestart = timestart
         self.timeend = timeend
 
-        if startdate is not None or enddate is not None:
+        if startdate is not None and enddate is not None:
             if enddate < startdate:
                 msg = u"End Date should be after Start Date!"
                 self._errors["dateend"] = self.error_class([msg])

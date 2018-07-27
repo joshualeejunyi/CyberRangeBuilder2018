@@ -40,7 +40,7 @@ class CreateImage(View):
         imageid = imageid.lower()
         
         for ip in serverip:
-            endpoint1 = 'http://' + ip + '/images/create?fromImage=dmit2.bulletplus.com:9100/{conid}'
+            endpoint1 = 'http://' + ip + '/images/create?fromImage=dmit2.bulletplus.com:8053/{conid}'
             header1 = {"X-Registry-Auth": "eyAidXNlcm5hbWUiOiAiYWRtaW4iLCAicGFzc3dvcmQiOiAicGFzc3dvcmQiLCAic2VydmVyYWRkcmVzcyI6ICJkbWl0Mi5idWxsZXRwbHVzLmNvbTo5MTAwIiB9Cg=="}
             url1 = endpoint1.format(conid=imageid)
             response = requests.post(url1, headers=header1)
@@ -58,7 +58,7 @@ class CreateImage(View):
             #IMAGE NAME CANNOT HAVE CAPITAL LETTERS!!!!!!!!!!!!!!!!!!!!!!!!!
             reference = {}
             imagename = str(rangeurl) + '.' + str(questionid)
-            endpoint2 = 'http://' + ip + '/images/dmit2.bulletplus.com:9100/' + imageid + '/tag?repo=' + imagename
+            endpoint2 = 'http://' + ip + '/images/dmit2.bulletplus.com:8053/' + imageid + '/tag?repo=' + imagename
             response = requests.post(endpoint2)
             
             if response.status_code == 201:
