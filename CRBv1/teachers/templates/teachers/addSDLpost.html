@@ -1,37 +1,31 @@
 {% extends 'teachers/teacherbase.html' %}
 {% block content %}
-<div class="row">
-    <div class="col-lg-10 col-lg-offset-1" style="margin: 0 10%;">
-        <div class="register-box-body">
-
-            <form method="post">
-
-                <h3 class="text-center panel"> Self Directed Learning </h3>
-
-                {{ form.media }}
-                {% csrf_token %}
-
-                <div class="form-group has-feedback">
+    <div class="row">
+        <div class="col-lg-10 col-lg-offset-1" style="margin: 0 10%;">
+            <div class="register-box-body">
+                <form method="post">
+                    <h3 class="text-center panel">Add A Post:</h3>
+                    {{ form.media }}
+                    {% csrf_token %}
+                    <div class="form-group has-feedback">
                         <label for="title">Title:</label>
                         <input type="text" name="title" class="form-control" required>
-                </div>
-
-                <div class="form-group has-feedback" style="margin-bottom:5%">
-                    <label for="text">Post Content:</label>
-                    <p> Enter your content here. You can use the "source code" button to embed images. </p>
-                    <div class="box">
-                        {{ form.text }}
                     </div>
-                </div>
+    
+                    <div class="form-group has-feedback" style="margin-bottom:5%">
+                        <label for="text">Post Content:</label>
+                        <p> Enter your content here. You can use the "source code" button to embed images. </p>
+            
+                        <div class="box">
+                            {{ form.text }}
+                        </div>
+                    </div>
 
-                <div class="footer">
-                <button type="submit" class="btn btn-primary" style="float: right; margin-top:-2%;" >Submit Post</button>
-                </div>
-
-            </form>
-
+                    <div class="footer">
+                        <button type="submit" class="btn btn-primary" style="float: right; margin-top:-2%;" >Submit Post</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
-
 {% endblock %}

@@ -91,11 +91,11 @@ urlpatterns = [
     path('classmanagement/addclass/', views.AddClass.as_view(), name='addclass'),
 
     path('SDLmanagement/', login_required(views.SDLManagement.as_view()), name='SDLManagement'),
-    path('SDLmanagement/addpost', login_required(views.AddPost.as_view()), name="addpost"),
-    path('SDLmanagement/addpost/success', login_required(views.AddPostSuccess.as_view()), name="addpostsuccess"),
-    path('SDLmanagement/modifypost/<postid>', login_required(views.ModifyPost.as_view()), name="modifypost"),
-    path('SDLmanagement/uppost/<postid>', login_required(views.UpPost.as_view()), name="uppost"),
-    path('SDLmanagement/downpost/<postid>', login_required(views.DownPost.as_view()), name="downpost"),
-    path('SDLmanagement/deletepost/<postid>', login_required(views.DeletePost.as_view()), name="deletepost"),
-    path('SDLmanagement/viewpost/<postid>', login_required(views.ViewPost.as_view()), name="viewpost"),
+    path('SDLmanagement/addpost/', login_required(views.AddPost.as_view()), name="addpost"),
+    path('SDLmanagement/edit/<postid>/', login_required(views.EditPost.as_view()), name="editpost"),
+    path('SDLmanagement/publish/<postid>/', login_required(views.PublishPost.as_view()), name="publishpost"),
+    path('SDLmanagement/withdraw/<postid>/', login_required(views.WithdrawPost.as_view()), name="withdrawpost"),
+    path('SDLmanagement/delete/<postid>/', login_required(views.DeletePost.as_view()), name="deletepost"),
+    path('SDLmanagement/view/<postid>/', login_required(views.ViewPost.as_view()), name="viewpost"),
+    path('SDLmanagement/view/<postid>/deletecomment/<commentid>', login_required(views.DeleteComment.as_view()), name="deletecomment"),
 ]  

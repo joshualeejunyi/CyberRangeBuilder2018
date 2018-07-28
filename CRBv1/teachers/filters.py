@@ -30,7 +30,7 @@ class RangeFilter(django_filters.FilterSet):
 class QuestionFilter(django_filters.FilterSet):
     title = django_filters.CharFilter(lookup_expr='icontains')
     topicid__topicname = django_filters.CharFilter(lookup_expr='icontains')
-    
+    rangeid__rangeurl = django_filters.CharFilter(lookup_expr='icontains')
     class Meta:
         model = Questions
         fields = ['questiontype', 'topicid__topicname', 'title', 'rangeid__isdisabled']

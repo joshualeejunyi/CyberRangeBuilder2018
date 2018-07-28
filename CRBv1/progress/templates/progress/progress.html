@@ -21,6 +21,7 @@
 				data.addRows({{graphdata|safe}});
 
 				var options = {
+					chartArea: {  width: "50%", height: "70%" },
 					chart: {
 					title: 'Past Five Range Scores',
 					subtitle: 'in percent (%)'
@@ -29,7 +30,6 @@
 					'width': "100%",
 					'height': 500,
 					vAxis: {
-						minTextSpacing: 0,
 						viewWindowMode:'explicit',
 						viewWindow: {
 							min:0,
@@ -49,9 +49,11 @@
 {% endblock %}
 
 {% block content_header%}
-	<section class="content-header">
+	<section class="content-header" style="width: 90%; margin: 0 auto;">
 		<h1>
-			{% block page_name %}{% endblock %}
+			{% block page_name %}
+			Progress
+			{% endblock %}
 			<small>{% block page_description %}{% endblock %}</small>
 		</h1>
 		{% block breadcrumbs %}
@@ -105,10 +107,8 @@
 			</div>
 		</div>
 		
-		<div class="col-md-7" style="margin-left:5%">
-			<div class="box-body">
-				<div id="linechart_material"></div>
-			</div>
+		<div class="col-md-7" style="margin-bottom: 5%; margin-left: 5%;">
+			<div id="linechart_material"></div>
 		</div>
 	</div>
 	

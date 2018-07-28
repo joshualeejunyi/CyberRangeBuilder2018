@@ -7,30 +7,24 @@
 		{% endblock %}
 	</title>
 <head>
-
-    <input type="hidden" id="correct" name="variable" value="{{ total_score }}">
-    <input type="hidden" id="maxscore" name="variable" value="{{ max_score }}">
-
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
-		<script>
+	<script>
       google.charts.load('current', {'packages':['corechart']});
 
       google.charts.setOnLoadCallback(drawChart);
 
       function drawChart() {
 
-        // Create the data table.
-        var data = new google.visualization.DataTable();
-		var correct = parseInt(document.getElementById("correct").value);
-		var maxscore = parseInt(document.getElementById("maxscore").value);
-		var incorrect = maxscore-correct
+		var points = {{ pointsawarded }}
+		var hintpenalty = {{ hintpenalty }}
+		var unobtained = {{ unobtained }}
 
-        data.addColumn('string', 'Answer');
-        data.addColumn('number', 'Amount');
-        data.addRows([
-          ['Points Achieved', correct],
-          ['Points lost', incorrect],
+		var data = google.visualization.arrayToDataTable([
+          ['Points', 'Answers'],
+          ['Points Awarded',     points],
+          ['Points Unobtained',      unobtained],
+          ['Hint Penalty',  hintpenalty],
         ]);
 
         // Set chart options
@@ -38,11 +32,11 @@
         'width': "100%",
         'height': 380,
         'backgroundColor': 'transparent',
-        pieHole: 0.4
+        pieHole: 0.2
         };
 
         // Instantiate and draw our chart, passing in some options.
-        var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
+        var chart = new google.visualization.PieChart(document.getElementById('piechart'));
         chart.draw(data, options);
       }
     </script>
@@ -53,7 +47,8 @@
 {% block content_header%}
 	<section class="content-header">
 		<h1>
-			{% block page_name %}{% endblock %}
+			{% block page_name %}
+			{% endblock %}
 			<small>{% block page_description %}{% endblock %}</small>
 		</h1>
 		{% block breadcrumbs %}
@@ -63,71 +58,138 @@
 {% endblock%}
 
 {% block content %}
-    <h1 class="text-center"> Progress Report of range: <strong>{{ range_name }}</strong></h1>
-    <div class="row">
-        <div class="col" style="text-align:center; margin-left: 25%; width: 50%">
-                <h3> Range score: <strong> {{total_score}} / {{max_score}} </strong> </h3>
-                <div id="chart_div"></div>
-            </div>
-    </div>
-
-    		<div class="row">
-
-
-			<div class="col" style="width: 70%; margin-left: 15%; margin-top: 3%">
-				<div class="box box-solid box-primary" style="box-shadow: 1px 2px 5px grey;">
-					<div class="box-header">
-						<h3 class="box-title" style="font-size:22px;">{{ range_name }} Questions</h3>
-						<div class="box-tools pull-right">
+    <div class="row" style="width:95%; margin: 0 auto;">
+		<div style="padding: 0.2%; width: 30%; margin: 0 auto; margin-bottom: 2%;">
+				<h2 style="text-align: center;">Report for Range: {{ rangename }}</h2>
+		</div>
+        <div class="col" style="text-align:center; margin: 0 auto; width: 50%; float: left;">
+			<h3> Points Awarded: <strong> {{pointsawarded}} / {{maxscore}} </strong> </h3>
+			<div id="piechart"></div>
+		</div>
+		<div class="col-md-6">
+			<div class="box box-solid box-success" style="box-shadow: 1px 2px 5px grey;">
+				<div class="box-header with-border">
+					<h3 class="box-title" style="font-size: 22px">Leaderboard</h3>
+					<div class="box-tools pull-right">
 						<button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
-						</div>
 					</div>
-					<div class="box-body">
-					<table id="studentstable" class="table table-bordered table-hover dataTable" role="grid" style="table-layout: fixed; width: 100%; word-wrap: break-word; display: table;">
+				</div>
+				
+				<div class="box-body" style="height: 400px; overflow: auto;">
+					<table class="table table-hover dataTable" role="grid">
 						<thead>
 							<tr role="row">
-								<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="5%">
-									#
+								<th class="sorting_asc text-center" tabindex="0" aria-controls="example2"  aria-sort="asceding">
+									Rank
 								</th>
-								<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="10%">
-									Topic
+								<th class="sorting_asc text-center" tabindex="0" aria-controls="example2"  aria-sort="asceding">
+									Score
 								</th>
-								<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="10%">
-									Question Title
-								</th>
-								<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="30%">
-									Question Text
-								</th>
-								<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="15%">
-									Given Answer
-								</th>
-								<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="15%">
-									Correct Answer
-								</th>
-								<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="6%">
-									Question Points
-								</th>
-								<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="6%">
-									Points Awarded
+								<th class="sorting_asc text-center" tabindex="0" aria-controls="example2" style="width:65%;" aria-sort="asceding">
+									Username
 								</th>
 							</tr>
 						</thead>
 						<tbody>
-						{% for title, text, userans, questionans, usermarks, questionmarks,topics in reportdata %}
-							<tr role="row">
-								<td>{{ forloop.counter }}</td>
-								<td>{{ topics }}</td>
-								<td>{{ title }}</td>
-								<td>{{ text }}</td>
-								<td>{{ userans }}</td>
-								<td>{{ questionans }}</td>
-								<td>{{ usermarks }}</td>
-								<td>{{ questionmarks }}</td>
-							</tr>
+						{% for students in ranking %}
+							{% if students.studentID == username %}
+								<tr role="row" class="bg-yellow">
+							{% else %}
+								<tr role="row">
+							{% endif %}
+									<td class="text-center" style="font-size:18px;"> #{{forloop.counter}}</td>
+									<td class="text-center" style="font-size:18px;">{{ students.points}}/{{ maxscore }}</td>
+									<td class="text-center" style="font-size:18px;"><strong>{{ students.studentID }}</strong></td>
+								</tr>
 						{% endfor %}
 						</tbody>
 					</table>
 				</div>
 			</div>
 		</div>
+    </div>
+	
+	<div class="row">
+		<div class="col" style="width: 95%; margin: 0 auto; margin-top: 3%;">
+			<div class="box box-solid box-primary" style="box-shadow: 1px 2px 5px grey;">
+				<div class="box-header">
+					<h3 class="box-title" style="font-size:22px;">{{ rangename }} Questions</h3>
+					<div class="box-tools pull-right">
+					<button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+					</div>
+				</div>
+				<div class="box-body">
+				<table id="studentstable" class="table table-bordered table-hover dataTable" role="grid" style="table-layout: fixed; width: 100%; word-wrap: break-word; display: table;">
+					<thead>
+						<tr role="row">
+							<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="10%">
+								Topic
+							</th>
+							<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="10%">
+								Question Title
+							</th>
+							<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="30%">
+								Question Text
+							</th>
+							<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="15%">
+								Given Answer
+							</th>
+							<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="15%">
+								Correct Answer
+							</th>
+							<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="10%">
+								Question Points
+							</th>
+							<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="10%">
+								Points Awarded
+							</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for question in studentquestionsobj %}
+						<tr role="row">
+							<td>{{ question.questionid.topicid.topicname }}</td>
+							<td>{{ question.questionid.title }}</td>
+							<td>{{ question.questionid.text | safe | cut:"<p>" | cut:"</p>"}}</td>
+							<td>
+								{{ question.answergiven}}
+							</td>
+							<td>
+								{% if rangeactive %}
+									<b><i>Undisclosed</i></b>
+								{% else %}
+									{{ question.answer }}
+								{% endif %}
+							</td>
+							<td>{{ question.questionid.points }}</td>
+							<td>
+								{{ question.marksawarded }}
+							</td>
+						</tr>
+						{% endfor %}
+						{% for question in questionsobject %}
+						<tr role="row">
+							<td>{{ question.topicid.topicname }}</td>
+							<td>{{ question.title }}</td>
+							<td>{{ question.text | safe | cut:"<p>" | cut:"</p>"}}</td>
+							<td> - </td>
+							<td>
+								{% if rangeactive %}
+									<b><i>Undisclosed</i></b>
+								{% else %}
+									{{ question.answer }}
+								{% endif %}
+							</td>
+							<td>{{ question.points }}</td>
+							<td> - </td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		</div>
+		<div style="width: 100px">
+			<a href="../" class="btn btn-block btn-primary">Back</a>
+		</div>
+	</div>
 {% endblock %}

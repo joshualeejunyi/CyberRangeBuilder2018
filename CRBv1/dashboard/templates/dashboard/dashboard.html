@@ -62,7 +62,7 @@
     <div class="col-md-6">
       <div class="box box-solid box-success" style="box-shadow: 1px 2px 5px grey;">
         <div class="box-header with-border">
-          <h3 class="box-title" style="font-size: 22px">Leaderboard for {{rangename}}</h3>
+          <h3 class="box-title" style="font-size: 22px">Top 5 Leaders in {{rangename}}</h3>
           <div class="box-tools pull-right">
 					  <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
 			    </div>
@@ -96,6 +96,7 @@
                     <td class="text-center" style="font-size:18px;"><strong>{{ students.studentID }}</strong></td>
                 </tr>
               {% endfor %}
+              
               {% if madeit is False %}
                 {% for students in ranking %}
                   {% if students.studentID == username %}
@@ -111,17 +112,20 @@
                 {% endfor %}
               {% endif %}
               </tbody>
-          {% else %}
-            <tr role="row">
-              <th class="sorting_asc text-center" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                No Assigned Active Ranges 
-              </th>
-            </tr>
-        {% endif %}
-        </table>
-			</div>
-            </div>
-        </div>
+            {% else %}
+              <tr role="row">
+                <th class="sorting_asc text-center" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                  No Assigned Active Ranges 
+                </th>
+              </tr>
+            {% endif %}
+          </table>
+          <div style="margin-top: 1%;">
+            <a class="btn btn-success center-block" href="/progress/{{rangename}}/report/">View Full Leaderboard in Range Report</a>
+          </div>
+		  	</div>
+      </div>
+    </div>
 
 </div>
 

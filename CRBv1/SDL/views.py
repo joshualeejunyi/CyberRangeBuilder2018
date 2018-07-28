@@ -68,61 +68,14 @@ class ViewPost(ListView, ModelFormMixin):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        postid = self.kwargs['postid']
+        comments = SDLComment.objects.filter(postid=postid)
+        print('------------------------------------')
+        print(comments)
+        print('------------------------------------')
 
-        # Obtain comment IDs and commenter's emails
-        commentidlist = SDLComment.objects.filter(postid=self.kwargs['postid']).values_list('commentid', flat=True).order_by('-dateposted','-timeposted')
-        commenterlist = SDLComment.objects.filter(postid=self.kwargs['postid']).values_list('commenter',flat=True).order_by('-dateposted', '-timeposted')
-
-        user = self.request.user
-
-        # Obtain all comments from a post
-        commentlist = []
-        for id in commentidlist:
-            comment = SDLComment.objects.filter(commentid=id).values_list('comment')[0][0]
-            commentlist.append(comment)
-
-        # Obtain all commenter usernames from a post
-        usernamelist = []
-        for id in commenterlist:
-            username = User.objects.filter(email=id).values_list('username')[0][0]
-            usernamelist.append(username)
-
-        # Obtain date of comment of a post
-        datepostedlist = []
-        for id in commentidlist:
-            dateposted = SDLComment.objects.filter(commentid=id).values_list('dateposted')[0][0]
-            datepostedlist.append(dateposted)
-
-        # Obtain time of comment of a post
-        timepostedlist = []
-        for id in commentidlist:
-            timeposted = SDLComment.objects.filter(commentid=id).values_list('timeposted')[0][0]
-            timepostedlist.append(timeposted)
-
-        # Obtain list of booleans, which identify which comment is made by the current user.
-        isuserlist = []
-        for id in commenterlist:
-            username = User.objects.filter(email=id).values_list('username')[0][0]
-            if str(username) == str(user):
-                isuser=1
-            else:
-                isuser=0
-            isuserlist.append(isuser)
-
-        # Obtain list of booleans, which identify which comment is made by a teacher.
-        isteacherlist = []
-        for id in commenterlist:
-            isteacher = User.objects.filter(email=id).values_list('is_staff')[0][0]
-            print(isteacher)
-            if isteacher:
-                teacher = 1
-            else:
-                teacher = 0
-            isteacherlist.append(teacher)
-
-        # Zipped a total of 7 lists to be sent to the template.
-        context['comments'] = zip(commentidlist, commentlist, usernamelist, datepostedlist, timepostedlist, isuserlist, isteacherlist)
-
+        context['comments'] = comments
+        
         return context
 
 class DeleteComment(View):

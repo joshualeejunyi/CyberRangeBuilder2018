@@ -42,15 +42,19 @@
                                     {% render_field filter.form.title class="form-control" %}
                                 </div>
                                 <div class="form-group col-sm-4 col-md-3">
-                                        <label for="title">Range Active:</label>
-                                        {% render_field filter.form.rangeid__isdisabled class="form-control" %}
-                                    </div>
-                                <div>
-                                    <button type="submit" class="btn btn-primary btn-flat" style="width: 200px; display: inline-block">
-                                        <span class="glyphicon glyphicon-search"></span> Search
-                                    </button>
-                                    <a href="." class="btn btn-primary btn-block btn-flat" style="width: 200px;  display: inline-block;" >Reset Filters</a>
+                                    <label for="title">Range Active:</label>
+                                    {% render_field filter.form.rangeid__isdisabled class="form-control" %}
                                 </div>
+                                <div class="form-group col-sm-4 col-md-3">
+                                    <label for="title">Range URL:</label>
+                                    {% render_field filter.form.rangeid__rangeurl class="form-control" %}
+                                </div>
+                            </div>
+                            <div>
+                                <button type="submit" class="btn btn-primary btn-flat" style="width: 200px; display: inline-block">
+                                    <span class="glyphicon glyphicon-search"></span> Search
+                                </button>
+                                <a href="." class="btn btn-primary btn-block btn-flat" style="width: 200px;  display: inline-block;" >Reset Filters</a>
                             </div>
                         </div>
                     </form>
@@ -89,7 +93,7 @@
                         Docker Image Name
                     </th>
                     <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                        Actions
+                        Range URL
                     </th>
         </thead>
         {% for x in questions %}
@@ -130,9 +134,8 @@
                 <td>
                     {{x.registryid}}
                 </td>
-                <td style="text-align: center">
-                    <a style="width: 100px;" class="btn btn-block btn-primary" href="{{ rangeurl }}/edit/{{ x.questionid }}">Edit</a>
-                    <a style="width: 100px;" class="btn btn-block btn-danger" href="{{ rangeurl }}/delete/{{ x.questionid }}">Delete</a>
+                <td>
+                    {{x.rangeid.rangeurl}}
                 </td>
             </tr>
         {% endfor %}

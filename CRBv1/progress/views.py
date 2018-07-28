@@ -68,154 +68,59 @@ class ProgressView(generic.ListView):
         print(graphdata)
         print('------------------------------')
 
-            
-            
-
-
-            #userpastcompletedrangesscore = list(reversed(RangeStudents.objects.filter(studentID=user).order_by('-datecompleted').exclude(datecompleted=None).values_list('points', flat=True)[:10]))
-
-            #pastcompletedrangenames = []
-            # for x in pastcompletedrangesid:
-            #     rangename = Range.objects.filter(rangeid=x).values_list('rangename', flat=True)
-            #     datecomplete = RangeStudents.objects.filter(rangeID=x,studentID=user).values_list('datecompleted')
-            #     datecompleted = str(datecomplete[0][0])
-            #     datecompleted = datecompleted[0:10]
-            #     datecompleted = parse_date(datecompleted)
-            #     rangenamedate = str(rangename[0]+" ("+str(datecompleted)+")")
-            #     pastcompletedrangenames.append(str(rangenamedate))
-
-            # for x in range(0, len(pastcompletedrangesid)):
-            #     empty2.append(pastcompletedrangesid[x])
-            # if len(pastcompletedrangesid) != 0:
-            #     rangescore = Range.objects.filter(rangeid=(pastcompletedrangesid[0])).values_list('maxscore',flat=True)
-            #     for x in range(1, len(pastcompletedrangesid)):
-            #         pastcompletedrangescore = Range.objects.filter(rangeid=(pastcompletedrangesid[x])).values_list('maxscore',flat=True)
-            #         rangescore = rangescore | pastcompletedrangescore
-            # pastcompletedrangescores = []
-            # for x in pastcompletedrangesid:
-            #     pastcompletedrangescores.append(rangescore.get(rangeid=x))
-
-            # percentlist = []
-            # for x in range(0, len(pastcompletedrangesid)):
-            #     percent = round(((userpastcompletedrangesscore[x] / pastcompletedrangescores[x]) * 100), 2)
-            #     percentlist.append(percent)
-            # percentlist = list(map(float, percentlist))
-
-            # finallinegraphdata = str(list(zip(pastcompletedrangenames, percentlist)))
-            # finallinegraphdata = finallinegraphdata.replace("(", "[").replace(")", "]")
-            # context['linegraphdata'] = finallinegraphdata
-
-            # # For achievements
-            # context['useraveragescore'] = round((sum(map(float, percentlist)) / len(pastcompletedrangesid)),2)
-
-            # rankingusernames = []
-            # completedranges = RangeStudents.objects.filter(studentID=user).exclude(datecompleted=None).values_list('rangeID')
-
-            # for x in completedranges:
-            #     rankings = RangeStudents.objects.filter(rangeID=x).values_list('studentID',flat=True).order_by('-points')[:5]
-            #     for y in rankings:
-            #         top5rankings = User.objects.filter(email=y).values_list('username',flat=True)
-            #         rankingusernames.append(top5rankings[0])
-
-            # context['frequencyoftop5'] = rankingusernames.count(str(user))
-
-            # # For the table
-            # allrangenames = []
-            # allrangescores = []
-            # alluserscores = []
-            # allrangeurls = []
-            # completedrangeslist = list(reversed(RangeStudents.objects.filter(studentID=user).exclude(datecompleted=None).values_list('rangeID',flat=True).order_by('datecompleted')))
-
-            # for x in completedrangeslist:
-            #     allrangename = Range.objects.filter(rangeid=x).values_list('rangename', flat=True)[0]
-            #     allrangenames.append(allrangename)
-
-            # for x in completedrangeslist:
-            #     alluserscore = RangeStudents.objects.filter(rangeID=x,studentID=user).values_list('points', flat=True)[0]
-            #     alluserscores.append(alluserscore)
-
-            # for x in completedrangeslist:
-            #     allrangescore = Range.objects.filter(rangeid=x).values_list('maxscore', flat=True)[0]
-            #     allrangescores.append(allrangescore)
-
-            # for x in completedrangeslist:
-            #     allrangeurl = Range.objects.filter(rangeid=x).values_list('rangeurl', flat=True)[0]
-            #     allrangeurls.append(allrangeurl)
-
-            # context['rangetabledata'] = zip(allrangenames, alluserscores, allrangescores, allrangeurls)
-
         return context
 
 class ReportView(generic.ListView):
     template_name='progress/report.html'
-    context_object_name = 'rangereport'
+    context_object_name = 'questionsobject'
     def get_queryset(self):
         rangeurl = self.kwargs['rangeurl']
-        completedrange = Range.objects.filter(rangeurl=rangeurl)
+        username = self.request.user
+        rangeid = Range.objects.filter(rangeurl=rangeurl).values_list('rangeid')[0][0]
+        rangestudentobj = RangeStudents.objects.filter(studentID=username, rangeID__rangeid=rangeid)[0]
 
-        return completedrange
+        studentquestionsobj = StudentQuestions.objects.filter(rangeid=rangeid, studentid=username)
+        answeredquestionlist = []
+        for question in studentquestionsobj:
+            questionid = question.questionid.questionid
+            if questionid not in answeredquestionlist:
+                answeredquestionlist.append(questionid)
+
+        questionsobj = Questions.objects.filter(rangeid=rangeid).exclude(questionid__in=answeredquestionlist)
+        return questionsobj
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         rangeurl = self.kwargs['rangeurl']
         user = self.request.user
-        completedrange = Range.objects.filter(rangeurl=rangeurl).values_list('rangeid')[0][0]
+        rangeid = Range.objects.filter(rangeurl=rangeurl).values_list('rangeid')[0][0]
 
-        latestrange = RangeStudents.objects.filter(studentID=user, rangeID=completedrange).values_list('rangeID', flat=True)
-        context['latest_range'] = latestrange
+        rangeobj = Range.objects.get(rangeurl=rangeurl)
+        rangestudentsobj = RangeStudents.objects.get(studentID=user, rangeID=rangeid)
+        studentquestionsobj = StudentQuestions.objects.filter(studentid=user, rangeid=rangeid)
+ 
+        context['rangename'] = rangeobj.rangename
+        context['maxscore'] = rangeobj.maxscore
+        pointsawarded = rangestudentsobj.points
+        context['pointsawarded'] = pointsawarded
 
-        latestrangename = Range.objects.filter(rangeid=latestrange[0]).values_list('rangename')
-        context['range_name'] = latestrangename[0][0]
+        hintpenaltyqueryset = StudentHints.objects.filter(studentid=user, rangeid = rangeid, hintactivated = True).values_list('questionid')
+        totalhintpenalty = 0
+        
+        for x in range(0, len(hintpenaltyqueryset)):
+            points = Questions.objects.filter(questionid = hintpenaltyqueryset[x][0]).values_list('hintpenalty')[0][0]
+            totalhintpenalty = totalhintpenalty + int(points)
 
-        context['max_score'] = Range.objects.filter(rangeid=latestrange[0]).values_list('maxscore', flat=True)[0]
+        context['hintpenalty'] = totalhintpenalty
+        unobtained = rangeobj.maxscore - totalhintpenalty - pointsawarded
+        context['unobtained'] = unobtained
+        context['rangestudentsobj'] = rangestudentsobj
+        context['studentquestionsobj'] = studentquestionsobj
+        context['allquestions'] = Questions.objects.filter(rangeid=rangeid)
+        context['rangeactive'] = Range.objects.filter(rangeid=rangeid).values_list('rangeactive')[0][0]
 
-        total_score = RangeStudents.objects.filter(studentID=user).values_list('points').latest('datecompleted')
-        context['total_score'] = total_score[0]
-
-        # For Question Report
-        questionidlist = Questions.objects.filter(rangeid=completedrange).values_list('questionid', flat=True)
-
-        questiontitles=[]
-        questiontexts=[]
-        useranswers=[]
-        questionanswers=[]
-        usermarks=[]
-        questionmarks=[]
-        topicids = []
-        topics = []
-
-        for x in questionidlist:
-            questiontitle = Questions.objects.filter(questionid=x).values_list('title')[0][0]
-            questiontitles.append(questiontitle)
-
-        for x in questionidlist:
-            questiontext = Questions.objects.filter(questionid=x).values_list('text')[0][0]
-            questiontexts.append(questiontext)
-
-        for x in questionidlist:
-            useranswer = StudentQuestions.objects.filter(questionid=x, rangeid=completedrange, studentid=user).values_list('answergiven')[0][0]
-            useranswers.append(useranswer)
-
-        for x in questionidlist:
-            questionanswer = Questions.objects.filter(questionid=x, rangeid=completedrange).values_list('answer')[0][0]
-            questionanswers.append(questionanswer)
-
-        for x in questionidlist:
-            usermark = StudentQuestions.objects.filter(questionid=x, rangeid=completedrange, studentid=user).values_list('marksawarded')[0][0]
-            usermarks.append(usermark)
-
-        for x in questionidlist:
-            questionmark = Questions.objects.filter(questionid=x).values_list('points')[0][0]
-            questionmarks.append(questionmark)
-
-        for x in questionidlist:
-            topicid = Questions.objects.filter(questionid=x).values_list('topicid')[0][0]
-            topicids.append(topicid)
-
-        for x in topicids:
-            topic = QuestionTopic.objects.filter(topicid=x).values_list('topicname')[0][0]
-            topics.append(topic)
-
-        context['reportdata'] = zip(questiontitles, questiontexts, useranswers, questionanswers, usermarks, questionmarks, topics)
+        ranking = RangeStudents.objects.filter(rangeID=rangeid).order_by('-points')
+        context['username'] = user
+        context['ranking'] = ranking
 
         return context
