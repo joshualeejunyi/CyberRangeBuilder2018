@@ -244,6 +244,9 @@ class EnableUser(View):
 class DeleteUser(View):
     def get(self, request, username):
         selecteduser = User.objects.get(username = self.kwargs['username'])
+        userclass = selecteduser.userclass.id
+        fakeuser = FakeUser.objects.get(username = self.kwargs['username'])
+        fakeuser.delete()
         selecteduser.delete()
         url = '/teachers/usermanagement/disabled'
 
@@ -433,7 +436,6 @@ class RemoveStudentFromGroup(View):
 @method_decorator(user_is_staff, name='dispatch')
 class DeleteGroup(View):
     template_name = 'teachers/confirmdeletegroup.html'
-    #success_url = '/teachers/groupmanagement/'
 
     def get(self, request, groupname):
         groupobj = Group.objects.get(groupname = groupname)
@@ -579,7 +581,7 @@ class ArchivedRangeQuestions(ListView, FilterView):
         context['range'] = Range.objects.filter(rangeurl = self.kwargs['rangeurl'])
         context['rangeurl'] = self.kwargs['rangeurl']
         context['topics'] = QuestionTopic.objects.all()
-        # context['marks'] = RangeQuestions.objects.filter(rangeid = selectedrangeid)
+        context['archivednumber']= len(Questions.objects.filter(rangeid = selectedrangeid, isarchived = True))
         return context
 
 @method_decorator(user_is_staff, name='dispatch')
@@ -661,9 +663,13 @@ class AddQuestioninRangeCommit(View):
             questionobj.rangeid = rangeobj
             questionobj.save()
 
-            error = CreateImage.get(self, request, rangeurl, questionid, imageid)
-            if error is not 0:
-                return HttpResponse('ERROR')
+            questionpoints = questionobj.points
+            rangeobj.maxscore = rangeobj.maxscore + questionpoints
+
+            if questionobj.usedocker is True:
+                error = CreateImage.get(self, request, rangeurl, questionid, imageid)
+                if error is not 0:
+                    return HttpResponse('ERROR')
         
         url = '/teachers/rangemanagement/view/' + rangeurl
         del request.session['questionscart']
@@ -732,12 +738,14 @@ class ModifyRange(UpdateView):
         context['questiontopic'] = questiontopic
         context['rangeurl'] = self.kwargs['rangeurl']
 
-        startdate = rangeobject.values_list('datestart')[0][0]  
-        startdate = startdate.strftime('%Y-%m-%d')
-        context['startdate'] = startdate
+        startdate = rangeobject.values_list('datestart')[0][0]
+        if startdate is not None:
+            startdate = startdate.strftime('%Y-%m-%d')
+            context['startdate'] = startdate
         enddate = rangeobject.values_list('dateend')[0][0]
-        enddate = enddate.strftime('%Y-%m-%d')
-        context['enddate'] = enddate
+        if enddate is not None:
+            enddate = enddate.strftime('%Y-%m-%d')
+            context['enddate'] = enddate
 
         starttime = rangeobject.values_list('timestart')[0][0]
         if starttime is not None:
@@ -1368,41 +1376,63 @@ class ExportCSV(View):
                                 '-'])
                 
         return response
+
 @method_decorator(user_is_staff, name='dispatch')
 class ReportView(generic.ListView):
     template_name='teachers/report.html'
-    context_object_name = 'questions'
+    context_object_name = 'questionsobject'
     def get_queryset(self):
+        rangeurl = self.kwargs['rangeurl']
         username = self.kwargs['username']
+        rangeid = Range.objects.filter(rangeurl=rangeurl).values_list('rangeid')[0][0]
         useremail = User.objects.filter(username=username).values_list('email')[0][0]
-        rangeid = Range.objects.filter(rangeurl=self.kwargs['rangeurl']).values_list('rangeid')[0][0]
-        questions = Questions.objects.filter(rangeid=rangeid)
+        rangestudentobj = RangeStudents.objects.filter(studentID=useremail, rangeID__rangeid=rangeid)
 
-        return questions
+        studentquestionsobj = StudentQuestions.objects.filter(rangeid=rangeid, studentid=useremail)
+        answeredquestionlist = []
+        for question in studentquestionsobj:
+            questionid = question.questionid.questionid
+            if questionid not in answeredquestionlist:
+                answeredquestionlist.append(questionid)
+
+        questionsobj = Questions.objects.filter(rangeid=rangeid).exclude(questionid__in=answeredquestionlist)
+        return questionsobj
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         rangeurl = self.kwargs['rangeurl']
         username = self.kwargs['username']
-        context['username'] = username
-        useremail = User.objects.filter(username=username).values_list('email')[0][0]
         rangeid = Range.objects.filter(rangeurl=rangeurl).values_list('rangeid')[0][0]
+        useremail = User.objects.filter(username=username).values_list('email')[0][0]
+        rangeobj = Range.objects.get(rangeurl=rangeurl)
+        rangestudentsobj = RangeStudents.objects.get(studentID=useremail, rangeID=rangeid)
+        studentquestionsobj = StudentQuestions.objects.filter(studentid=useremail, rangeid=rangeid)
+ 
+        context['rangename'] = rangeobj.rangename
+        context['maxscore'] = rangeobj.maxscore
+        pointsawarded = rangestudentsobj.points
+        context['pointsawarded'] = pointsawarded
 
-        context['rangename'] = Range.objects.filter(rangeurl=rangeurl).values_list('rangename')[0][0]
-        context['maxscore'] = Range.objects.filter(rangeurl=rangeurl).values_list('maxscore')[0][0]
-        context['totalscore'] = RangeStudents.objects.filter(studentID=useremail).values_list('points')[0][0]
-        useranswer = StudentQuestions.objects.filter(rangeid=rangeid, studentid=useremail).values_list('answergiven')
-        if len(useranswer) != 0:
-            context['useranswer'] = useranswer[0][0]
-        else:
-            context['useranswer'] = None
+        hintpenaltyqueryset = StudentHints.objects.filter(studentid=username, rangeid = rangeid, hintactivated = True).values_list('questionid')
+        totalhintpenalty = 0
         
-        context['usermark'] = StudentQuestions.objects.filter(rangeid=rangeid, studentid=useremail).all()
-        context['topic'] = QuestionTopic.objects.all()
+        for x in range(0, len(hintpenaltyqueryset)):
+            points = Questions.objects.filter(questionid = hintpenaltyqueryset[x][0]).values_list('hintpenalty')[0][0]
+            totalhintpenalty = totalhintpenalty + int(points)
+
+        context['hintpenalty'] = totalhintpenalty
+        unobtained = rangeobj.maxscore - totalhintpenalty - pointsawarded
+        context['unobtained'] = unobtained
+        context['rangestudentsobj'] = rangestudentsobj
+        context['studentquestionsobj'] = studentquestionsobj
+        context['allquestions'] = Questions.objects.filter(rangeid=rangeid)
+        context['rangeactive'] = Range.objects.filter(rangeid=rangeid).values_list('rangeactive')[0][0]
+
+        ranking = RangeStudents.objects.filter(rangeID=rangeid).order_by('-points')
+        context['username'] = username
+        context['ranking'] = ranking
 
         return context
-
-
 
 
 @method_decorator(user_is_staff, name='dispatch')

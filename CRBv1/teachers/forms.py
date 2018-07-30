@@ -119,7 +119,6 @@ class ModifyRangeForm(ModelForm):
         enddate = cleaned_data.get("dateend")
         timestart = cleaned_data.get("timestart")
         timeend = cleaned_data.get("timeend")
-        isopen = cleaned_data.get("isopen")
 
         self.startdate = startdate
         self.enddate = enddate
@@ -157,7 +156,7 @@ class ModifyRangeForm(ModelForm):
 
     class Meta:
         model = Range
-        fields = ('rangename', 'datestart', 'timestart', 'dateend', 'timeend', 'isopen', 'attempts', 'rangeinfo')
+        fields = ('rangename', 'datestart', 'timestart', 'dateend', 'timeend', 'attempts', 'rangeinfo')
         
 class QuestionForm(ModelForm):
     def __init__(self, *args, **kwargs):
@@ -240,18 +239,15 @@ class ModifyQuestionForm(ModelForm):
         question = super().save(commit=False)
         topicname = self.request.POST.get('topicname',' ')
         registryid = self.request.POST.get('registryid','')
-
-        print('----------------------------------')
-        print(registryid)
-        print(self.usedocker)
-        print('----------------------------------')
-
         topicid = QuestionTopic.objects.get(topicname = topicname)
         question.topicid = topicid
+        print('------------')
+        print(self.usedocker)
 
         if self.usedocker is True:
             question.registryid = registryid
             imageid = registryid
+            print(imageid)
             error = teachersview.CreateImage.get(self, self.request, self.rangeurl, self.questionid, imageid)
             if error is not 0:
                 return HttpResponse('ERROR')
@@ -279,7 +275,6 @@ class ClassForm(ModelForm):
         classnumber = self.request.POST.get('classnumber')
         fullclass = course+'/'+time+'/'+yearsem+'/'+classnumber
         newclass.userclass = fullclass
-        print(fullclass)
         if commit:
             newclass.save()
         return newclass

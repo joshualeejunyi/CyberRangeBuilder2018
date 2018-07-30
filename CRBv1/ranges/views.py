@@ -727,8 +727,7 @@ class RangesView(ListView):
                     if timecheck:
                         checkifalreadyinactive = Range.objects.filter(rangeid = x[0]).values_list("rangeactive")[0][0]
                         if checkifalreadyinactive == 1:
-                            studentobject = RangeStudents.objects.filter(rangeid = x[0], datecompleted=None)
-                            studentobject.datecompleted = currenttime
+                            studentobject = RangeStudents.objects.filter(rangeid = x[0])
                             studentobject.save()
 
                             rangeobject = Range.objects.get(rangeid = x[0])

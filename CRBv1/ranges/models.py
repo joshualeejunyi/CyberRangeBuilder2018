@@ -60,12 +60,9 @@ class FakeRange(models.Model):
 
 class RangeStudents(models.Model):
     dateJoined = models.DateTimeField(db_column='dateJoined', max_length=45, blank=True, null=True)
-    progress = models.IntegerField(db_column='progress', null=True)
     points = models.IntegerField(db_column='points', default=0)
     rangeID = models.ForeignKey(Range, models.DO_NOTHING, db_column='rangeID',unique=False)
     studentID = models.ForeignKey('accounts.User', models.DO_NOTHING, db_column='email', unique=False)
-    datecompleted = models.DateField(db_column='dateCompleted', null=True)
-    timecompleted = models.TimeField(db_column='timeCompleted', null=True)
     lastaccess = models.DateTimeField(db_column='lastaccess', null=True)
     groupid = models.ForeignKey('accounts.Group', on_delete=models.CASCADE, db_column="groupid", null=True, blank=True)
 

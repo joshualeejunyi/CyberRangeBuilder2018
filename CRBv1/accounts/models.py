@@ -11,17 +11,18 @@ class UserClass(models.Model):
         db_table = 'UserClass'
         verbose_name_plural = 'UserClass'
 
+
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(db_column='email', primary_key = True)
     username = models.CharField(db_column='username', max_length=45, unique=True)
     password = models.CharField(db_column='password', max_length=100,)
     name = models.CharField(db_column='name', max_length=100)
-    userclass = models.ForeignKey('accounts.UserClass', models.DO_NOTHING, db_column='UserClass', blank=True, null=True)
+    userclass = models.ForeignKey('accounts.UserClass', on_delete=models.DO_NOTHING, db_column='UserClass', blank=True, null=True, related_name='UC')
     datejoined = models.DateField(db_column='dateJoined', blank=True, null=True)
     lastmodifieddate = models.DateField(db_column='lastModifiedDate', blank=True, null=True)
     lastmodifiedtime = models.TimeField(db_column='lastModifiedTime', null=True)
-    lastmodifiedby = models.ForeignKey('accounts.User', models.DO_NOTHING, db_column='lastModifiedBy', blank=True, null=True, related_name="LMB")
-    acceptedby = models.ForeignKey('accounts.User', models.DO_NOTHING, db_column='acceptedBy', related_name="AB", null=True) 
+    lastmodifiedby = models.ForeignKey('accounts.User', on_delete=models.DO_NOTHING, db_column='lastModifiedBy', blank=True, null=True, related_name="LMB")
+    acceptedby = models.ForeignKey('accounts.User', on_delete=models.DO_NOTHING, db_column='acceptedBy', related_name="AB", null=True) 
     last_login = models.DateTimeField(db_column='lastlogin', blank=True, null=True)
     is_superuser = models.BooleanField(db_column='admin', default=False)
     is_staff = models.BooleanField(db_column='teacher', default=False)
@@ -39,6 +40,28 @@ class User(AbstractBaseUser, PermissionsMixin):
         db_table = 'User'
         verbose_name_plural = 'Users'
         ordering = ['-lastmodifieddate', '-lastmodifiedtime']
+
+class FakeUser(models.Model):
+    email = models.EmailField(db_column='email', primary_key = True)
+    username = models.CharField(db_column='username', max_length=45, unique=True)
+    password = models.CharField(db_column='password', max_length=100,)
+    name = models.CharField(db_column='name', max_length=100)
+    userclass = models.ForeignKey('accounts.UserClass', on_delete=models.DO_NOTHING, db_column='UserClass', blank=True, null=True, related_name='fUC')
+    datejoined = models.DateField(db_column='dateJoined', blank=True, null=True)
+    lastmodifieddate = models.DateField(db_column='lastModifiedDate', blank=True, null=True)
+    lastmodifiedtime = models.TimeField(db_column='lastModifiedTime', null=True)
+    lastmodifiedby = models.ForeignKey('accounts.User', on_delete=models.DO_NOTHING, db_column='lastModifiedBy', blank=True, null=True, related_name="fLMB")
+    acceptedby = models.ForeignKey('accounts.User', on_delete=models.DO_NOTHING, db_column='acceptedBy', related_name="fAB", null=True) 
+    last_login = models.DateTimeField(db_column='lastlogin', blank=True, null=True)
+    is_superuser = models.BooleanField(db_column='admin', default=False)
+    is_staff = models.BooleanField(db_column='teacher', default=False)
+    isdisabled = models.BooleanField(db_column='isdisabled', default=False)
+    isaccepted = models.BooleanField(db_column='isaccepted', default=False)
+    
+    class Meta:
+        app_label = User._meta.app_label
+        db_table = User._meta.db_table
+        managed = False
 
 class Group(models.Model):
     groupid = models.AutoField(db_column='groupID', primary_key=True)

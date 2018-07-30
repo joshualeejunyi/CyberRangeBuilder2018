@@ -33,7 +33,7 @@
                             <li><h4>{{users}}</h4></li>
                         {% endfor %}
                         </ul>
-                        <a href="assigngroups/commit" class="btn btn-primary btn-block btn-flat" style="width: 100px; margin-top: 0.2%;">Submit</a>
+                        <a href="commit" class="btn btn-primary btn-block btn-flat" style="width: 100px; margin-top: 0.2%;">Submit</a>
                     </div>
                     {% endif %}
                         <form method="get">
@@ -105,9 +105,9 @@
                                 </td>
                             <td>
                                 {% if group.groupname in cart %}
-                                <a class="btn btn-block btn-primary" href="assigngroups/remove/{{ group.groupname }}">Remove</a>
+                                <a class="btn btn-block btn-danger" href="remove/{{ group.groupname }}">Remove</a>
                                 {% else %}
-                                <a class="btn btn-block btn-primary" href="assigngroups/add/{{ group.groupname }}">Add</a>
+                                <a class="btn btn-block btn-primary" href="add/{{ group.groupname }}">Add</a>
                                 {% endif %}
                             </td>
                         </tr>

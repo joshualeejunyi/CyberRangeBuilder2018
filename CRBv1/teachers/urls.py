@@ -31,9 +31,9 @@ urlpatterns = [
     path('groupmanagement/<groupname>/makeleader/<username>/', login_required(views.MakeLeader.as_view()), name="makeleader"),
     path('groupmanagement/<groupname>/remove/<username>/', login_required(views.RemoveStudentFromGroup.as_view()), name="removestudentfromgroup"),
     path('groupmanagement/<groupname>/addusers/', login_required(views.AddUserInGroup.as_view()), name="adduseringroup"),
-    path('groupmanagement/<groupname>/addusers/<username>/', login_required(views.AddUserToCart.as_view()), name="addusertocart"),
+    path('groupmanagement/<groupname>/addusers/add/<username>/', login_required(views.AddUserToCart.as_view()), name="addusertocart"),
     path('groupmanagement/<groupname>/addusers/remove/<username>/', login_required(views.RemoveUserFromCart.as_view()), name="removeuserfromcart"),
-    path('groupmanagement/<groupname>/commit/', login_required(views.UserGroupCommit.as_view()), name="usergroupcommit"),
+    path('groupmanagement/<groupname>/addusers/commit/', login_required(views.UserGroupCommit.as_view()), name="usergroupcommit"),
     path('groupmanagement/deletegroup/', login_required(views.UserGroupCommit.as_view()), name="usergroupcommit"),
 
     # RANGE MANAGEMENT

@@ -97,8 +97,8 @@
                                 <td>{{ user.username }}</td>
                                 <td>{{ user.userclass.userclass }}</td>
                                 <td>
-                                    <a class="btn btn-block btn-success" onclick="return confirm('Make {{user.username}} Group Leader?')" href="makeleader/{{ user.username }}" style="width: 60%">Make Group Leader</a>
-                                    <a class="btn btn-block btn-danger" onclick="return confirm('Remove {{user.username}} from {{groupname}}?')" href="remove/{{ user.username }}" style="width: 60%">Remove from Group</a>
+                                    <a class="btn btn-block btn-success" onclick="return confirm('Make {{user.username}} Group Leader?')" href="makeleader/{{ user.username }}">Make Group Leader</a>
+                                    <a class="btn btn-block btn-danger" onclick="return confirm('Remove {{user.username}} from {{groupname}}?')" href="remove/{{ user.username }}">Remove from Group</a>
                                 </td>
                             </tr>
                         {% endfor %}

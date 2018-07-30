@@ -261,7 +261,7 @@
                                     <td>{{x.hintpenalty}}</td>
                                     <td style="text-align: center">
                                         <a class="btn btn-block btn-primary" href="edit/{{ x.questionid }}">Edit</a>
-                                        <a class="btn btn-block btn-primary" href="archive/{{ x.questionid }}">Archive</a>
+                                        <a class="btn btn-block btn-danger"  onclick="return confirm('Archive Question {{ x.questionid}} ?')" href="archive/{{ x.questionid }}">Archive</a>
                                     </td>
                                 </tr>
                             {% endfor %}
@@ -310,7 +310,7 @@
                                 <td>{{ group.groupleader }}</td>
                                 <td>{{ group.datejoined }}</td>
                                 <td>
-                                    <a class="btn btn-block btn-danger" href="removegroup/{{ group.groupname }}">Remove</a>
+                                    <a class="btn btn-block btn-danger" onclick="return confirm('Remove {{ group.groupname }} from {{rangename}}?')" href="removegroup/{{ group.groupname }}">Remove</a>
                                 </td>
                             </tr>
                         {% endfor %}
@@ -371,7 +371,7 @@
                                 </td>
                                 <td>
                                     <a class="btn btn-block btn-success" href="report/{{ user.username }}">User Report</a>
-                                    <a class="btn btn-block btn-danger" href="remove/{{ user.username }}">Remove User</a>
+                                    <a class="btn btn-block btn-danger" onclick="return confirm('Remove {{student.username}} from {{rangename}}?')"href="remove/{{ user.username }}">Remove User</a>
                                 </td>
                             </tr>
                         {% endfor %}

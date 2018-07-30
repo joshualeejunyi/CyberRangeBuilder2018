@@ -74,7 +74,7 @@
                 </div>
                 <div class="box-body">
                     <table class="table table-bordered table-hover dataTable">
-                        {% if result is not None%}
+                        {% if archivednumber is 0 %}
                         <thead>
                             <tr role="row">
                                 <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
@@ -143,14 +143,14 @@
                                     </td>
                                     <td style="text-align: center">
                                         <a class="btn btn-block btn-success" href="unarchive/{{ x.questionid }}">Unarchive</a>
-                                        <a class="btn btn-block btn-danger" href="delete/{{ x.questionid }}">Permanently Delete</a>
+                                        <a class="btn btn-block btn-danger" onclick="return confirm('Permanently Delete Question {{ x.questionid}} ?')" href="delete/{{ x.questionid }}">Permanently Delete</a>
                                     </td>
                                 </tr>
                             {% endfor %}
                         {% else %}
                         <thead>
                             <th>
-                                <h4>No Archived Questions Found in {{ rangename }}</h4>
+                                <h4>No Archived Questions Found</h4>
                             </th>
                         </thead>
                         {% endif %}
@@ -158,6 +158,7 @@
                     </table>
                 </div>
             </div>
+            <a href="../" class="btn btn-primary btn-block btn-flat" style="width: 100px">Back</a>
         </div>
     </section>
 {% endblock %}

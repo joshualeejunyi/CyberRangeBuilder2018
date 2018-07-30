@@ -75,7 +75,7 @@
                                   <button type="submit" class="btn btn-primary btn-flat">
                                     <span class="glyphicon glyphicon-search"></span> Search
                                   </button>
-                                  <a href="./addusers" class="btn btn-primary btn-block btn-flat" style="width: 100px; margin-top: 0.2%;">Reset Filters</a>
+                                  <a href="." class="btn btn-primary btn-block btn-flat" style="width: 100px; margin-top: 0.2%;">Reset Filters</a>
                                 </div>
                               </form>
                     <table id="studentstable" class="table table-bordered table-hover dataTable" role="grid">
@@ -107,9 +107,9 @@
                             <td>{{ user.userclass.userclass }}</td>
                             <td>
                                 {% if user.email in cart %}
-                                <a class="btn btn-block btn-danger" href="addusers/remove/{{ user.username }}">Remove</a>
+                                <a class="btn btn-block btn-danger" href="remove/{{ user.username }}">Remove</a>
                                 {% else %}
-                                <a class="btn btn-block btn-primary" href="addusers/{{ user.username }}">Add</a>
+                                <a class="btn btn-block btn-primary" href="add/{{ user.username }}">Add</a>
                                 {% endif %}
                             </td>
                         </tr>
