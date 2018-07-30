@@ -22,6 +22,14 @@ class AddGroupCommit(AddGroup):
         self.request = kwargs.pop("request")
         super(AddGroupCommit, self).__init__(*args, **kwargs)
 
+    def clean(self):
+        cleaned_data = super(AddGroupCommit, self).clean()
+        groupname = cleaned_data.get("groupname")
+        
+        if not re.match("^[A-Za-z0-9_-]*$", groupname):
+            msg = u"Group Name should only contain letters, numbers, dashes or underscore!"
+            self._errors["groupname"] = self.error_class([msg])
+            
     def save(self, commit=True):
         group = super().save(commit=False)
         group.datecreated = datetime.date.today()
@@ -241,13 +249,10 @@ class ModifyQuestionForm(ModelForm):
         registryid = self.request.POST.get('registryid','')
         topicid = QuestionTopic.objects.get(topicname = topicname)
         question.topicid = topicid
-        print('------------')
-        print(self.usedocker)
 
         if self.usedocker is True:
             question.registryid = registryid
             imageid = registryid
-            print(imageid)
             error = teachersview.CreateImage.get(self, self.request, self.rangeurl, self.questionid, imageid)
             if error is not 0:
                 return HttpResponse('ERROR')
@@ -269,16 +274,10 @@ class ClassForm(ModelForm):
     
     def save(self, commit=True):
         newclass = super().save(commit=False)
-        course = self.request.POST.get('course')
-        time = self.request.POST.get('time')
-        yearsem = self.request.POST.get('yearsem')
-        classnumber = self.request.POST.get('classnumber')
-        fullclass = course+'/'+time+'/'+yearsem+'/'+classnumber
-        newclass.userclass = fullclass
         if commit:
             newclass.save()
         return newclass
 
     class Meta:
         model = UserClass
-        fields = ()
+        fields = ('userclass',)

@@ -24,6 +24,7 @@ class DashboardView(generic.ListView):
             lateststudentrange = latestrange[0]
             latestrangeid = lateststudentrange.rangeID
             ranking = RangeStudents.objects.filter(rangeID=latestrangeid.rangeid).order_by('-points')
+            context['rangeurl'] = Range.objects.filter(rangeid=latestrangeid.rangeid).values_list('rangeurl')[0][0]
             context['username'] = username
             context['rangename'] = latestrangeid.rangename
             context['maxscore'] = latestrangeid.maxscore

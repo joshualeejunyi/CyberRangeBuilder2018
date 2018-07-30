@@ -5,7 +5,7 @@ from ranges.models import Range
 # Create your models here.
 
 class UserClass(models.Model):
-    userclass = models.CharField(db_column='class', max_length=45)
+    userclass = models.CharField(db_column='class', max_length=45, unique=True)
 
     class Meta:
         db_table = 'UserClass'

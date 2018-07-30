@@ -46,7 +46,7 @@
                             <label for="userclass">Class:</label>
                             {% if form.userclass.errors %}
                                 <select name="userclass" class="form-control" placeholder="Class" required>
-                                    <option value="{{ user.userclass }}" selected disabled hidden>{{ user.userclass}}</option>
+                                    <option value="{{ user.userclass.id }}" selected disabled hidden>{{ user.userclass.userclass }}</option>
                                     {% for class in classesobject %}	
                                     <option value='{{ class.id }}'>{{ class.userclass }}</option>
                                     {% endfor %}
@@ -58,7 +58,7 @@
                                 </ul>
                             {% else %}
                                 <select name="userclass" class="form-control" placeholder="Class" required required>
-                                    <option value="{{ user.userclass }}" selected hidden>{{ user.userclass}}</option>
+                                    <option value="{{ user.userclass.id }}" selected hidden>{{ user.userclass.userclass}}</option>
                                     {% for class in classesobject %}	
                                     <option value='{{ class.id }}'>{{ class.userclass }}</option>
                                     {% endfor %}
@@ -66,7 +66,7 @@
                             {% endif %}
                         </div>
                         <div style="padding-bottom: 3%">
-                            <a href="{{ user.username }}/resetpassword" class="btn btn-danger btn-block btn-flat">Reset User Password</a>
+                            <a href="resetpassword" class="btn btn-danger btn-block btn-flat">Reset User Password</a>
                         </div>
                         <button type="submit" class="btn btn-primary btn-block btn-flat pull-right" style="width: 100px">Submit</button>
                         <a href="../" class="btn btn-primary btn-block btn-flat" style="width: 100px">Back</a>

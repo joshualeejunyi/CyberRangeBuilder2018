@@ -1,6 +1,7 @@
 from django import forms
 from .models import *
 from django.utils import timezone
+import datetime
 
 class AnswerForm(forms.ModelForm):
     answergiven = forms.CharField(label='Answer', max_length=100, widget=forms.TextInput(attrs={'class' : 'form-control'}))
@@ -15,11 +16,7 @@ class AnswerForm(forms.ModelForm):
         isthisashortanswer = Questions.objects.filter(questionid = questionid).values_list('questiontype')[0][0]
         repeatedcheck = StudentQuestions.objects.filter(questionid = questionid, studentid = user, rangeid = rangeinstance)
         numberofrangequestions = Questions.objects.filter(rangeid=rangeinstance).count()
-        progress = RangeStudents.objects.filter(rangeID=rangeinstance, studentID=user).values_list('progress')[0][0]
-        if progress is None:
-            progress = 0
-        else:
-            progress = int(progress)
+        
 
         check = False
         if isthisashortanswer == 'SA':
@@ -48,12 +45,22 @@ class AnswerForm(forms.ModelForm):
             studentobject.answercorrect = check
 
             if check is True:
-                pointsobject = RangeStudents.objects.get(rangeID = rangeinstance, studentID = user)
-                pointsobject.points += points
-                pointsobject.save()
-
                 studentobject.marksawarded = points
                 studentobject.save()
+
+                pointsobject = RangeStudents.objects.get(rangeID = rangeinstance, studentID = user)
+                pointsobject.points += points
+                checkcompletion = len(StudentQuestions.objects.filter(rangeid = rangeinstance, studentid = user, answercorrect = 1))
+
+                print(checkcompletion)
+                print(numberofrangequestions)
+
+                if checkcompletion == numberofrangequestions:
+                    pointsobject.datecompleted = timezone.now()
+                pointsobject.save()
+
+
+                
             
                 return True
             else:
@@ -67,18 +74,21 @@ class AnswerForm(forms.ModelForm):
             studentobject.questionid = questioninstance
             studentobject.answergiven = answergiven
             studentobject.answercorrect = check
-            studentobject.answercorrect = check
             studentobject.attempts = len(repeatedcheck) + 1
 
             if check is True:
+                studentobject.marksawarded = points
+                studentobject.save()
+
                 pointsobject = RangeStudents.objects.get(rangeID = rangeinstance, studentID = user)
                 pointsobject.points = pointsobject.points - studentobject.marksawarded
                 pointsobject.points += points
-                pointsobject.save()
 
-                studentobject.marksawarded = points
-                studentobject.save()
-            
+                checkcompletion = len(StudentQuestions.objects.filter(rangeid = rangeinstance, studentid = user, answercorrect = 1))
+
+                if checkcompletion == numberofrangequestions:
+                    pointsobj.datecompleted = timezone.now()
+
                 return True
             else:
                 studentobject.marksawarded = 0
@@ -107,11 +117,6 @@ class AnswerMCQForm(forms.ModelForm):
         isthisashortanswer = Questions.objects.filter(questionid = questionid).values_list('questiontype')[0][0]
         repeatedcheck = StudentQuestions.objects.filter(questionid = questionid, studentid = user, rangeid = rangeinstance)
         numberofrangequestions = Questions.objects.filter(rangeid=rangeinstance).count()
-        progress = RangeStudents.objects.filter(rangeID=rangeinstance, studentID=user).values_list('progress')[0][0]
-        if progress is None:
-            progress = 0
-        else:
-            progress = int(progress)
 
         check = False
         if isthisashortanswer == 'SA':
@@ -140,13 +145,18 @@ class AnswerMCQForm(forms.ModelForm):
             studentobject.answercorrect = check
 
             if check is True:
-                pointsobject = RangeStudents.objects.get(rangeID = rangeinstance, studentID = user)
-                pointsobject.points += points
-                pointsobject.save()
-
                 studentobject.marksawarded = points
                 studentobject.save()
-            
+
+                pointsobject = RangeStudents.objects.get(rangeID = rangeinstance, studentID = user)
+                pointsobject.points += points
+                checkcompletion = len(StudentQuestions.objects.filter(rangeid = rangeinstance, studentid = user, answercorrect = 1))
+
+                if checkcompletion == numberofrangequestions:
+                    pointsobject.datecompleted = timezone.now()
+
+                pointsobject.save()
+
                 return True
             else:
                 studentobject.marksawarded = 0
@@ -163,14 +173,19 @@ class AnswerMCQForm(forms.ModelForm):
             studentobject.attempts = len(repeatedcheck) + 1
 
             if check is True:
+                studentobject.marksawarded = points
+                studentobject.save()
+
                 pointsobject = RangeStudents.objects.get(rangeID = rangeinstance, studentID = user)
                 pointsobject.points = pointsobject.points - studentobject.marksawarded
                 pointsobject.points += points
                 pointsobject.save()
 
-                studentobject.marksawarded = points
-                studentobject.save()
-            
+                checkcompletion = len(StudentQuestions.objects.filter(rangeid = rangeinstance, studentid = user, answercorrect = 1))
+
+                if checkcompletion == numberofrangequestions:
+                    pointsobject.datecompleted = timezone.now()
+
                 return True
             else:
                 studentobject.marksawarded = 0

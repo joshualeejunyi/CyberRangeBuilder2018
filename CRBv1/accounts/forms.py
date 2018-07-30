@@ -6,6 +6,7 @@ import datetime
 from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth.forms import AuthenticationForm
+import re
 
 class CheckUserDisabled(AuthenticationForm):
     def confirm_login_allowed(self, user):
@@ -82,6 +83,14 @@ class UserCreationForm(forms.ModelForm):
                 password_validation.validate_password(password, self.instance)
             except forms.ValidationError as error:
                 self.add_error('password2', error)
+        
+    def clean(self):
+        cleaned_data = super(UserCreationForm, self).clean()
+        username = cleaned_data.get("username")
+        
+        if not re.match("^[A-Za-z0-9_-]*$", username):
+            msg = u"Username should only contain letters, numbers, dashes or underscore!"
+            self._errors["username"] = self.error_class([msg])
 
     def save(self, commit=True):
         user = super().save(commit=False)
@@ -224,6 +233,14 @@ class AdminModifyForm(AdminModifyModelForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop("request")
         super(AdminModifyForm, self).__init__(*args, **kwargs)
+
+    def clean(self):
+        cleaned_data = super(AdminModifyForm, self).clean()
+        username = cleaned_data.get("username")
+        
+        if not re.match("^[A-Za-z0-9_-]*$", username):
+            msg = u"Username should only contain letters, numbers, dashes or underscore!"
+            self._errors["username"] = self.error_class([msg])
 
     def save(self, commit=True):
         user = super().save(commit=False)

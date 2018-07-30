@@ -19,7 +19,7 @@
                 
             <div class="box">
                 <div class="box-header with-border">
-                        <h3 class="box-title">Add Students to {{ groupname }}</h3>
+                        <h3 class="box-title">Add Students to {{ rangename }}</h3>
                         <div class="box-tools pull-right">
                             <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
                         </div>
@@ -79,6 +79,7 @@
                                 </div>
                               </form>
                     <table id="studentstable" class="table table-bordered table-hover dataTable" role="grid">
+                    {% if studentnumber != 0 %}
                     <thead>
                         <tr role="row">
                             <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
@@ -115,6 +116,13 @@
                         </tr>
                     {% endfor %}
                     </tbody>
+                    {% else %}
+                    <thead>
+                        <th>
+                            <h4>No Users Found</h4>
+                        </th>
+                    </thead>
+                    {% endif %}
                 </table>
 
                 {% if is_paginated %}
@@ -142,6 +150,7 @@
                 {% endif %}
             </div>
         </div>
+        <a class="btn btn-block btn-primary" style="width: 20%;"href="../">Back</a>
     </section>
 {% endblock %}
 

@@ -10,6 +10,7 @@ import datetime
 from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth.forms import AuthenticationForm
+import re
 
 class UserModifyModelForm(forms.ModelForm):
     email = forms.EmailField(max_length=254, help_text='Required. Please enter a valid email address', widget=forms.TextInput(attrs={'class' : 'form-group has-feedback'})),
@@ -20,6 +21,14 @@ class UserModifyModelForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         if self._meta.model.USERNAME_FIELD in self.fields:
             self.fields[self._meta.model.USERNAME_FIELD].widget.attrs.update({'autofocus': True})
+
+    def clean(self):
+        cleaned_data = super(UserModifyModelForm, self).clean()
+        username = cleaned_data.get("username")
+        
+        if not re.match("^[A-Za-z0-9_-]*$", username):
+            msg = u"Username should only contain letters, numbers, dashes or underscore!"
+            self._errors["username"] = self.error_class([msg])
 
     class Meta:
         model = User

@@ -9,7 +9,7 @@
                         <form method="post">
                             {% csrf_token %}	
                             <div class="form-group has-feedback">
-                                <label for="groupname">Group Name:</label>
+                                <label for="groupname">Group Name: <p style="color:#dd4b39;"><i>(Do note that allowed characters include letters, numbers, underscores or dashes)</i></p></label>
                                 {% if form.groupname.errors %}
                                 <input type="text" name="groupname" class="form-control" placeholder="Group Name" required style="border-color: #dd4b39;">
                                 <ul style="color: #dd4b39">
@@ -22,7 +22,7 @@
                                 {% endif %}
                             </div>
                             <button type="submit" class="btn btn-primary btn-block btn-flat pull-right" style="width: 100px">Submit</button>
-                            <a href="./" class="btn btn-primary btn-block btn-flat" style="width: 100px">Back</a>
+                            <a href="../" class="btn btn-primary btn-block btn-flat" style="width: 100px">Back</a>
                         </form>
                     </div>
                 </div>

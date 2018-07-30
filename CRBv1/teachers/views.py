@@ -861,11 +861,14 @@ class AssignUser(ListView, FilterView):
         rangeid = Range.objects.filter(rangeurl = self.kwargs['rangeurl']).values_list('rangeid')[0][0]
         studentsinrange = RangeStudents.objects.filter(rangeID = rangeid).values_list('studentID')
         allstudents = User.objects.filter(is_superuser = False, is_staff = False, isdisabled = False).exclude(email__in=studentsinrange).order_by('-lastmodifieddate')
+        self.allstudents = allstudents
         return allstudents
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['classesobject'] = UserClass.objects.all()
+        context['studentnumber'] = len(self.allstudents)
+        context['rangename'] = Range.objects.filter(rangeurl = self.kwargs['rangeurl']).values_list('rangename')[0][0]
 
         if "userrangecart" in self.request.session:
             cart = self.request.session.get('userrangecart', {})
@@ -1467,7 +1470,7 @@ class AddTeacher(ListView, ModelFormMixin):
             return render(request, 'teachers/addteacher.html/')
 
         else:
-            return render(request, 'teachers/addteacher.html/')
+            return ListView.get(self, request, *args, **kwargs)
 
 @method_decorator(user_is_staff, name='dispatch')
 class ClassView(ListView):
@@ -1497,10 +1500,10 @@ class AddClass(ListView, ModelFormMixin):
         if self.form.is_valid():
             self.form.save()
             messages.success(request, 'New Class Added Successfuly')
-            return render(request, 'teachers/addclass.html')
+            return render(template_name='teachers/addclass.html')
         
         else:
-            return render(request, 'teachers/addclass.html')
+            return ListView.get(self, request, *args, **kwargs)
 
     def get_form_kwargs(self):
         kwargs = super(AddClass, self).get_form_kwargs()
