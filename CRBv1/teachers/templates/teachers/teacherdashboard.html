@@ -4,11 +4,11 @@
 	<section class="content-header">
 		<h1>
             {% block page_name %}
-                Teacher's Dashboard
+                Dashboard
             {% endblock %}
 		    <small>
                 {% block page_description %}
-                    
+                    teachers dashboard
                 {% endblock %}
             </small>
 		</h1>
@@ -75,7 +75,7 @@
                             <td>{{ user.name }}</td>
                             <td>{{ user.email }}</td>
                             <td>{{ user.username }}</td>
-                            <td>{{ user.userclass }}</td>
+                            <td>{{ user.userclass.userclass }}</td>
                             <td>{{ user.datejoined }}</td>
                             <td>{{ user.isaccepted }}</td>
                             <td>{{ user.acceptedby }}</td>

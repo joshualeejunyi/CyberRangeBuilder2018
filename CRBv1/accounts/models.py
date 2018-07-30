@@ -16,7 +16,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(db_column='username', max_length=45, unique=True)
     password = models.CharField(db_column='password', max_length=100,)
     name = models.CharField(db_column='name', max_length=100)
-    userclass = models.CharField(db_column='userclass', max_length=45, default='Public', null=True)
+    userclass = models.ForeignKey('accounts.UserClass', models.DO_NOTHING, db_column='UserClass', blank=True, null=True)
     datejoined = models.DateField(db_column='dateJoined', blank=True, null=True)
     lastmodifieddate = models.DateField(db_column='lastModifiedDate', blank=True, null=True)
     lastmodifiedtime = models.TimeField(db_column='lastModifiedTime', null=True)

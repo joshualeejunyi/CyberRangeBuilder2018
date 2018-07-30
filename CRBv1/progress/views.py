@@ -62,12 +62,6 @@ class ProgressView(generic.ListView):
         graphdata = str(list(zip(rangenameslist, percentlist)))
         graphdata = graphdata.replace("(", "[").replace(")", "]")
         context['graphdata'] = graphdata
-
-        
-        print('------------------------------')
-        print(graphdata)
-        print('------------------------------')
-
         return context
 
 class ReportView(generic.ListView):

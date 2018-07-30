@@ -54,17 +54,14 @@ class DockerKill(View):
         # delete old port if existing
         previousport = UnavailablePorts.objects.filter(studentid = self.request.user).values_list('portnumber')
         if previousport:
-            #print("HI")
             port = previousport[0][0]
             containername = UnavailablePorts.objects.filter(studentid = self.request.user).values_list('containername')[0][0]
             if int(port) >= 9051:
                 serverip = '192.168.100.42'
             elif int(port) <= 9050:
                 serverip = '192.168.100.43'
-            #serverip = 'localhost'
             endpoint = 'http://' + serverip + ':8051/containers/{conid}?force=True'
             url = endpoint.format(conid=containername)
-            #print(url)
             response = requests.delete(url)
             # need to delete from db
             deleteportsdb = UnavailablePorts.objects.filter(studentid = self.request.user)
@@ -75,7 +72,6 @@ class DockerKill(View):
         if allentriesinportsdb != 0:
             for entry in allentriesinportsdb:
                 timediff = timezone.now() - entry.datetimecreated 
-                #print(timediff)
                 if timediff > datetime.timedelta(hours = 3):
                     containername = entry.containername
                     port = entry.portnumber
@@ -101,7 +97,6 @@ class AttemptQuestionView(ListView, ModelFormMixin):
     def checkPorts(self):
         database = UnavailablePorts.objects.all().values_list('portnumber')
         size = len(database)
-        #print(size)
 
         dockerserver = []
         webserver = []
@@ -120,13 +115,8 @@ class AttemptQuestionView(ListView, ModelFormMixin):
             #return first available port for docker server
             return 9051
 
-        #print('FIRST --->')
-        #print(dockerserver, webserver)
-
         webserversize = len(webserver)
         dockerserversize = len(dockerserver)
-        #print('SECOND --->')
-        #print(webserversize, dockerserversize)
         
         if dockerserversize < 50:
             if int(dockerserver[dockerserversize - 1][0]) == 9100:
@@ -187,8 +177,6 @@ class AttemptQuestionView(ListView, ModelFormMixin):
         #serverip = 'localhost'
         url = 'http://' + serverip + ':8051/containers/create'
         response = requests.post(url, json=payload)
-        #print('HI IM HERE')
-        #print(response.status_code)
         if response.status_code == 201:
             test = True
             data = response.json()
@@ -248,8 +236,6 @@ class AttemptQuestionView(ListView, ModelFormMixin):
             result = result[len(result) - 1][0]
         else:
             result = None
-        print('-------------------------------------------------------result')
-        print(result)
         
         return result
 
@@ -276,9 +262,7 @@ class AttemptQuestionView(ListView, ModelFormMixin):
         DockerKill.get(self, self.request)
         self.questionid = get_object_or_404(Questions, questionid=self.kwargs['questionid'])
         self.rangeid = get_object_or_404(Range, rangeurl=self.kwargs['rangeurl'], rangeactive=1)
-        #print("1 --> " + str(self.kwargs['questionid']))
         question = Questions.objects.filter(questionid = self.kwargs['questionid'])[0]
-        #print("2 --> "+ str(question))
         return question
 
     def get_context_data(self, **kwargs):
@@ -295,9 +279,6 @@ class AttemptQuestionView(ListView, ModelFormMixin):
             context['password'] = False
 
         context['hitmaxattempts'] = self.checkattemptlimit()
-        print('----------------------------------')
-        print(context['hitmaxattempts'])
-        print('----------------------------------')
         context['latestanswer'] = self.latestanswer()
 
         #gotta check if it's mcq, and if it is, get options from database
@@ -322,8 +303,6 @@ class AttemptQuestionView(ListView, ModelFormMixin):
             context['correct'] = True
         else:
             context['correct'] = False
-        print('>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<')
-        print(context['correct'])
 
         questiontopic = Questions.objects.filter(rangeid = self.rangeid, questionid = questionid).values_list('topicid')[0][0]
         topicname = QuestionTopic.objects.filter(topicid = questiontopic).values_list('topicname')[0][0]
@@ -341,7 +320,6 @@ class AttemptMCQQuestionView(ListView, ModelFormMixin):
     def checkPorts(self):
         database = UnavailablePorts.objects.all().values_list('portnumber')
         size = len(database)
-        #print(size)
 
         dockerserver = []
         webserver = []
@@ -360,13 +338,8 @@ class AttemptMCQQuestionView(ListView, ModelFormMixin):
             #return first available port for docker server
             return 9051
 
-        #print('FIRST --->')
-        #print(dockerserver, webserver)
-
         webserversize = len(webserver)
         dockerserversize = len(dockerserver)
-        #print('SECOND --->')
-        #print(webserversize, dockerserversize)
         
         if dockerserversize < 50:
             if int(dockerserver[dockerserversize - 1][0]) == 9100:
@@ -427,8 +400,6 @@ class AttemptMCQQuestionView(ListView, ModelFormMixin):
         #serverip = 'localhost'
         url = 'http://' + serverip + ':8051/containers/create'
         response = requests.post(url, json=payload)
-        #print('HI IM HERE')
-        #print(response.status_code)
         if response.status_code == 201:
             test = True
             data = response.json()
@@ -488,8 +459,6 @@ class AttemptMCQQuestionView(ListView, ModelFormMixin):
             result = result[len(result) - 1][0]
         else:
             result = None
-        print('-------------------------------------------------------result')
-        print(result)
         
         return result
 
@@ -500,9 +469,7 @@ class AttemptMCQQuestionView(ListView, ModelFormMixin):
         for x in list:
             options = MCQOptions.objects.filter(questionid = self.kwargs['questionid']).values_list('option'+str(x))[0][0]
             choice = (options, options)
-            #print(choice)
             newlist.append(choice)
-            #print(newlist)
         kwargs['choices'] = newlist
         return kwargs
     
@@ -530,9 +497,7 @@ class AttemptMCQQuestionView(ListView, ModelFormMixin):
         DockerKill.get(self, self.request)
         self.questionid = get_object_or_404(Questions, questionid=self.kwargs['questionid'])
         self.rangeid = get_object_or_404(Range, rangeurl=self.kwargs['rangeurl'], rangeactive=1)
-        #print("1 --> " + str(self.kwargs['questionid']))
         question = Questions.objects.filter(questionid = self.kwargs['questionid'])[0]
-        #print("2 --> "+ str(question))
         return question
 
     def get_context_data(self, **kwargs):
@@ -573,8 +538,6 @@ class AttemptMCQQuestionView(ListView, ModelFormMixin):
             context['correct'] = True
         else:
             context['correct'] = False
-        print('>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<')
-        print(context['correct'])
         return context
 
 
@@ -623,20 +586,16 @@ class QuestionsView(ListView):
 
         # get the questionids of the questions in the range in a queryset
         questionidsinrange = Questions.objects.filter(rangeid = currentrangeid).values_list("questionid")
-        #print("firstquestionid ----->>>>>" + str(questionidsinrange))
 
         # create empty list for topics
         topiclist = []
 
         if len(questionidsinrange) != 0:
-            #print("number --->>>>> " + str(len(questionidsinrange)))
             # get the queryset of the topicid of the first question
             topicidqueryset = Questions.objects.filter(questionid = (questionidsinrange[0][0]))
-            #print("firstquestiontopic ----->>>>>> " + str(topicidqueryset))
 
             # loop so that i can get all the topic ids of the questions in the range
             for x in range(0, len(questionidsinrange)):
-                #print("HI")
                 currenttopicidqueryset = Questions.objects.filter(questionid=(questionidsinrange[x][0]))
                 currenttopicidforlistinteger = Questions.objects.filter(questionid=(questionidsinrange[x][0])).values_list("topicid")[0][0]
 
@@ -647,7 +606,6 @@ class QuestionsView(ListView):
                     topicidqueryset = topicidqueryset | currenttopicidqueryset
 
                     # but i need the questiontopic queryset
-                    #print("TEST PLS WORK PLPSPLSPLS ----->>> " + str(topiclist[0]))
 
                     # get the first topicid for the loop
                     questiontopicqueryset = QuestionTopic.objects.filter(topicid = topiclist[0])
@@ -660,15 +618,12 @@ class QuestionsView(ListView):
                             # append the queryset together
                             questiontopicqueryset = questiontopicqueryset | qs
 
-                # test print
-                #print("TOPICS ------>>>>> " + str(questiontopicqueryset))
         else:
             # probably won't be none but still
             questiontopicqueryset = None
 
         # return topics as a context YEBOI YAY ME
         context['topics'] = questiontopicqueryset
-        #print("OMG FML ___>>>" + str(context['topics']))
 
         # gotta get the instance cause django
         rangeinstance = Range.objects.get(rangeurl = rangeurl)
@@ -700,17 +655,6 @@ class QuestionsView(ListView):
         unattemptedquestions = Questions.objects.filter(rangeid=currentrangeid, isarchived =False).exclude(questionid__in=thingstoexclude)
         context['unattemptedquestions'] = unattemptedquestions
 
-        print('--------------------------------------------')
-        print('correct questions:')
-        print(context['correct'])
-        print(correctquestionslist)
-        print(correctquestionsqueryset)
-        print('attempted but not correct:')
-        print(context['attemptedquestions'])
-        print('unattempted:')
-        print(context['unattemptedquestions'])
-        print('--------------------------------------------')
-
         context['rangename'] = Range.objects.filter(rangeurl = rangeurl).values_list('rangename')[0][0]
 
         # okay i need the score that the user has in this range
@@ -731,7 +675,6 @@ class QuestionsView(ListView):
         context['rangeinfo'] = Range.objects.filter(rangeurl= rangeurl).values_list('rangeinfo')[0][0]
         adminemail = Range.objects.filter(rangeurl= rangeurl).values_list('createdbyusername')[0][0]
         adminusername = User.objects.filter(email=adminemail).values_list('name')[0][0]
-        #print(adminusername)
         context['rangeadmin'] = adminusername
         context['attempts'] = Range.objects.filter(rangeurl=rangeurl).values_list('attempts')[0][0]
         rangeid = Range.objects.filter(rangeurl=rangeurl).values_list('rangeid')[0][0]

@@ -61,7 +61,7 @@
 				<select name="userclass" class="form-control" placeholder="Class" required>
 					<option value="" selected disabled hidden>Choose Class...</option>
 					{% for class in classesobject %}	
-					<option value='{{ class.0 }}'>{{ class.0 }}</option>
+					<option value='{{ class.id }}'>{{ class.userclass }}</option>
 					{% endfor %}
 				</select>
 				<ul style="color: #dd4b39">
@@ -73,7 +73,7 @@
 				<select name="userclass" class="form-control" placeholder="Class" required required>
 					<option value="" selected disabled hidden>Choose Class...</option>
 					{% for class in classesobject %}	
-					<option value='{{ class.0 }}'>{{ class.0 }}</option>
+					<option value='{{ class.id }}'>{{ class.userclass }}</option>
 					{% endfor %}
 				</select>
 			{% endif %}

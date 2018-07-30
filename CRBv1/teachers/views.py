@@ -41,7 +41,7 @@ class CreateImage(View):
         
         for ip in serverip:
             endpoint1 = 'http://' + ip + '/images/create?fromImage=dmit2.bulletplus.com:8053/{conid}'
-            header1 = {"X-Registry-Auth": "eyAidXNlcm5hbWUiOiAiYWRtaW4iLCAicGFzc3dvcmQiOiAicGFzc3dvcmQiLCAic2VydmVyYWRkcmVzcyI6ICJkbWl0Mi5idWxsZXRwbHVzLmNvbTo5MTAwIiB9Cg=="}
+            header1 = {"X-Registry-Auth": "eyAidXNlcm5hbWUiOiAiYWRtaW4iLCAicGFzc3dvcmQiOiAicGFzc3dvcmQiLCAic2VydmVyYWRkcmVzcyI6ICJkbWl0Mi5idWxsZXRwbHVzLmNvbTo4MDUzIiB9Cg=="}
             url1 = endpoint1.format(conid=imageid)
             response = requests.post(url1, headers=header1)
             if response.status_code == 200:
@@ -89,12 +89,11 @@ class TeacherDashboard(ListView, PermissionRequiredMixin):
 
     def get_queryset(self):
         unacceptedstudents = User.objects.filter(is_superuser = False, is_staff = False, isdisabled=True, isaccepted=False).order_by('-lastmodifieddate', '-lastmodifiedtime')
-        print(unacceptedstudents)
         return unacceptedstudents
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['classesobject'] = UserClass.objects.values_list('userclass')
+        context['classesobject'] = UserClass.objects.all()
         return context
 
 @method_decorator(user_is_staff, name='dispatch')
@@ -110,7 +109,7 @@ class UserManagement(FilterView, ListView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['classesobject'] = UserClass.objects.values_list('userclass')
+        context['classesobject'] = UserClass.objects.all()
         return context
 
 @method_decorator(user_is_staff, name='dispatch')
@@ -122,12 +121,11 @@ class DisabledUserManagement(FilterView, ListView):
 
     def get_queryset(self):
         allstudents = User.objects.filter(is_superuser = False, is_staff = False, isdisabled=True, isaccepted=True).order_by('-lastmodifieddate')
-        print(allstudents)
         return allstudents
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['classesobject'] = UserClass.objects.values_list('userclass')
+        context['classesobject'] = UserClass.objects.all()
         return context
 
 @method_decorator(user_is_staff, name='dispatch')
@@ -148,13 +146,12 @@ class AddUser(ListView, ModelFormMixin):
 
         if self.form.is_valid():
             self.form.save()
-            return redirect('addusersuccess')
+            return redirect('/teachers/usermanagement/')
         else:
-            print("BYE")
             return ListView.get(self, request, *args, **kwargs)
     
     def get_queryset(self):
-        classes =  UserClass.objects.values_list('userclass')
+        classes = UserClass.objects.all()
         return classes
 
     def get_form_kwargs(self):
@@ -179,7 +176,7 @@ class ModifyUser(UpdateView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['classesobject'] = UserClass.objects.values_list('userclass')
+        context['classesobject'] = UserClass.objects.all()
         return context
 
     def get_form_kwargs(self):
@@ -279,12 +276,12 @@ class AddGroup(ListView, ModelFormMixin):
 
         if self.form.is_valid():
             self.form.save()
-            return redirect('addgroupsuccess')
+            return redirect('/teachers/groupmanagement/')
         else:
             return ListView.get(self, request, *args, **kwargs)
     
     def get_queryset(self):
-        classes =  UserClass.objects.values_list('userclass')
+        classes =  UserClass.objects.all()
         return classes
 
     def get_form_kwargs(self):
@@ -304,7 +301,6 @@ class GroupView(ListView):
     def get_queryset(self):
         groupid = Group.objects.filter(groupname = self.kwargs['groupname']).values_list('groupid')[0][0]
         studentsingroup = StudentGroup.objects.filter(groupid = groupid).values_list('studentid')
-        print(studentsingroup)
 
         if len(studentsingroup) != 0:
             students = User.objects.filter(email = studentsingroup[0][0])
@@ -337,13 +333,11 @@ class AddUserInGroup(FilterView, ListView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['classesobject'] = UserClass.objects.values_list('userclass')
+        context['classesobject'] = UserClass.objects.all()
         context['groupname'] = self.kwargs['groupname']
 
         if "usercart" in self.request.session:
             cart = self.request.session.get('usercart', {})
-            print("HI")
-            print(cart)
             context['cart'] = cart
 
         return context
@@ -356,7 +350,6 @@ class AddUserToCart(View):
         userslist = []
         if 'usercart' in request.session:
             userslist = request.session['usercart']
-        print(userslist)
         if username not in userslist:
             userslist.append(useremail)
         request.session['usercart'] = userslist
@@ -372,7 +365,6 @@ class RemoveUserFromCart(View):
         userslist = []
         if 'usercart' in request.session:
             userslist = request.session['usercart']
-        print(userslist)
         if username not in userslist:
             userslist.remove(useremail)
         request.session['usercart'] = userslist
@@ -387,11 +379,8 @@ class UserGroupCommit(View):
             userslist = request.session['usercart']
 
         for student in userslist:
-            #print(student)
             studentid = User.objects.get(email = student)
-            print(studentid)
             groupid = Group.objects.get(groupname = groupname)
-            # print(groupid)
             obj = StudentGroup(studentid = studentid, groupid = groupid)
             obj.save()
 
@@ -447,7 +436,6 @@ class DeleteGroup(View):
     #success_url = '/teachers/groupmanagement/'
 
     def get(self, request, groupname):
-        print(groupname)
         groupobj = Group.objects.get(groupname = groupname)
         groupid = Group.objects.filter(groupname = groupname).values_list('groupid')[0][0]
         fakegroupobj = FakeStudentGroup.objects.filter(groupid = groupid)
@@ -476,7 +464,6 @@ class RangeManagement(FilterView, ListView):
 
     def get_queryset(self):
         user = self.request.user
-        print(user)
         ranges = Range.objects.all().filter(isdisabled = False, createdbyusername=user).order_by('-lastmodifieddate', '-datecreated')
         return ranges
 
@@ -514,7 +501,6 @@ class CreateRange(CreateView, RedirectView):
         if self.form.is_valid():
             self.form.save()
             rangeurl = self.form.cleaned_data['rangeurl']
-            print(rangeurl)
             url = '/teachers/rangemanagement/view/' + rangeurl
             messages.success(request, 'Range Created.')
             return redirect(url)
@@ -530,7 +516,6 @@ class RangeView(ListView, FilterView):
     def get_queryset(self):
         selectedrange = Range.objects.get(rangeurl= self.kwargs['rangeurl'])
         selectedrangeid = selectedrange.rangeid
-        #print(selectedrangeid)
         result = Questions.objects.filter(rangeid = selectedrangeid, isarchived = False)
         if len(result) == 0:
             return None
@@ -582,35 +567,14 @@ class ArchivedRangeQuestions(ListView, FilterView):
     def get_queryset(self):
         selectedrange = Range.objects.get(rangeurl= self.kwargs['rangeurl'])
         selectedrangeid = selectedrange.rangeid
-        #print(selectedrangeid)
         result = Questions.objects.filter(rangeid = selectedrangeid, isarchived = True)
-        # print(len(questions))
-        # if len(questions) != 0:
-        #     result = Questions.objects.filter(questionid=(questions[0][0]))
-        #     for x in range(1, len(questions)):
-        #         currentquestion= Questions.objects.filter(questionid=(questions[x][0]))
-                
-        #         result = result | currentquestion # if i didn't get the first object just now python will scold me
-        # else:
-        #     result = None
-        # print(result)
         return result
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        print(context)
         selectedrange = Range.objects.get(rangeurl= self.kwargs['rangeurl'])
         selectedrangeid = selectedrange.rangeid
-        # questions = RangeQuestions.objects.filter(rangeid = selectedrangeid, isdisabled = True).values_list('questionid')
-        # if len(questions) != 0:
-        #     result = RangeQuestions.objects.filter(questionid=(questions[0][0]))
-        #     for x in range(1, len(questions)):
-        #         currentquestion= RangeQuestions.objects.filter(questionid=(questions[x][0]))
-        #         result = result | currentquestion # if i didn't get the first object just now python will scold me
-        # else:
-        #     result = None
-        
-        # context['answer'] = result
+
         context['rangename'] = Range.objects.filter(rangeurl= self.kwargs['rangeurl']).values_list('rangename')[0][0]
         context['range'] = Range.objects.filter(rangeurl = self.kwargs['rangeurl'])
         context['rangeurl'] = self.kwargs['rangeurl']
@@ -634,7 +598,6 @@ class AddQuestioninRange(FilterView, ListView):
         questionsinrange = Questions.objects.filter(rangeid = currentrangeid).values_list('questionid')
 
         unimportedquestions = Questions.objects.exclude(questionid__in=questionsinrange)
-        print(unimportedquestions)
         if len(unimportedquestions) == 0:
             return None
         return unimportedquestions
@@ -647,7 +610,6 @@ class AddQuestioninRange(FilterView, ListView):
         questionslist = []
         if 'questionscart' in self.request.session:
             cart = self.request.session.get('questionscart', {})
-            print(cart)
             context['cart'] = cart
 
         return context
@@ -788,7 +750,6 @@ class ModifyRange(UpdateView):
         if endtime is not None:
             amorpm = endtime.strftime('%p')
             minutes = endtime.strftime('%M')
-            print(minutes)
             hours = endtime.strftime('%H')
             context['endtime'] = str(hours) + ':' + str(minutes)
         return context
@@ -859,13 +820,13 @@ class UnarchiveQuestion(View):
         rangeurl = self.kwargs['rangeurl']
         questionid = self.kwargs['questionid']
         rangeinstance = Range.objects.get(rangeurl = rangeurl)
-        selectedquestioninstance = Questions.objects.get(questionid = questionid)
-        selectedrangequestion = Questions.objects.get(rangeid=rangeinstance, questionid=selectedquestioninstance)
+        #selectedquestioninstance = Questions.objects.filter(questionid = questionid)
+        selectedrangequestion = Questions.objects.get(rangeid=rangeinstance, questionid=questionid)
         selectedrangequestion.isarchived = 0
         selectedrangequestion.save()
 
         # questionmarks = RangeQuestions.objects.filter(rangeid=rangeinstance, questionid = selectedquestioninstance).values_list('points')[0][0]
-        updatedscore = rangeinstance.maxscore + selectedrangequestion.marks
+        updatedscore = rangeinstance.maxscore + selectedrangequestion.points
         rangeinstance.maxscore = updatedscore
         rangeinstance.save()
         return redirect(previousurl)
@@ -892,12 +853,11 @@ class AssignUser(ListView, FilterView):
         rangeid = Range.objects.filter(rangeurl = self.kwargs['rangeurl']).values_list('rangeid')[0][0]
         studentsinrange = RangeStudents.objects.filter(rangeID = rangeid).values_list('studentID')
         allstudents = User.objects.filter(is_superuser = False, is_staff = False, isdisabled = False).exclude(email__in=studentsinrange).order_by('-lastmodifieddate')
-        print(allstudents)
         return allstudents
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['classesobject'] = UserClass.objects.values_list('userclass')
+        context['classesobject'] = UserClass.objects.all()
 
         if "userrangecart" in self.request.session:
             cart = self.request.session.get('userrangecart', {})
@@ -913,7 +873,6 @@ class AddUserRangeCart(View):
         userslist = []
         if 'userrangecart' in request.session:
             userslist = request.session['userrangecart']
-        print(userslist)
         if username not in userslist:
             userslist.append(useremail)
         request.session['userrangecart'] = userslist
@@ -928,7 +887,6 @@ class RemoveUserRangeCart(View):
         userslist = []
         if 'userrangecart' in request.session:
             userslist = request.session['userrangecart']
-        print(userslist)
         if username not in userslist:
             userslist.remove(useremail)
         request.session['userrangecart'] = userslist
@@ -942,11 +900,8 @@ class UserRangeCommit(View):
             userslist = request.session['userrangecart']
 
         for student in userslist:
-            #print(student)
             studentid = User.objects.get(email = student)
-            print(studentid)
             rangeid = Range.objects.get(rangeurl = rangeurl)
-            # print(groupid)
             datejoined = datetime.date.today()
             obj = RangeStudents(studentID = studentid, rangeID = rangeid, dateJoined = datejoined)
             obj.save()
@@ -966,7 +921,6 @@ class AssignGroup(ListView, FilterView):
         rangeid = Range.objects.filter(rangeurl = self.kwargs['rangeurl']).values_list('rangeid')[0][0]
         groupsinrange = RangeStudents.objects.filter(rangeID = rangeid, studentID = None).values_list('groupid')
         allgroups = Group.objects.exclude(groupid__in = groupsinrange).order_by('-lastmodifieddate')
-        print(allgroups)
         return allgroups
 
     def get_context_data(self, **kwargs):
@@ -974,8 +928,6 @@ class AssignGroup(ListView, FilterView):
 
         if "grouprangecart" in self.request.session:
             cart = self.request.session.get('grouprangecart', {})
-            print("HI")
-            print(cart)
             context['cart'] = cart
 
         return context
@@ -983,12 +935,10 @@ class AssignGroup(ListView, FilterView):
 @method_decorator(user_is_staff, name='dispatch')
 class AddGroupRangeCart(View):
     def get(self, request, rangeurl, groupname):
-        print(groupname)
         get_object_or_404(Group, groupname = groupname)
         groupslist = []
         if 'grouprangecart' in request.session:
             groupslist = request.session['grouprangecart']
-        print(groupslist)
         if groupname not in groupslist:
             groupslist.append(groupname)
         request.session['grouprangecart'] = groupslist
@@ -1002,7 +952,6 @@ class RemoveGroupRangeCart(View):
         groupslist = []
         if 'grouprangecart' in request.session:
             groupslist = request.session['grouprangecart']
-        print(groupslist)
         if groupname in groupslist:
             groupslist.remove(groupname)
         request.session['grouprangecart'] = groupslist
@@ -1016,7 +965,6 @@ class GroupRangeCommit(View):
             groupslist = request.session['grouprangecart']
 
         for groupname in groupslist:
-            #print(student)
             groupid = Group.objects.filter(groupname = groupname).values_list('groupid')[0][0]
             studentsingroup = StudentGroup.objects.filter(groupid = groupid).values_list('studentid')
 
@@ -1215,7 +1163,6 @@ class QuestionManagement(FilterView, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['topics'] = QuestionTopic.objects.all()
-        print(context['topics'])
         return context
 
 @method_decorator(user_is_staff, name='dispatch')
@@ -1311,20 +1258,9 @@ class ImportCSV(View):
                     if answer == 'FALSE':
                         answer = 'False'
 
-                    print('questiontype is ' + str(questiontype))
-                    print('topicname is ' + str(topicname))
-                    print('title is ' + str(title))
-                    print('text is ' + str(text))
-                    print('answer is ' + str(answer))
-                    print('hint is ' + str(hint))
-                    print('marks is ' + str(marks))
-                    print('--------------------------------------------------------------------------------')
-
                     datetimenow = datetime.datetime.now()
                     username = self.request.user
-                    print(username)
                     userinstance = User.objects.get(username = username)
-                    print(userinstance.email)
                     rangeinstance = Range.objects.get(rangeurl = rangeurl)
 
                     try:
@@ -1356,10 +1292,6 @@ class ImportCSV(View):
                         optiontwo = fields[11]
                         optionthree = fields[12]
                         optionfour = fields[13]
-                        print(optionone)
-                        print(optiontwo)
-                        print(optionthree)
-                        print(optionfour)
                         mcqoptions_obj = MCQOptions(optionone = optionone,
                                                     optiontwo = optiontwo,
                                                     optionthree = optionthree,
@@ -1398,7 +1330,6 @@ class ExportCSV(View):
         for qns in questions:
             topicname = QuestionTopic.objects.get(topicid = qns[2])
             if qns[1] == 'MCQ':
-                print('got mcq')
                 questioninstance = Questions.objects.get(questionid = qns[0])
                 mcqoptionsinstance = MCQOptions.objects.get(questionid = questioninstance)
                 writer.writerow([qns[0],
@@ -1419,7 +1350,6 @@ class ExportCSV(View):
                                 mcqoptionsinstance.optionfour])
 
             else:
-                print('it tried')
                 writer.writerow([qns[0],
                                 qns[1],
                                 topicname.topicname,
@@ -1447,7 +1377,6 @@ class ReportView(generic.ListView):
         useremail = User.objects.filter(username=username).values_list('email')[0][0]
         rangeid = Range.objects.filter(rangeurl=self.kwargs['rangeurl']).values_list('rangeid')[0][0]
         questions = Questions.objects.filter(rangeid=rangeid)
-        print(questions)
 
         return questions
 
@@ -1503,14 +1432,12 @@ class AddTeacher(ListView, ModelFormMixin):
         self.form = self.get_form(self.form_class)
 
         if self.form.is_valid():
-            print('what')
             self.form.save(request)
             messages.success(request, 'Teacher account successfully created')
             return render(request, 'teachers/addteacher.html/')
 
         else:
-            print(self.form.errors)
-            print('not valid')
+            return render(request, 'teachers/addteacher.html/')
 
 @method_decorator(user_is_staff, name='dispatch')
 class ClassView(ListView):
@@ -1543,8 +1470,7 @@ class AddClass(ListView, ModelFormMixin):
             return render(request, 'teachers/addclass.html')
         
         else:
-            print(self.form.errors)
-            print('not valid')
+            return render(request, 'teachers/addclass.html')
 
     def get_form_kwargs(self):
         kwargs = super(AddClass, self).get_form_kwargs()
@@ -1698,9 +1624,6 @@ class ViewPost(ListView, ModelFormMixin):
         context = super().get_context_data(**kwargs)
         postid = self.kwargs['postid']
         comments = SDLComment.objects.filter(postid=postid)
-        print('------------------------------------')
-        print(comments)
-        print('------------------------------------')
 
         context['comments'] = comments
 

@@ -70,9 +70,6 @@ class ViewPost(ListView, ModelFormMixin):
         context = super().get_context_data(**kwargs)
         postid = self.kwargs['postid']
         comments = SDLComment.objects.filter(postid=postid)
-        print('------------------------------------')
-        print(comments)
-        print('------------------------------------')
 
         context['comments'] = comments
         

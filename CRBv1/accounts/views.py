@@ -37,7 +37,7 @@ class RegisterView(ListView, ModelFormMixin):
             return ListView.get(self, request, *args, **kwargs)
     
     def get_queryset(self):
-        classes =  UserClass.objects.values_list('userclass')
+        classes = UserClass.objects.all()
         return classes
 
 class RegistrationSucess(generic.TemplateView):

@@ -57,7 +57,7 @@
                                         <select name="userclass" class="form-control" placeholder="Class">
                                             <option value="" selected></option>
                                             {% for class in classesobject %}	
-                                            <option value='{{ class.0 }}'>{{ class.0 }}</option>
+                                            <option value='{{ class.id }}'>{{ class.userclass }}</option>
                                             {% endfor %}
                                         </select>
                                     </div>
@@ -104,7 +104,7 @@
                             <td>{{ user.name }}</td>
                             <td>{{ user.email }}</td>
                             <td>{{ user.username }}</td>
-                            <td>{{ user.userclass }}</td>
+                            <td>{{ user.userclass.userclass }}</td>
                             <td>
                                 {% if user.email in cart %}
                                 <a class="btn btn-block btn-danger" href="addusers/remove/{{ user.username }}">Remove</a>

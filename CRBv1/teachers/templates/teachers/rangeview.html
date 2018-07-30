@@ -361,7 +361,7 @@
                                 <td>{{ user.name }}</td>
                                 <td>{{ user.email }}</td>
                                 <td>{{ user.username }}</td>
-                                <td>{{ user.userclass }}</td>
+                                <td>{{ user.userclass.userclass }}</td>
                                 <td>
                                     {% for student in groupstudent %}
                                         {% if student.studentID.username == user.username %}
