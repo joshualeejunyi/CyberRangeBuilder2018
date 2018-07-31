@@ -74,7 +74,7 @@
                 </div>
                 <div class="box-body">
                     <table class="table table-bordered table-hover dataTable">
-                        {% if archivednumber is 0 %}
+                        {% if archivednumber is not 0 %}
                         <thead>
                             <tr role="row">
                                 <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
@@ -142,7 +142,7 @@
                                         {% endfor %}
                                     </td>
                                     <td style="text-align: center">
-                                        <a class="btn btn-block btn-success" href="unarchive/{{ x.questionid }}">Unarchive</a>
+                                        <a class="btn btn-block btn-success" onclick="return confirm('Unarchive Question {{ x.questionid}} ?')" href="unarchive/{{ x.questionid }}">Unarchive</a>
                                         <a class="btn btn-block btn-danger" onclick="return confirm('Permanently Delete Question {{ x.questionid}} ?')" href="delete/{{ x.questionid }}">Permanently Delete</a>
                                     </td>
                                 </tr>

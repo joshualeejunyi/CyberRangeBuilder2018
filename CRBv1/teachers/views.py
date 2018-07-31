@@ -581,7 +581,7 @@ class ArchivedRangeQuestions(ListView, FilterView):
         context['range'] = Range.objects.filter(rangeurl = self.kwargs['rangeurl'])
         context['rangeurl'] = self.kwargs['rangeurl']
         context['topics'] = QuestionTopic.objects.all()
-        context['archivednumber']= len(Questions.objects.filter(rangeid = selectedrangeid, isarchived = True))
+        context['archivednumber']= Questions.objects.filter(rangeid = selectedrangeid, isarchived = True).count()
         return context
 
 @method_decorator(user_is_staff, name='dispatch')
