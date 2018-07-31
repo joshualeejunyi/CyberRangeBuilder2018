@@ -1500,7 +1500,7 @@ class AddClass(ListView, ModelFormMixin):
         if self.form.is_valid():
             self.form.save()
             messages.success(request, 'New Class Added Successfuly')
-            return render(template_name='teachers/addclass.html')
+            return render(request, template_name='teachers/addclass.html')
         
         else:
             return ListView.get(self, request, *args, **kwargs)
