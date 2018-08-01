@@ -97,7 +97,7 @@
                     {% endfor %}
                 </td>
                 <td> {{x.title }} </td>
-                <td> {{x.text }} </td>
+                <td> {{x.text | safe | cut:"<p>" | cut:"</p>"}} </td>
                 <td> {{x.hint }} </td>
                 <td> {{x.points }} </td>
                 <td> {{x.createdby }} </td>
