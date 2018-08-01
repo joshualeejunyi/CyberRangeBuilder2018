@@ -34,7 +34,7 @@
 											<input type="text" class="form-control" placeholder="{{ latestanswer }}" disabled>
 											<div>
 												{% if hint is None %}
-													<a href="activatehint" class="btn btn-block btn-danger pull-left" style="margin-top: 2%; max-width: 40%;">Use Hint <b>{% if question.hintpenalty is 0%}(no points deducted){%else%}({{question.hintpenalty}} points deducted){% endif %}</b></a>
+													<a href="activatehint" class="btn btn-block btn-danger pull-left" style="margin-top: 2%; max-width: 50%;">Use Hint <b>{% if question.hintpenalty is 0%}(no points deducted){%else%}({{question.hintpenalty}} points deducted){% endif %}</b></a>
 												{% else %}
 													<h5 class="pull-left" style="width: 20%; margin-top: 2%;"><b>Hint:</b> {{question.hint}}</h5>
 												{% endif %}
@@ -138,7 +138,7 @@
 										</div>
 										<div>
 										{% if hint is None %}
-											<a href="activatehint" class="btn btn-block btn-danger pull-left" style="margin-top: 2%; max-width: 40%;">Use Hint <b>{% if question.hintpenalty is 0%}(no points deducted){%else%}({{question.hintpenalty}} points deducted){% endif %}</b></a>
+											<a href="activatehint" class="btn btn-block btn-danger pull-left" style="margin-top: 2%; max-width: 50%;">Use Hint <b>{% if question.hintpenalty is 0%}(no points deducted){%else%}({{question.hintpenalty}} points deducted){% endif %}</b></a>
 											{% if question.questiontype != 'OE' %}
 												<button class="btn btn-block btn-primary pull-right" type="submit" style="width: 20%; margin-top: 2%;">Submit</button>
 											{% else %}

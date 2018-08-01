@@ -62,7 +62,8 @@ class ViewPost(ListView, ModelFormMixin):
             postinstance = SDLPost.objects.get(postid=self.kwargs['postid'])
             user = self.request.user
             self.form.save(postinstance, user)
-            return HttpResponseRedirect("")
+            url = 'selfdirected/view/' + postid
+            return redirect(url)
         else:
             return ListView.get(self, request, *args, **kwargs)
 

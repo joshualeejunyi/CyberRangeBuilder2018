@@ -123,7 +123,7 @@ class ReportView(generic.ListView):
         if dateend is not None:
             if dateend >= datetime.date.today():
                 currenttime = datetime.datetime.now().time()
-                if currenttime >= timestart:
+                if currenttime >= timeend:
                     canshowquestions = True
         print(canshowquestions)
         context['canshowquestions'] = canshowquestions
