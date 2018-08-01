@@ -891,7 +891,7 @@ class QuestionsView(ListView):
         # do i need the categoryname?
 
         # get the questionids of the questions in the range in a queryset
-        questionidsinrange = Questions.objects.filter(rangeid = currentrangeid).values_list("questionid")
+        questionidsinrange = Questions.objects.filter(rangeid = currentrangeid, isarchived=False).values_list("questionid")
 
         # create empty list for topics
         topiclist = []
@@ -980,7 +980,7 @@ class QuestionsView(ListView):
         context['questionpoints'] = points
         context['rangeinfo'] = Range.objects.filter(rangeurl= rangeurl).values_list('rangeinfo')[0][0]
         adminemail = Range.objects.filter(rangeurl= rangeurl).values_list('createdbyusername')[0][0]
-        adminusername = User.objects.filter(email=adminemail).values_list('name')[0][0]
+        adminusername = User.objects.filter(email=adminemail).values_list('username')[0][0]
         context['rangeadmin'] = adminusername
         context['attempts'] = Range.objects.filter(rangeurl=rangeurl).values_list('attempts')[0][0]
         rangeid = Range.objects.filter(rangeurl=rangeurl).values_list('rangeid')[0][0]

@@ -33,13 +33,13 @@ class SDLAddPostForm(ModelForm):
 
     class Meta:
         model = SDLPost
-        fields = ('title', 'text', 'postactive', 'postid')
+        fields = ('title', 'text', 'postid')
 
 class PostModifyModelForm(forms.ModelForm):
 
     class Meta:
         model = SDLPost
-        fields = ('title', 'text', 'postactive', 'postid')
+        fields = ('title', 'text', 'postid')
 
 class PostModifyForm(PostModifyModelForm):
     def __init__(self, *args, **kwargs):
@@ -56,7 +56,7 @@ class PostModifyForm(PostModifyModelForm):
 
     class Meta:
         model = SDLPost
-        fields = ('title', 'text', 'postactive',)
+        fields = ('title', 'text',)
 
 class SDLPostComment(ModelForm):
     comment = forms.CharField(label='comment', max_length=256,

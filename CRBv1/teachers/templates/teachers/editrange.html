@@ -69,7 +69,7 @@
                                 {% endif %}
                             </div>
                             <div class="form-group has-feedback">
-                                <label for="timestart">Start Time:</label>
+                                <label for="timestart">Start Time: <p style="color:#dd4b39;"><i>(Defaults to 08:30AM if there is a Start and End Date)</i></p></label>
                                 {% if form.timestart.errors %}
                                     <input type="time" name="timestart" class="form-control" style="border-color: #dd4b39;" value="{{ starttime }}">
                                     {% for error in form.timestart.errors %}
@@ -94,7 +94,7 @@
                                 {% endif %}
                             </div>
                             <div class="form-group has-feedback">
-                                <label for="timeend">Time End:</label>
+                                <label for="timeend">Time End: <p style="color:#dd4b39;"><i>(Defaults to 11:59PM if there is a Start and End Date)</i></p></label>
                                 {% if form.timeend.errors %}
                                 <input type="time" name="timeend" class="form-control" style="color: #dd4b39" value="{{ endtime }}">
                                     <ul style="color: #dd4b39">

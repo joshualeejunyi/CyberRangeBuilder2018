@@ -699,10 +699,12 @@ class AddQuestioninRangeCommit(View):
             questionobj = Questions.objects.get(questionid = questionid)
             questionobj.pk = None
             questionobj.rangeid = rangeobj
+            questionobj.isarchived = False
             questionobj.save()
 
             questionpoints = questionobj.points
             rangeobj.maxscore = rangeobj.maxscore + questionpoints
+            rangeobj.save()
 
             if questionobj.usedocker is True:
                 error = CreateImage.get(self, request, rangeurl, questionid, imageid)
@@ -1662,7 +1664,7 @@ class EditPost(UpdateView):
         return selectedpost
 
     def get_form_kwargs(self):
-        kwargs = super(ModifyPost, self).get_form_kwargs()
+        kwargs = super(EditPost, self).get_form_kwargs()
         kwargs.update({'request': self.request})
         return kwargs
 

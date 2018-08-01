@@ -109,6 +109,7 @@
 		</div>
     </div>
 	
+	{% if rangeactive is False %}
 	<div class="row">
 		<div class="col" style="width: 95%; margin: 0 auto; margin-top: 3%;">
 			<div class="box box-solid box-primary" style="box-shadow: 1px 2px 5px grey;">
@@ -155,11 +156,7 @@
 								{{ question.answergiven}}
 							</td>
 							<td>
-								{% if rangeactive %}
-									<b><i>Undisclosed</i></b>
-								{% else %}
-									{{ question.answer }}
-								{% endif %}
+								{{ question.answer }}
 							</td>
 							<td>{{ question.questionid.points }}</td>
 							<td>
@@ -174,11 +171,7 @@
 							<td>{{ question.text | safe | cut:"<p>" | cut:"</p>"}}</td>
 							<td> - </td>
 							<td>
-								{% if rangeactive %}
-									<b><i>Undisclosed</i></b>
-								{% else %}
-									{{ question.answer }}
-								{% endif %}
+								{{ question.answer }}
 							</td>
 							<td>{{ question.points }}</td>
 							<td> - </td>
@@ -186,10 +179,17 @@
 						{% endfor %}
 					</tbody>
 				</table>
+				</div>
 			</div>
+			
 		</div>
-		<div style="width: 100px">
-			<a href="../../" class="btn btn-block btn-primary">Back</a>
+	</div>
+	{% endif %}
+	<div class="row">
+		<div class="col" style="width: 95%; margin: 0 auto; margin-top: 3%;">
+			<div style="width: 100px">
+				<a href="../../" class="btn btn-block btn-primary">Back</a>
+			</div>
 		</div>
 	</div>
 {% endblock %}

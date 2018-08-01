@@ -15,7 +15,7 @@ class AnswerForm(forms.ModelForm):
         correctanswer = Questions.objects.filter(questionid = questionid).values_list('answer')[0][0]
         isthisashortanswer = Questions.objects.filter(questionid = questionid).values_list('questiontype')[0][0]
         repeatedcheck = StudentQuestions.objects.filter(questionid = questionid, studentid = user, rangeid = rangeinstance)
-        numberofrangequestions = Questions.objects.filter(rangeid=rangeinstance).count()
+        numberofrangequestions = Questions.objects.filter(rangeid=rangeinstance, isarchived=False).count()
         
 
         check = False
@@ -116,7 +116,7 @@ class AnswerMCQForm(forms.ModelForm):
         correctanswer = Questions.objects.filter(questionid = questionid).values_list('answer')[0][0]
         isthisashortanswer = Questions.objects.filter(questionid = questionid).values_list('questiontype')[0][0]
         repeatedcheck = StudentQuestions.objects.filter(questionid = questionid, studentid = user, rangeid = rangeinstance)
-        numberofrangequestions = Questions.objects.filter(rangeid=rangeinstance).count()
+        numberofrangequestions = Questions.objects.filter(rangeid=rangeinstance, isarchived=False).count()
 
         check = False
         if isthisashortanswer == 'SA':

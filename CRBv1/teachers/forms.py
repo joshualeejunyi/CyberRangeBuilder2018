@@ -162,11 +162,18 @@ class ModifyRangeForm(ModelForm):
         
     def save(self, commit=True):
         modifyrange = super().save(commit=False)
+        
         if commit:
             modifyrange.lastmodifieddate = datetime.date.today()
             admin = self.request.user
             modifyrange.lastmodifiedby = User.objects.get(username = admin)
             modifyrange.lastmodifiedtime = datetime.datetime.now().time()
+            
+            if self.startdate is not None and self.enddate is not None:
+                if self.timestart is None and self.timeend is None:
+                    modifyrange.timestart = '08:30:AM'
+                    modifyrange.timeend = '11:59:PM'
+
             modifyrange.save()
         return modifyrange
 

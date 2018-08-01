@@ -63,7 +63,11 @@
 
 {% block content %}
 	<div class="row" style="width:90%; margin: 0 auto;">
+		{% if numberofcompletedranges > 1 %}
 		<div class="col-md-4" >
+		{% else %}
+		<div style="margin: 0 auto; width: 40%;">
+		{% endif %}
 			<div class="box-body ">
 				<div class="info-box bg-green">
 					<span class="info-box-icon">
@@ -86,7 +90,11 @@
 							Average Score Percentage:
 						</span>
 					  	<span class="info-box-number" style="font-size:34px">
-							  {{ averagepercent }}%
+							{% if averagepercent is not None %}
+								{{ averagepercent }}%
+							{% else %}
+								0%
+							{% endif %}
 						</span>
 					</div>
 				</div>
@@ -107,9 +115,11 @@
 			</div>
 		</div>
 		
+		{% if numberofcompletedranges > 1 %}
 		<div class="col-md-7" style="margin-bottom: 5%; margin-left: 5%;">
 			<div id="linechart_material"></div>
 		</div>
+		{% endif %}
 	</div>
 	
 	<div class="row">

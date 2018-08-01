@@ -1,3 +1,19 @@
+# What is Project Ostrich?
+Project Ostrich is a Cyber Range Builder that Team Ostrich has built from scratch using the Django Framework, Dockers (along with Docker Engine API), Shell-in-a-box (within dockers), and much more. This project is part of our Final Year Project for our Diploma in Infocomm Security Management in Singapore Polytechnic. This builder is open-sourced - so feel free to fork it and make enhancements and continually build on our project. Do remember to credit us!
+
+We hope that many will use Project Ostrich to train their students in Cyber Security for the future to come.
+
+## In Case You Were Wondering...
+Team Ostrich consists of:
+Team Leader: 
+- Joshua Lee
+Assistant Team Leader: 
+- Marcus Kho
+Members:
+- Dexter Gui
+- Jonathan Au
+- Wesley Chiau
+
 # Deployment Guide
 This documentation will guide administrators who would like to setup Project Ostrich on their own systems.
 
@@ -291,14 +307,14 @@ You have now successfully deployed Ostrich to your server. You can access it by 
 As Project Ostrich is only in Phase 1, the feature to dynamically add Docker Servers and their ports is not implemented yet. Hence, we will be needing to modify the source code to suit our needs.
 In our implementation, we have two servers that can serve Docker Containers. The first server is the dedicated Docker Server, with an internal IP address of 192.168.100.42. The ports dedicated to this server are between the range of 9051 to 9100, inclusive. After the ports have been used up, the service will be overflowed to the second server – in our case, the Web Server. The Web Server has an internal IP address of 192.168.100.43, with the ports between the range 9000 to 9050.
 
-###The DockerKill() Class
+### The DockerKill() Class
 First, we will be modifying the views.py, located in /home/cyberwsgi/grouped/CRBv1/ranges. Now, go to the DockerKill() class at line 80. You should see the following:
  
 Adjust the port numbers ‘9051’ and ‘9050’ and the serverip accordingly. To add more than two servers at this stage, we will just have to add more else if statements and configure the if statements accordingly.
 In lines 114 to 119, there same code can be seen. Adjust it accordingly as well.
  
  
-###The checkPorts() Function
+### The checkPorts() Function
 The functions checkPorts() at line 136 and 482 both checks the database for ports that are being used – both have to be reconfigured. We will be instructing the changes required for the first function at line 136.
 The function takes information from the database and segregates them into two lists, one for the Web Server and the other for the Docker Server. This allows us to dynamically assign the port number and the IP address. After which, it checks the available port number and returns the first available port number. This allows for an organized system of maintaining our ports.
 To add more than two servers at this stage, another list must be made, and the if else statements will need to be added on. Adjust the port numbers at lines 150 and 153 accordingly, to the appropriate server lists. Next, at line 158, enter the first port that will be used.
@@ -325,7 +341,7 @@ That should be all for this views.py. Next, we would have to make adjustments to
 The CreateImage Class
 At line 41, just adjust the list of server IP addresses accordingly. The items in the list will be for looped and will create the image in each server.
  
-###The AdminDockerKill() Class
+### The AdminDockerKill() Class
 At line 1255, adjust the if else statement accordingly to your setup. Also change the server variables to the IP addresses of your available servers
  
 

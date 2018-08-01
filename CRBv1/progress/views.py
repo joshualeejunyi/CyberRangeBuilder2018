@@ -6,6 +6,8 @@ from accounts.models import User
 
 from django.utils.dateparse import parse_date
 
+import datetime
+
 class ProgressView(generic.ListView):
     template_name='progress/progress.html'
     context_object_name = 'rangesobject'
@@ -112,7 +114,19 @@ class ReportView(generic.ListView):
         context['studentquestionsobj'] = studentquestionsobj
         context['allquestions'] = Questions.objects.filter(rangeid=rangeid)
         context['rangeactive'] = Range.objects.filter(rangeid=rangeid).values_list('rangeactive')[0][0]
-
+        rangeobject = Range.objects.get(rangeid=rangeid)
+        dateend = rangeobject.dateend
+        timeend = rangeobject.timeend
+        
+        canshowquestions = False
+        
+        if dateend is not None:
+            if dateend >= datetime.date.today():
+                currenttime = datetime.datetime.now().time()
+                if currenttime >= timestart:
+                    canshowquestions = True
+        print(canshowquestions)
+        context['canshowquestions'] = canshowquestions
         ranking = RangeStudents.objects.filter(rangeID=rangeid).order_by('-points')
         context['username'] = user
         context['ranking'] = ranking
