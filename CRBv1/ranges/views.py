@@ -17,74 +17,113 @@ import random
 
 class EnterCode(View):
     def get(self, request, *args, **kwargs):
+        # get will render the page.
         return render(request, 'ranges/joinrange.html')
     
     def post(self, request, *args, **kwargs):
+        # from the form, get the entered rangecode
         form_rangecode = request.POST.get('rangecode')
-        
+        # use a try statement to attempt adding
         try:
+            # get the range object identified by the unique rangecode
             selectedrange = Range.objects.get(rangecode = form_rangecode, isopen=1)
+            # get the username of the current user
             user = self.request.user
+            # get the user object of the current user
             requestuser = User.objects.get(username = user)
+            # get the email of the current user
             requestemail = requestuser.studentID
 
             try:
+                # use a try statement to get the range student object
                 checkifstudentinrange = RangeStudents.objects.get(rangeid = selectedrange,
                                                                   email = requestuser)
+                #if the record exists, it means that the user is already in the range
                 messages.error(request,'You already belong in the range')
+                # returns the user back to the page to inform them that they are already in the range
                 return render(request, 'ranges/entercode.html')
 
             except RangeStudents.DoesNotExist:
+                # if the user is not in the range already
+                # get the current datetime
                 datetimenow = datetime.datetime.now()
+                # create a rangestudents object
                 rangestudents_obj = RangeStudents(rangeID = selectedrange,
                                                 studentID = requestuser,
                                                 dateJoined = datetimenow)
-                
+                # save the object to the database
                 rangestudents_obj.save()
+                # informs the user that they hae successfully joined the range
                 messages.success(request, 'Successfully Joined The Range')
+                # returns the user to the page
                 return render(request, 'ranges/joinrange.html')
 
         except Range.DoesNotExist:
+            # if the range does not exist, or is the rangecode is not open to be added
             selectedrange = None
+            # informs the user that it is invalid
             messages.error(request, 'Invalid Range Code or Range Is Not Open')
+            # returns the user to the page
             return render(request, 'ranges/joinrange.html')
 
 class DockerKill(View):
+    # function to delete old ports and dockers 
     def get(self, request):
-        # delete old port if existing
+        # checks if the user has previously opened a docker container and a port
         previousport = UnavailablePorts.objects.filter(studentid = self.request.user).values_list('portnumber')
         if previousport:
+            # if there is, get the portnumber
             port = previousport[0][0]
+            # get the containername of the docker used previously
             containername = UnavailablePorts.objects.filter(studentid = self.request.user).values_list('containername')[0][0]
+            # checks the port to determine the server to talk to
             if int(port) >= 9051:
+                # if the port is more than 9051 inclusive, the server must be the docker service
                 serverip = '192.168.100.42'
             elif int(port) <= 9050:
+                # else if the port is less than 9051 inclusive, the server must be ther web server
                 serverip = '192.168.100.43'
+            # url for the web server to talk to
             endpoint = 'http://' + serverip + ':8051/containers/{conid}?force=True'
             url = endpoint.format(conid=containername)
+            # request to delete the container
             response = requests.delete(url)
-            # need to delete from db
+            
+            # after it is deleted, we have to delete the entry from the database
+            # get the object
             deleteportsdb = UnavailablePorts.objects.filter(studentid = self.request.user)
+            # delete the entry
             deleteportsdb.delete()
             
-        # timeout for ports
+        # we also have to timeout the ports in case the user did not close the docker container properly
+        # first, we get all the used ports from the database
         allentriesinportsdb = UnavailablePorts.objects.all()
+        # check if there are no entries
         if allentriesinportsdb != 0:
+            # if there are entries, use a forloop to traverse the queryset
             for entry in allentriesinportsdb:
+                # check the time difference between now and the date and time the docker was created
                 timediff = timezone.now() - entry.datetimecreated 
+                # checks if the time difference is more than 3 hours
                 if timediff > datetime.timedelta(hours = 3):
+                    # if the container has been opened for more than 3 hours, get the container name
                     containername = entry.containername
+                    # get the port number as well
                     port = entry.portnumber
-                    if int(port) >= 9052:
+                    # use the port number to determine the server that it is opened in
+                    if int(port) >= 9051:
+                        # if it is more than 9051 inclusive, it must be the docker server
                         serverip = '192.168.100.42'
                     elif int(port) <= 9050:
+                        # else if is is less than 9051 inclusive, it must be the web srver
                         serverip = '192.168.100.43'
-                    #serverip = 'localhost'
+                    # get the url for the request
                     endpoint = 'http://' + serverip + ':8051/containers/{conid}?force=True'
                     url = endpoint.format(conid=containername)
+                    # send the request to delete the container
                     response = requests.delete(url)
                     
-                    # need to delete from db
+                    # like before, we need to delete the entry in the database
                     deleteportsdb = UnavailablePorts.objects.filter(studentid = self.request.user)
                     deleteportsdb.delete()
 
@@ -95,9 +134,12 @@ class AttemptQuestionView(ListView, ModelFormMixin):
     form_class = AnswerForm
 
     def checkPorts(self):
+        # get all the entries of the ports currently being used
         database = UnavailablePorts.objects.all().values_list('portnumber')
+        # determine the size of the database query
         size = len(database)
 
+        # we need two lists for the two servers that we have
         dockerserver = []
         webserver = []
 
@@ -115,28 +157,55 @@ class AttemptQuestionView(ListView, ModelFormMixin):
             #return first available port for docker server
             return 9051
 
+        # determine the length of both of the webserver and dockerserver lists
         webserversize = len(webserver)
         dockerserversize = len(dockerserver)
         
         if dockerserversize < 50:
-            if int(dockerserver[dockerserversize - 1][0]) == 9100:
+            # check if the docker server is not full (used all 50 ports)
+            if int(dockerserver[dockerserversize - 1][0]) == 9099:
+                # check if the last entry is the last available port. 
+                # if it is not the last available port, it means that there are gaps inbetween the list
                 for x in range(0, 48):
+                    # use a for loop to loop the number of available ports in one server minused one
+                    # this means that because we have 49 ports, we will have to forloop between 0 and 48
                     if int(dockerserver[x + 1][0]) - int(dockerserver[x][0]) != 1:
+                        # using the loop, we take the difference of the next port number and the current port number
+                        # if the difference is one, it means that there is no gap in between
+                        # else if the different is more than one, there is a gap
+                        # so we will take the current portnumber and add one to determine the port number to give
                         result = int(dockerserver[x][0]) + 1
+                        # return the port number
                         return result
             else:
+                # takes the last used port and adds one 
                 result = int(dockerserver[dockerserversize - 1][0]) + 1
+                # return the port number
                 return result
         elif webserversize < 50:
+            # because the docker server is full, we will now overflow to the web server
             if int(webserver[webserversize - 1][0]) == 9050:
-                for x in range(0, 48):
+                # same logic:
+                # check if the last entry is the last available port. 
+                # if it is not the last available port, it means that there are gaps inbetween the list
+                for x in range(0, 49):
+                    # use a for loop to loop the number of available ports in one server minused one
+                    # this means that because we have 50 ports, we will have to forloop between 0 and 49
                     if int(webserver[x + 1][0]) - int(webserver[x][0]) != 1:
+                        # using the loop, we take the difference of the next port number and the current port number
+                        # if the difference is one, it means that there is no gap in between
+                        # else if the different is more than one, there is a gap
+                        # so we will take the current portnumber and add one to determine the port number to give
                         result = int(webserver[x][0]) + 1
+                        # return the port number
                         return result
             else:
+                # takes the last used port and adds one 
                 result = int(webserver[webserversize - 1][0]) + 1
+                # return the port number
                 return result
         else:
+            # the server is completely full. return -1 to show an error.
             return -1
 
     def dockerContainerStart(self):
@@ -144,20 +213,33 @@ class AttemptQuestionView(ListView, ModelFormMixin):
         # we need to check if there are any open containers
         # we have stored it in the session
         data = {}
+        # calls the checkPorts function from above to get the available port
         port = self.checkPorts()
+        # declare an empty string for the server ip
         serverip = ''
+        # checks if the port is -1
         if port == -1:
+            # if the port is -1, it means that the server is busy, display an error
             return HttpResponse('SERVER BUSY. PLEASE TRY AGAIN LATER.')
-        # port 8051 is reserved for API
+        # determine the ip address using the port number        
         elif port >= 9051:
+            # if it is 9051 inclusive, it must be the docker server
             serverip = '192.168.100.42'
         elif port <= 9050:
+            # else if it is less than 9050 inclusive, it must be the web server
             serverip = '192.168.100.43'
+        # convert the port to a string for concatenation later
         port = str(port)
+        # get the current rangeurl
         rangename = self.kwargs['rangeurl']
+        # get the current questionid
         questionnumber = self.kwargs['questionid']
+        # gets the string of the imagename to be converted to
+        # the format is <rangeurl>.<questionid>
         imagename = str(rangename + '.' + questionnumber)
-        #image = 'siab_server'
+        # create the payload for the docker engine api
+        # the imagename used is to determine the image name to be created
+        # the image should be already created in the docker server
         payload = {
             'Image':imagename,
             'HostConfig': {
@@ -174,20 +256,30 @@ class AttemptQuestionView(ListView, ModelFormMixin):
                 }
             }
         }
-        #serverip = 'localhost'
+        # use the docker engine api to create the container
         url = 'http://' + serverip + ':8051/containers/create'
+        # request with the payload
         response = requests.post(url, json=payload)
         if response.status_code == 201:
             test = True
+            # get the data from the response
             data = response.json()
+            # get the container id
             containerid = data['Id']
+            # get the url to start the container
             starturl = 'http://' + serverip + ':8051/containers/%s/start' % containerid
+            # request to start the container
             response = requests.post(starturl)
-
+            # create a new entry in the database
             portsdb = UnavailablePorts(portnumber = int(port), studentid = self.request.user, containername = containerid, datetimecreated = timezone.now())
+            # save the object to the database
             portsdb.save()
+            # get the final url for the iframe
             finalsiaburl = 'dmit2.bulletplus.com:' + port
+
+            # generate a randompassword for the docker container
             randompassword = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(6))
+            # attempt to change the password
             changepassword = '["/bin/bash","-c","echo \"guest:pass\" | chpasswd"]'
             execcmd = {
                 "AttachStdin":"true", 
@@ -207,107 +299,177 @@ class AttemptQuestionView(ListView, ModelFormMixin):
             return randompassword, finalsiaburl
 
         elif response.status_code == 400:
-            return redirect('/error')
+            # return error
+            return -1
         elif response.status_code == 409:
-            return redirect('/error')
+            # return error
+            return -2
         else:
-            return redirect('/error')
+            # return error
+            return -3
 
 
     def checkattemptlimit(self):
+        # this function is to determine if the user has reached his attempt limit
+        # declare the attempted as false first
         attempted = False
+        # get the current user
         user = self.request.user
+        # get the question object of the current object
         questioninstance = Questions.objects.get(questionid = self.kwargs['questionid'])
+        # get the rangeurl of the currenet range
         rangeurl = self.kwargs['rangeurl']
+        # get the rangeid using the range url
         rangeid = Range.objects.filter(rangeurl=rangeurl).values_list('rangeid')[0][0]
+        # check the number of attempts that the user has attempted this question before
         numberofattempts = len(StudentQuestions.objects.filter(studentid = user, rangeid = rangeid, questionid = questioninstance))
+        # get the max number of attempts for this question
         maxattempts = Range.objects.filter(rangeid = rangeid).values_list('attempts')[0][0]
+        # check if the user has reached his attempt limit 
         if maxattempts != 0 and numberofattempts == maxattempts:
+            # if it is, return true
             attempted = True
+        # otherwise, return false
         return attempted
 
     def latestanswer(self):
+        # this function is to get the latest answer that the user has attempted
+        # first, get the username
         user = self.request.user
+        # then, get the question instnace
         questioninstance = Questions.objects.get(questionid = self.kwargs['questionid'])
+        # get the rangeurl of the current range
         rangeurl = self.kwargs['rangeurl']
+        # get the range instance object of the current range
         rangeinstance = Range.objects.get(rangeurl = rangeurl)
+        # get the queryset of the studentquestions for the students attempts
         result = StudentQuestions.objects.filter(studentid = user, rangeid = rangeinstance, questionid = questioninstance).values_list('answergiven')
+        # check if the return is not 0
         if len(result) != 0:
+            # get the latest given answer
             result = result[len(result) - 1][0]
         else:
+            # set result as None
             result = None
-        
+        # return the result
         return result
 
     def get(self, request, *args, **kwargs):
+        # this get function is to display the get method form
+        # declare self.object as none
         self.object = None
+        # get the form using the form class stated at the start of this view
         self.form = self.get_form(self.form_class)
+        # return the list view
         return ListView.get(self, request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        # this post function is to display the post method form
+        # declare self.object as none
         self.object = None
+        # get the form using the form class stated at the start of this view
         self.form = self.get_form(self.form_class)
 
+        # check if the form is valid
         if self.form.is_valid():
+            # if the form is valid
+            # get the user
             user = self.request.user
+            # get the answer they gave
             answergiven = self.form.cleaned_data['answergiven']
+            # get the question object of current question
             questioninstance = Questions.objects.get(questionid = self.kwargs['questionid'])
+            # get the current range url
             rangeurl = self.kwargs['rangeurl']
+            # get the range instance object using the rangeurl
             rangeinstance = Range.objects.get(rangeurl = rangeurl)
+            # get the questionid
             questionid = Questions.objects.filter(questionid = self.kwargs['questionid']).values_list('questionid')[0][0]
+            # call the checkanswer function from above
             check = self.form.checkAnswer(user, answergiven, questioninstance, rangeinstance, questionid)
+            # return the post form
             return ListView.get(self, request, *args, **kwargs)
 
     def get_queryset(self):
+        # get queryset is to pull from the database to get info for the listview
+        # call the docker kill class
         DockerKill.get(self, self.request)
+        # check if the question exists, otherwise raise 404
         self.questionid = get_object_or_404(Questions, questionid=self.kwargs['questionid'])
+        # check if the range exists, otherwise raise 404
         self.rangeid = get_object_or_404(Range, rangeurl=self.kwargs['rangeurl'], rangeactive=1)
+        # get the questions
         question = Questions.objects.filter(questionid = self.kwargs['questionid'])[0]
         return question
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        # get the questionid
         questionid = self.kwargs['questionid']
+        # get the rangeid using the rangeurl
         rangeid = Range.objects.filter(rangeurl = self.kwargs['rangeurl']).values_list('rangeid')[0][0]
+        # check if the question uses docker
         usedocker = Questions.objects.filter(questionid = questionid).values_list('usedocker')[0][0]
         if usedocker is True:
+            # if it is true, call the dockercontainerstart function
             password, siab = self.dockerContainerStart()
+            # set siab and password as context
             context['siab'] = siab
             context['password'] = password
         else:
+            # otherwise, set both to false
             context['siab'] = False
             context['password'] = False
 
+        # call the checkattemptlimit function to be set as context
         context['hitmaxattempts'] = self.checkattemptlimit()
+        # call the latestanswer function to be set as contexxt
         context['latestanswer'] = self.latestanswer()
 
-        #gotta check if it's mcq, and if it is, get options from database
+        # gotta check if it's mcq, and if it is, get options from database
         # first i gotta get the questionobject
         questiontype = Questions.objects.filter(questionid = questionid).values_list('questiontype')[0][0]
-
+        
+        # if it is mcq
         if questiontype == 'MCQ':
+            # get the mcqoptions from the database
             options = MCQOptions.objects.filter(questionid = questionid)
+            # set the options as context
             context['mcqoptions'] = options
 
+        # get the question points for that question to be set as context
         context['questionpoints'] = Questions.objects.filter(rangeid = self.rangeid, questionid = questionid).values_list('points')[0][0]
         
+        # check if the student activated the hint for this question before
         hintactivated = StudentHints.objects.filter(rangeid = self.rangeid, questionid = questionid, studentid = self.request.user).values_list('hintactivated')
+        # check if the queryset has data
         if len(hintactivated) != 0:
+            # if it does, get the hint
             hint = hintactivated[0][0]
         else:
+            # otherwise set to none
             hint = None
+        #set hint as the context
         context['hint'] = hint
 
+        # check the database if the student has answer the question correctly before
         correctcheck = StudentQuestions.objects.filter(studentid = self.request.user, rangeid = rangeid, questionid = questionid, answercorrect = 1)
+        # if the queryset has that entry
         if len(correctcheck) == 1:
+            # set context as tTrue
             context['correct'] = True
         else:
+            # otherwise set false
             context['correct'] = False
 
+        # get the question topic of the question
         questiontopic = Questions.objects.filter(rangeid = self.rangeid, questionid = questionid).values_list('topicid')[0][0]
+        # get the topic name from the database
         topicname = QuestionTopic.objects.filter(topicid = questiontopic).values_list('topicname')[0][0]
+        # set the context as topicname
         context['topic'] = topicname
 
+        # return context
         return context
 
 
@@ -318,9 +480,12 @@ class AttemptMCQQuestionView(ListView, ModelFormMixin):
     form_class = AnswerMCQForm
 
     def checkPorts(self):
+        # get all the entries of the ports currently being used
         database = UnavailablePorts.objects.all().values_list('portnumber')
+        # determine the size of the database query
         size = len(database)
 
+        # we need two lists for the two servers that we have
         dockerserver = []
         webserver = []
 
@@ -338,28 +503,55 @@ class AttemptMCQQuestionView(ListView, ModelFormMixin):
             #return first available port for docker server
             return 9051
 
+        # determine the length of both of the webserver and dockerserver lists
         webserversize = len(webserver)
         dockerserversize = len(dockerserver)
         
         if dockerserversize < 50:
-            if int(dockerserver[dockerserversize - 1][0]) == 9100:
+            # check if the docker server is not full (used all 50 ports)
+            if int(dockerserver[dockerserversize - 1][0]) == 9099:
+                # check if the last entry is the last available port. 
+                # if it is not the last available port, it means that there are gaps inbetween the list
                 for x in range(0, 48):
+                    # use a for loop to loop the number of available ports in one server minused one
+                    # this means that because we have 49 ports, we will have to forloop between 0 and 48
                     if int(dockerserver[x + 1][0]) - int(dockerserver[x][0]) != 1:
+                        # using the loop, we take the difference of the next port number and the current port number
+                        # if the difference is one, it means that there is no gap in between
+                        # else if the different is more than one, there is a gap
+                        # so we will take the current portnumber and add one to determine the port number to give
                         result = int(dockerserver[x][0]) + 1
+                        # return the port number
                         return result
             else:
+                # takes the last used port and adds one 
                 result = int(dockerserver[dockerserversize - 1][0]) + 1
+                # return the port number
                 return result
         elif webserversize < 50:
+            # because the docker server is full, we will now overflow to the web server
             if int(webserver[webserversize - 1][0]) == 9050:
-                for x in range(0, 48):
+                # same logic:
+                # check if the last entry is the last available port. 
+                # if it is not the last available port, it means that there are gaps inbetween the list
+                for x in range(0, 49):
+                    # use a for loop to loop the number of available ports in one server minused one
+                    # this means that because we have 50 ports, we will have to forloop between 0 and 49
                     if int(webserver[x + 1][0]) - int(webserver[x][0]) != 1:
+                        # using the loop, we take the difference of the next port number and the current port number
+                        # if the difference is one, it means that there is no gap in between
+                        # else if the different is more than one, there is a gap
+                        # so we will take the current portnumber and add one to determine the port number to give
                         result = int(webserver[x][0]) + 1
+                        # return the port number
                         return result
             else:
+                # takes the last used port and adds one 
                 result = int(webserver[webserversize - 1][0]) + 1
+                # return the port number
                 return result
         else:
+            # the server is completely full. return -1 to show an error.
             return -1
 
     def dockerContainerStart(self):
@@ -367,20 +559,33 @@ class AttemptMCQQuestionView(ListView, ModelFormMixin):
         # we need to check if there are any open containers
         # we have stored it in the session
         data = {}
+        # calls the checkPorts function from above to get the available port
         port = self.checkPorts()
+        # declare an empty string for the server ip
         serverip = ''
+        # checks if the port is -1
         if port == -1:
+            # if the port is -1, it means that the server is busy, display an error
             return HttpResponse('SERVER BUSY. PLEASE TRY AGAIN LATER.')
-        # port 8051 is reserved for API
+        # determine the ip address using the port number        
         elif port >= 9051:
+            # if it is 9051 inclusive, it must be the docker server
             serverip = '192.168.100.42'
         elif port <= 9050:
+            # else if it is less than 9050 inclusive, it must be the web server
             serverip = '192.168.100.43'
+        # convert the port to a string for concatenation later
         port = str(port)
+        # get the current rangeurl
         rangename = self.kwargs['rangeurl']
+        # get the current questionid
         questionnumber = self.kwargs['questionid']
+        # gets the string of the imagename to be converted to
+        # the format is <rangeurl>.<questionid>
         imagename = str(rangename + '.' + questionnumber)
-        #image = 'siab_server'
+        # create the payload for the docker engine api
+        # the imagename used is to determine the image name to be created
+        # the image should be already created in the docker server
         payload = {
             'Image':imagename,
             'HostConfig': {
@@ -397,21 +602,30 @@ class AttemptMCQQuestionView(ListView, ModelFormMixin):
                 }
             }
         }
-        #serverip = 'localhost'
+        # use the docker engine api to create the container
         url = 'http://' + serverip + ':8051/containers/create'
+        # request with the payload
         response = requests.post(url, json=payload)
         if response.status_code == 201:
             test = True
+            # get the data from the response
             data = response.json()
+            # get the container id
             containerid = data['Id']
+            # get the url to start the container
             starturl = 'http://' + serverip + ':8051/containers/%s/start' % containerid
+            # request to start the container
             response = requests.post(starturl)
-
+            # create a new entry in the database
             portsdb = UnavailablePorts(portnumber = int(port), studentid = self.request.user, containername = containerid, datetimecreated = timezone.now())
+            # save the object to the database
             portsdb.save()
-            # for testing
+            # get the final url for the iframe
             finalsiaburl = 'dmit2.bulletplus.com:' + port
+
+            # generate a randompassword for the docker container
             randompassword = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(6))
+            # attempt to change the password
             changepassword = '["/bin/bash","-c","echo \"guest:pass\" | chpasswd"]'
             execcmd = {
                 "AttachStdin":"true", 
@@ -431,128 +645,220 @@ class AttemptMCQQuestionView(ListView, ModelFormMixin):
             return randompassword, finalsiaburl
 
         elif response.status_code == 400:
-            return redirect('/error')
+            # return error
+            return -1
         elif response.status_code == 409:
-            return redirect('/error')
+            # return error
+            return -2
         else:
-            return redirect('/error')
+            # return error
+            return -3
+
 
     def checkattemptlimit(self):
+        # this function is to determine if the user has reached his attempt limit
+        # declare the attempted as false first
         attempted = False
+        # get the current user
         user = self.request.user
+        # get the question object of the current object
         questioninstance = Questions.objects.get(questionid = self.kwargs['questionid'])
+        # get the rangeurl of the currenet range
         rangeurl = self.kwargs['rangeurl']
+        # get the rangeid using the range url
         rangeid = Range.objects.filter(rangeurl=rangeurl).values_list('rangeid')[0][0]
+        # check the number of attempts that the user has attempted this question before
         numberofattempts = len(StudentQuestions.objects.filter(studentid = user, rangeid = rangeid, questionid = questioninstance))
+        # get the max number of attempts for this question
         maxattempts = Range.objects.filter(rangeid = rangeid).values_list('attempts')[0][0]
+        # check if the user has reached his attempt limit 
         if maxattempts != 0 and numberofattempts == maxattempts:
+            # if it is, return true
             attempted = True
+        # otherwise, return false
         return attempted
 
     def latestanswer(self):
+        # this function is to get the latest answer that the user has attempted
+        # first, get the username
         user = self.request.user
+        # then, get the question instnace
         questioninstance = Questions.objects.get(questionid = self.kwargs['questionid'])
+        # get the rangeurl of the current range
         rangeurl = self.kwargs['rangeurl']
+        # get the range instance object of the current range
         rangeinstance = Range.objects.get(rangeurl = rangeurl)
+        # get the queryset of the studentquestions for the students attempts
         result = StudentQuestions.objects.filter(studentid = user, rangeid = rangeinstance, questionid = questioninstance).values_list('answergiven')
+        # check if the return is not 0
         if len(result) != 0:
+            # get the latest given answer
             result = result[len(result) - 1][0]
         else:
+            # set result as None
             result = None
-        
+        # return the result
         return result
 
     def get_form_kwargs(self):
+        # get the keyword arguments for the form
         kwargs = super(AttemptMCQQuestionView, self).get_form_kwargs()
+        # set list one to four
         list = ['one', 'two', 'three', 'four']
         newlist = []
+
         for x in list:
+            # get the mcq options from the database
             options = MCQOptions.objects.filter(questionid = self.kwargs['questionid']).values_list('option'+str(x))[0][0]
+            # set the choice syntax
             choice = (options, options)
+            # append to the list
             newlist.append(choice)
+        # set the keyword arguments as newlist
         kwargs['choices'] = newlist
+        # return kwargs
         return kwargs
     
     def get(self, request, *args, **kwargs):
+        # this get function is to display the get method form
+        # declare self.object as none
         self.object = None
+        # get the form using the form class stated at the start of this view
         self.form = self.get_form(self.form_class)
+        # return the list view
         return ListView.get(self, request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        # this post function is to display the post method form
+        # declare self.object as none
         self.object = None
+        # get the form using the form class stated at the start of this view
         self.form = self.get_form(self.form_class)
 
+        # check if the form is valid
         if self.form.is_valid():
+            # if the form is valid
+            # get the user
             user = self.request.user
+            # get the answer they gave
             answergiven = self.form.cleaned_data['answergiven']
+            # get the question object of current question
             questioninstance = Questions.objects.get(questionid = self.kwargs['questionid'])
+            # get the current range url
             rangeurl = self.kwargs['rangeurl']
+            # get the range instance object using the rangeurl
             rangeinstance = Range.objects.get(rangeurl = rangeurl)
+            # get the questionid
             questionid = Questions.objects.filter(questionid = self.kwargs['questionid']).values_list('questionid')[0][0]
+            # call the checkanswer function from above
             check = self.form.checkAnswer(user, answergiven, questioninstance, rangeinstance, questionid)
+            # return the post form
             return ListView.get(self, request, *args, **kwargs)
 
-    
     def get_queryset(self):
+        # get queryset is to pull from the database to get info for the listview
+        # call the docker kill class
         DockerKill.get(self, self.request)
+        # check if the question exists, otherwise raise 404
         self.questionid = get_object_or_404(Questions, questionid=self.kwargs['questionid'])
+        # check if the range exists, otherwise raise 404
         self.rangeid = get_object_or_404(Range, rangeurl=self.kwargs['rangeurl'], rangeactive=1)
+        # get the questions
         question = Questions.objects.filter(questionid = self.kwargs['questionid'])[0]
         return question
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        # get the questionid
         questionid = self.kwargs['questionid']
+        # get the rangeid using the rangeurl
         rangeid = Range.objects.filter(rangeurl = self.kwargs['rangeurl']).values_list('rangeid')[0][0]
+        # check if the question uses docker
         usedocker = Questions.objects.filter(questionid = questionid).values_list('usedocker')[0][0]
         if usedocker is True:
+            # if it is true, call the dockercontainerstart function
             password, siab = self.dockerContainerStart()
+            # set siab and password as context
             context['siab'] = siab
             context['password'] = password
         else:
+            # otherwise, set both to false
             context['siab'] = False
             context['password'] = False
 
+        # call the checkattemptlimit function to be set as context
         context['hitmaxattempts'] = self.checkattemptlimit()
+        # call the latestanswer function to be set as contexxt
         context['latestanswer'] = self.latestanswer()
 
-        #gotta check if it's mcq, and if it is, get options from database
+        # gotta check if it's mcq, and if it is, get options from database
         # first i gotta get the questionobject
         questiontype = Questions.objects.filter(questionid = questionid).values_list('questiontype')[0][0]
-
+        
+        # if it is mcq
         if questiontype == 'MCQ':
+            # get the mcqoptions from the database
             options = MCQOptions.objects.filter(questionid = questionid)
+            # set the options as context
             context['mcqoptions'] = options
 
+        # get the question points for that question to be set as context
         context['questionpoints'] = Questions.objects.filter(rangeid = self.rangeid, questionid = questionid).values_list('points')[0][0]
         
+        # check if the student activated the hint for this question before
         hintactivated = StudentHints.objects.filter(rangeid = self.rangeid, questionid = questionid, studentid = self.request.user).values_list('hintactivated')
+        # check if the queryset has data
         if len(hintactivated) != 0:
+            # if it does, get the hint
             hint = hintactivated[0][0]
         else:
+            # otherwise set to none
             hint = None
+        #set hint as the context
         context['hint'] = hint
 
+        # check the database if the student has answer the question correctly before
         correctcheck = StudentQuestions.objects.filter(studentid = self.request.user, rangeid = rangeid, questionid = questionid, answercorrect = 1)
+        # if the queryset has that entry
         if len(correctcheck) == 1:
+            # set context as tTrue
             context['correct'] = True
         else:
+            # otherwise set false
             context['correct'] = False
+
+        # get the question topic of the question
+        questiontopic = Questions.objects.filter(rangeid = self.rangeid, questionid = questionid).values_list('topicid')[0][0]
+        # get the topic name from the database
+        topicname = QuestionTopic.objects.filter(topicid = questiontopic).values_list('topicname')[0][0]
+        # set the context as topicname
+        context['topic'] = topicname
+
+        # return context
         return context
 
-
 class ActivateHint(View):
+    # this class is to activate the hint as a student
     def get(self, request, questionid, rangeurl):
+        # get the current user
         user = self.request.user
+        # create a new hint object
         hintobj = StudentHints()
+        # set the student id of the object
         hintobj.studentid = user
+        # get the range instance object of current range
         rangeinstance = Range.objects.get(rangeurl = rangeurl)
+        # set the rangeinstance as the rangeid of the object
         hintobj.rangeid = rangeinstance
+        # get the question instance object
         questioninstance = Questions.objects.get(questionid = questionid)
+        # set the questioninstance as questionid of the object
         hintobj.questionid = questioninstance
+        # set the hintactivated as True
         hintobj.hintactivated = True
+        # save the object
         hintobj.save()
-
+        # redirect the user
         return redirect('./')
 
 

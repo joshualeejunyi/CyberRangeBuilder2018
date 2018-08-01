@@ -205,7 +205,6 @@ class AdminResetPassword(forms.ModelForm):
             except forms.ValidationError as error:
                 self.add_error('password2', error)
 
-
 class AdminResetCommit(AdminResetPassword):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop("request")

@@ -133,7 +133,7 @@ class ModifyRangeForm(ModelForm):
         self.timestart = timestart
         self.timeend = timeend
 
-        if startdate is not None or enddate is not None:
+        if startdate is not None and enddate is not None:
             if enddate < startdate:
                 msg = u"End Date should be after Start Date!"
                 self._errors["dateend"] = self.error_class([msg])
@@ -142,7 +142,14 @@ class ModifyRangeForm(ModelForm):
                 if timeend < timestart:
                     msg = u"End Time should be after Start Time for a one day range!"
                     self._errors["timeend"] = self.error_class([msg])
-                    
+        
+        if startdate is None and enddate is not None:
+            msg = u"Please enter a Start Date!"
+            self._errors["datestart"] = self.error_class([msg])
+
+        if startdate is not None and enddate is None:
+            msg = u"Please enter a End Date!"
+            self._errors["dateend"] = self.error_class([msg])
 
         if timestart is None and timeend is not None:
             msg = u"Please enter a Start Time!"
@@ -151,6 +158,7 @@ class ModifyRangeForm(ModelForm):
         if timeend is None and timestart is not None:
             msg = u"Please enter a End Time!"
             self._errors["timeend"] = self.error_class([msg])
+
         
     def save(self, commit=True):
         modifyrange = super().save(commit=False)

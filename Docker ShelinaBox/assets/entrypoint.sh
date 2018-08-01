@@ -8,7 +8,7 @@ hex()
 }
 
 echo "Preparing container .."
-COMMAND="/usr/bin/shellinaboxd --debug --no-beep -u shellinabox -g shellinabox -c /var/lib/shellinabox -p ${SIAB_PORT} --user-css ${SIAB_USERCSS}"
+COMMAND="/usr/bin/shellinaboxd --debug --no-beep -u shellinabox -g shellinabox  -p ${SIAB_PORT} --user-css ${SIAB_USERCSS}"
 
 if [ "$SIAB_PKGS" != "none" ]; then
 	set +e
@@ -19,8 +19,8 @@ if [ "$SIAB_PKGS" != "none" ]; then
 	set -e
 fi
 
-if [ "$SIAB_SSL" != "true" ]; then
-	COMMAND+=" -t"
+if [ "$SIAB_SSL" = "true" ]; then
+	COMMAND+=" -c /usr/local/sbin/certificate"
 fi
 
 if [ "${SIAB_ADDUSER}" == "true" ]; then

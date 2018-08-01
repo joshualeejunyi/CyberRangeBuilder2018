@@ -1,6 +1,7 @@
 from django.urls import path, include
 from django.conf.urls import url
 from . import views
+from settings import views as settingview
 from django_filters.views import FilterView
 from .filters import *
 from django.contrib.auth.decorators import login_required
@@ -77,6 +78,10 @@ urlpatterns = [
     #QUESTION MANAGEMENT
     path('questionmanagement/', login_required(views.QuestionManagement.as_view()), name='questionmanagement'),
     path('questionmanagement/edit/<questionid>', login_required(views.EditQuestion.as_view()), name='editquestion'),
+    path('questionmanagement/view/<questionid>', login_required(views.ViewArchivedQuestion.as_view()), name='viewquestion'),
+    path('questionmanagement/archived', login_required(views.ArchivedQuestionManagement.as_view()), name='archivedquestionmanagement'),
+    path('questionmanagement/archived/unarchive/<questionid>', login_required(views.UnarchiveFromQuestionManagement.as_view()), name='unarchivefromquestionmanagement'),
+    path('<username>/changepassword', login_required(settingview.ResetPassword.as_view()), name='forcechangepassword'),
 
     #DOCKER MANAGEMENT
     path('dockermanagement/', login_required(views.DockerManagement.as_view()), name='dockermanagement'),

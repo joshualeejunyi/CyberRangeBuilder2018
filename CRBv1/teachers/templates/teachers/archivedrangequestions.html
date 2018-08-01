@@ -124,22 +124,11 @@
                                             {% endif %}
                                         {% endfor %}
                                     </td>
-                                    <td> {{x.title }} </td>
-                                    <td> {{x.text }} </td>
+                                    <td> {{x.title}}</td>
+                                    <td> {{ x.text | safe | cut:"<p>"| cut:"</p>"}} </td>
                                     <td> {{x.hint }} </td>
-                                    <td>
-                                        {% for y in answer %}
-                                            {% if y.questionid.questionid == x.questionid %}
-                                                {{ y.answer }}
-                                            {% endif %}
-                                        {% endfor %}
-                                    </td>
                                     <td> 
-                                        {% for a in marks %}
-                                            {% if a.questionid.questionid == x.questionid %}
-                                                {{ a.points }}
-                                            {% endif %}
-                                        {% endfor %}
+                                        {{x.answer}}
                                     </td>
                                     <td style="text-align: center">
                                         <a class="btn btn-block btn-success" onclick="return confirm('Unarchive Question {{ x.questionid}} ?')" href="unarchive/{{ x.questionid }}">Unarchive</a>

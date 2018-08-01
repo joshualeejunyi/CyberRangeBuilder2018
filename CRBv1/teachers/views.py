@@ -31,15 +31,20 @@ from SDL.models import *
 
 
 # Create your views here.
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class CreateImage(View):
+    # create image class to pull from registry and create the image in the local server
     def get(self, request, rangeurl, questionid, imageid):
-        #PULL FROM REGSITRY FROM IP ADDRESS 192.168.40.134:5000
         data = {}
+        # declare a list of server ip addresses for the for loop later
         serverip = ['192.168.100.42:8051', '192.168.100.43:8051']
+        # conver the imageid to be lowercase
         imageid = imageid.lower()
         
+        # start a forloop for each ip address in the list
         for ip in serverip:
+            # set the 
             endpoint1 = 'http://' + ip + '/images/create?fromImage=dmit2.bulletplus.com:8053/{conid}'
             header1 = {"X-Registry-Auth": "eyAidXNlcm5hbWUiOiAiYWRtaW4iLCAicGFzc3dvcmQiOiAicGFzc3dvcmQiLCAic2VydmVyYWRkcmVzcyI6ICJkbWl0Mi5idWxsZXRwbHVzLmNvbTo4MDUzIiB9Cg=="}
             url1 = endpoint1.format(conid=imageid)
@@ -54,10 +59,11 @@ class CreateImage(View):
                 return response.status_code
 
 
-            #RENAME THE IMAGE NAME
-            #IMAGE NAME CANNOT HAVE CAPITAL LETTERS!!!!!!!!!!!!!!!!!!!!!!!!!
+            # next, we have to rename the image
             reference = {}
+            # concatenate the rangeurl and questionid with a period between to form the imagename syntax
             imagename = str(rangeurl) + '.' + str(questionid)
+            # set the endpoint
             endpoint2 = 'http://' + ip + '/images/dmit2.bulletplus.com:8053/' + imageid + '/tag?repo=' + imagename
             response = requests.post(endpoint2)
             
@@ -80,6 +86,7 @@ class CreateImage(View):
 
         return 0
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class TeacherDashboard(ListView, PermissionRequiredMixin):
     template_name = 'teachers/teacherdashboard.html'
@@ -96,6 +103,7 @@ class TeacherDashboard(ListView, PermissionRequiredMixin):
         context['classesobject'] = UserClass.objects.all()
         return context
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class UserManagement(FilterView, ListView):
     template_name = 'teachers/usermanagement.html'
@@ -112,6 +120,7 @@ class UserManagement(FilterView, ListView):
         context['classesobject'] = UserClass.objects.all()
         return context
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class DisabledUserManagement(FilterView, ListView):
     template_name = 'teachers/disabledusermanagement.html'
@@ -128,6 +137,7 @@ class DisabledUserManagement(FilterView, ListView):
         context['classesobject'] = UserClass.objects.all()
         return context
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class AddUser(ListView, ModelFormMixin):
     template_name = 'teachers/adduserform.html'
@@ -159,10 +169,12 @@ class AddUser(ListView, ModelFormMixin):
         kwargs.update({'request': self.request})
         return kwargs
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class AddUserSuccess(generic.TemplateView):
     template_name = 'teachers/addusersuccess.html'
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class ModifyUser(UpdateView):
     form_class = AdminModifyForm
@@ -200,6 +212,7 @@ class ResetPasswordView(UpdateView):
         kwargs.update({'request': self.request})
         return kwargs
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class DisableUser(View):
     def get(self, request, username):
@@ -209,6 +222,7 @@ class DisableUser(View):
 
         return redirect('/teachers/usermanagement/')
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class AcceptUser(View):
     def get(self, request, username):
@@ -224,6 +238,7 @@ class AcceptUser(View):
 
         return redirect('/teachers/usermanagement/')
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class RejectUser(View):
     def get(self, request, username):
@@ -231,6 +246,7 @@ class RejectUser(View):
         selecteduser.delete()
         return redirect('/teachers/')
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class EnableUser(View):
     def get(self, request, username):
@@ -240,6 +256,7 @@ class EnableUser(View):
 
         return redirect('/teachers/usermanagement/disabled')
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class DeleteUser(View):
     def get(self, request, username):
@@ -252,6 +269,7 @@ class DeleteUser(View):
 
         return redirect(url)
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class GroupManagement(FilterView, ListView):
     template_name = 'teachers/groupmanagement.html'
@@ -262,6 +280,7 @@ class GroupManagement(FilterView, ListView):
         allgroups = Group.objects.all().order_by('-lastmodifieddate')
         return allgroups
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class AddGroup(ListView, ModelFormMixin):
     template_name = 'teachers/addgroupform.html'
@@ -292,10 +311,12 @@ class AddGroup(ListView, ModelFormMixin):
         kwargs.update({'request': self.request})
         return kwargs
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class AddGroupSuccess(generic.TemplateView):
     template_name = 'teachers/addgroupsuccess.html'
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class GroupView(ListView):
     template_name = 'teachers/groupview.html'
@@ -321,6 +342,7 @@ class GroupView(ListView):
         context['groupobjects'] = Group.objects.filter(groupname = self.kwargs['groupname']).order_by('-lastmodifieddate')
         return context
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class AddUserInGroup(FilterView, ListView):
     template_name = 'teachers/adduseringroup.html'
@@ -345,6 +367,7 @@ class AddUserInGroup(FilterView, ListView):
 
         return context
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class AddUserToCart(View):
     def get(self, request, groupname, username):
@@ -360,6 +383,7 @@ class AddUserToCart(View):
         url = "/teachers/groupmanagement/" + groupname + "/addusers"
         return redirect(url)
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class RemoveUserFromCart(View):
     def get(self, request, groupname, username):
@@ -375,6 +399,7 @@ class RemoveUserFromCart(View):
         url = "/teachers/groupmanagement/" + groupname + "/addusers"
         return redirect(url)
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class UserGroupCommit(View):
     def get(self, request, groupname):
@@ -391,6 +416,7 @@ class UserGroupCommit(View):
         del request.session['usercart']
         return redirect(url)
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class RemoveStudentFromRange(View):
     def get(self, request, rangeurl, username):
@@ -401,6 +427,7 @@ class RemoveStudentFromRange(View):
         url = '/teachers/rangemanagement/view/' + rangeurl
         return redirect(url)
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class RemoveGroupFromRange(View):
     def get(self, request, rangeurl, groupname):
@@ -421,6 +448,7 @@ class RemoveGroupFromRange(View):
         url = '/teachers/rangemanagement/view/' + rangeurl
         return redirect(url)
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class RemoveStudentFromGroup(View):
     def get(self, request, groupname, username):
@@ -433,6 +461,7 @@ class RemoveStudentFromGroup(View):
         url = '/teachers/groupmanagement/' + groupname
         return redirect(url)
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class DeleteGroup(View):
     template_name = 'teachers/confirmdeletegroup.html'
@@ -445,6 +474,7 @@ class DeleteGroup(View):
         groupobj.delete()
         return redirect('/teachers/groupmanagement')
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class MakeLeader(View):
     def get(self, request, groupname, username):
@@ -457,6 +487,7 @@ class MakeLeader(View):
         url = "/teachers/groupmanagement/" + groupname
         return redirect(url)
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class RangeManagement(FilterView, ListView):
     template_name = 'teachers/rangemanagement.html'
@@ -469,6 +500,7 @@ class RangeManagement(FilterView, ListView):
         ranges = Range.objects.all().filter(isdisabled = False, createdbyusername=user).order_by('-lastmodifieddate', '-datecreated')
         return ranges
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class ArchivedRangeManagement(FilterView, ListView):
     template_name = 'teachers/archivedrangemanagement.html'
@@ -480,6 +512,7 @@ class ArchivedRangeManagement(FilterView, ListView):
         ranges = Range.objects.all().filter(isdisabled = True)
         return ranges
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class CreateRange(CreateView, RedirectView):
     template_name = 'teachers/addrange.html'
@@ -509,6 +542,7 @@ class CreateRange(CreateView, RedirectView):
         else:
             return CreateView.get(self, request, *args, **kwargs)
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class RangeView(ListView, FilterView):
     template_name = 'teachers/rangeview.html'
@@ -560,6 +594,7 @@ class RangeView(ListView, FilterView):
         context['groups'] = groups
         return context
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class ArchivedRangeQuestions(ListView, FilterView):
     template_name = 'teachers/archivedrangequestions.html'
@@ -584,6 +619,7 @@ class ArchivedRangeQuestions(ListView, FilterView):
         context['archivednumber']= Questions.objects.filter(rangeid = selectedrangeid, isarchived = True).count()
         return context
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class AddQuestioninRange(FilterView, ListView):
     template_name = 'teachers/addquestionsinrange.html'
@@ -616,6 +652,7 @@ class AddQuestioninRange(FilterView, ListView):
 
         return context
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class AddQuestionToCart(View):
     def get(self, request, questionid, rangeurl):
@@ -632,7 +669,7 @@ class AddQuestionToCart(View):
         url = '/teachers/rangemanagement/view/' + rangeurl + '/import/'
         return redirect(url)
 
-
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class RemoveQuestionFromCart(View):
     def get(self, request, questionid, rangeurl):
@@ -649,6 +686,7 @@ class RemoveQuestionFromCart(View):
         url = '/teachers/rangemanagement/view/' + rangeurl + '/import/'
         return redirect(url)
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class AddQuestioninRangeCommit(View):
     def get(self, request, rangeurl):
@@ -675,6 +713,7 @@ class AddQuestioninRangeCommit(View):
         del request.session['questionscart']
         return redirect(url)
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class EditQuestion (UpdateView):
     form_class = ModifyQuestionForm
@@ -719,6 +758,7 @@ class EditQuestion (UpdateView):
 
         return context
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class ModifyRange(UpdateView):
     form_class = ModifyRangeForm
@@ -767,6 +807,7 @@ class ModifyRange(UpdateView):
         kwargs.update({'request': self.request})
         return kwargs
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class ArchiveRange(View):
     def get(self, request, rangeurl):
@@ -778,6 +819,7 @@ class ArchiveRange(View):
 
         return redirect(previousurl)
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class DeleteRange(View):
     def get(self, request, rangeurl):
@@ -792,6 +834,7 @@ class DeleteRange(View):
         rangeobj.delete()
         return redirect('../../')
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class UnarchiveRange(View):
     def get(self, request, rangeurl):
@@ -803,6 +846,7 @@ class UnarchiveRange(View):
 
         return redirect(previousurl)
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class ArchiveQuestion(View):
     def get(self, request, rangeurl, questionid):
@@ -821,6 +865,7 @@ class ArchiveQuestion(View):
         rangeinstance.save()
         return redirect(previousurl)
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class UnarchiveQuestion(View):
     def get(self, request, rangeurl, questionid):
@@ -839,6 +884,7 @@ class UnarchiveQuestion(View):
         rangeinstance.save()
         return redirect(previousurl)
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class DeleteQuestionFromRange(View):
     def get(self, request, rangeurl, questionid):
@@ -850,6 +896,7 @@ class DeleteQuestionFromRange(View):
         selectedquestioninstance.delete()
         return redirect(previousurl)
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class AssignUser(ListView, FilterView):
     template_name = 'teachers/assignuserrange.html'
@@ -876,6 +923,7 @@ class AssignUser(ListView, FilterView):
 
         return context
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class AddUserRangeCart(View):
     def get(self, request, rangeurl, username):
@@ -890,6 +938,7 @@ class AddUserRangeCart(View):
         url = "/teachers/rangemanagement/view/" + rangeurl + "/assignusers"
         return redirect(url)
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class RemoveUserRangeCart(View):
     def get(self, request, rangeurl, username):
@@ -904,6 +953,7 @@ class RemoveUserRangeCart(View):
         url = "/teachers/rangemanagement/view/" + rangeurl + "/assignusers"
         return redirect(url)
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class UserRangeCommit(View):
     def get(self, request, rangeurl):
@@ -921,6 +971,7 @@ class UserRangeCommit(View):
         del request.session['userrangecart']
         return redirect(url)
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class AssignGroup(ListView, FilterView):
     template_name = 'teachers/assigngrouprange.html'
@@ -943,6 +994,7 @@ class AssignGroup(ListView, FilterView):
 
         return context
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class AddGroupRangeCart(View):
     def get(self, request, rangeurl, groupname):
@@ -956,6 +1008,7 @@ class AddGroupRangeCart(View):
         url = "/teachers/rangemanagement/view/" + rangeurl + "/assigngroups"
         return redirect(url)
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class RemoveGroupRangeCart(View):
     def get(self, request, rangeurl, groupname):
@@ -969,6 +1022,7 @@ class RemoveGroupRangeCart(View):
         url = "/teachers/rangemanagement/view/" + rangeurl + "/assigngroups"
         return redirect(url)
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class GroupRangeCommit(View):
     def get(self, request, rangeurl):
@@ -991,6 +1045,7 @@ class GroupRangeCommit(View):
         del request.session['grouprangecart']
         return redirect(url)
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class CreateQuestion(ListView, ModelFormMixin):
     template_name = 'teachers/addquestion.html'
@@ -1140,6 +1195,7 @@ class CreateQuestion(ListView, ModelFormMixin):
         context['questiontopic'] = questiontopic
         return context
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class ActivateRange(View):
     def get(self, request, rangeurl):
@@ -1150,6 +1206,7 @@ class ActivateRange(View):
         rangeobject.save()
         return redirect('../')
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class DeactivateRange(View):
     def get(self, request, rangeurl):
@@ -1160,6 +1217,7 @@ class DeactivateRange(View):
         rangeobject.save()
         return redirect('../')
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class QuestionManagement(FilterView, ListView):
     template_name = 'teachers/questionmanagement.html'
@@ -1176,6 +1234,7 @@ class QuestionManagement(FilterView, ListView):
         context['topics'] = QuestionTopic.objects.all()
         return context
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class DockerManagement(ListView):
     template_name = 'teachers/dockermanagement.html'
@@ -1186,14 +1245,18 @@ class DockerManagement(ListView):
         dockers = UnavailablePorts.objects.all()
         return dockers
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class AdminDockerKill(View):
     def get(self, request, containername):
-        # i think i need to get the ports to check if it's web server or docker server
+        # get the port number that the teacher is trying to kill
         portnumber = UnavailablePorts.objects.filter(containername = containername).values_list('portnumber')[0][0]
-        if int(portnumber) > 9051:
+        # determine which server it is from the port number
+        if int(portnumber) >= 9051:
+            # if it is more than 9051 inclusivve, it is the docker server
             server = '192.168.100.42'
         else:
+            # else it is the web server
             server = '192.168.100.43'
         # delete old port if existing
         endpoint = 'http://' + server + ':8051/containers/' + containername + '?force=True'
@@ -1204,6 +1267,7 @@ class AdminDockerKill(View):
 
         return redirect('/teachers/dockermanagement/')
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class DownloadImportTemplate(View):
     def get(self, request, *args, **kwargs):
@@ -1215,7 +1279,7 @@ class DownloadImportTemplate(View):
 
         return response
 
-
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class ImportCSV(View):
     def get(self, request, *args, **kwargs):
@@ -1324,6 +1388,7 @@ class ImportCSV(View):
         return render(request, 'teachers/importqns.html')
 
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class ExportCSV(View):
     def get(self, request, *args, **kwargs):
@@ -1342,6 +1407,7 @@ class ExportCSV(View):
             topicname = QuestionTopic.objects.get(topicid = qns[2])
             if qns[1] == 'MCQ':
                 questioninstance = Questions.objects.get(questionid = qns[0])
+                print(questioninstance)
                 mcqoptionsinstance = MCQOptions.objects.get(questionid = questioninstance)
                 writer.writerow([qns[0],
                                 qns[1],
@@ -1380,6 +1446,7 @@ class ExportCSV(View):
                 
         return response
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class ReportView(generic.ListView):
     template_name='teachers/report.html'
@@ -1437,7 +1504,7 @@ class ReportView(generic.ListView):
 
         return context
 
-
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class TeacherView(FilterView, ListView):
     template_name = 'teachers/teachermanagement.html'
@@ -1448,6 +1515,7 @@ class TeacherView(FilterView, ListView):
         allteachers = User.objects.filter(is_staff = 1)
         return allteachers
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class AddTeacher(ListView, ModelFormMixin):
     template_name = 'teachers/addteacher.html'
@@ -1472,6 +1540,7 @@ class AddTeacher(ListView, ModelFormMixin):
         else:
             return ListView.get(self, request, *args, **kwargs)
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class ClassView(ListView):
     template_name = 'teachers/classmanagement.html'
@@ -1481,6 +1550,7 @@ class ClassView(ListView):
         alluserclass = UserClass.objects.all()
         return alluserclass
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class AddClass(ListView, ModelFormMixin):
     template_name = 'teachers/addclass.html'
@@ -1510,6 +1580,7 @@ class AddClass(ListView, ModelFormMixin):
         kwargs.update({'request': self.request})
         return kwargs
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class IsOpen(View):
     def get(self, request, *args, **kwargs):
@@ -1521,6 +1592,7 @@ class IsOpen(View):
         returnurl = ('/teachers/rangemanagement/view/' + str(rangeurl))
         return HttpResponseRedirect(returnurl)
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class IsClose(View):
     def get(self, request, *args, **kwargs):
@@ -1532,6 +1604,7 @@ class IsClose(View):
         returnurl = ('/teachers/rangemanagement/view/' + str(rangeurl))
         return HttpResponseRedirect(returnurl)
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class SDLManagement(FilterView, ListView):
     template_name='teachers/SDLmanagement.html'
@@ -1548,6 +1621,7 @@ class SDLManagement(FilterView, ListView):
         context['teachers'] = User.objects.filter(is_staff=1).values_list('username', flat=True)
         return context
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class AddPost(FormView):
     template_name = 'teachers/addSDLpost.html'
@@ -1574,6 +1648,7 @@ class AddPost(FormView):
         kwargs.update({'request': self.request})
         return kwargs
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class EditPost(UpdateView):
     form_class = PostModifyForm
@@ -1591,6 +1666,7 @@ class EditPost(UpdateView):
         kwargs.update({'request': self.request})
         return kwargs
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class PublishPost(View):
     def get(self, request, postid):
@@ -1603,6 +1679,7 @@ class PublishPost(View):
         selectedpost.save()
         return redirect('/teachers/SDLmanagement')
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class WithdrawPost(View):
     def get(self, request, postid):
@@ -1612,6 +1689,7 @@ class WithdrawPost(View):
         selectedpost.save()
         return redirect('/teachers/SDLmanagement')
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class DeletePost(View):
     def get(self, request, postid):
@@ -1619,6 +1697,7 @@ class DeletePost(View):
         selectedpost.delete()
         return redirect('/teachers/SDLmanagement')
 
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class ViewPost(ListView, ModelFormMixin):
     template_name='teachers/viewpost.html'
@@ -1661,7 +1740,7 @@ class ViewPost(ListView, ModelFormMixin):
         context['comments'] = comments
 
         return context
-
+@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class DeleteComment(View):
     def get(self, request, postid, commentid):
@@ -1669,3 +1748,73 @@ class DeleteComment(View):
         comment.delete()
         url = '/teachers/SDLmanagement/view/' + postid
         return redirect(url)
+
+
+
+@method_decorator(change_password, name='dispatch')
+@method_decorator(user_is_staff, name='dispatch')
+class ArchivedQuestionManagement(FilterView, ListView):
+    template_name = 'teachers/archivedquestionmanagement.html'
+    context_object_name = 'questions'
+    paginate_by = 10
+    filterset_class = QuestionFilter
+
+    def get_queryset(self):
+        questions = Questions.objects.filter(isarchived = 1)
+        for x in questions:
+            print(x.createdby)
+        return questions
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['topics'] = QuestionTopic.objects.all()
+        print(context['topics'])
+        questions_obj = Questions.objects.filter(isarchived = 1)
+        context['createdby'] = self.request.user
+        return context
+
+@method_decorator(change_password, name='dispatch')
+@method_decorator(user_is_staff, name='dispatch')
+class UnarchiveFromQuestionManagement(View):
+    def get(self, request, *args, **kwargs):
+        selectedquestionid = self.kwargs['questionid']
+        selectedquestioninstance = Questions.objects.get(questionid = selectedquestionid)
+        selectedquestioninstance.isarchived = 0
+        selectedquestioninstance.save()
+        
+        previousurl = request.META.get('HTTP_REFERER')
+        return redirect(previousurl)
+
+@method_decorator(change_password, name='dispatch')
+@method_decorator(user_is_staff, name='dispatch')
+class ViewArchivedQuestion(ListView):
+    template_name = 'teachers/viewarchivedquestion.html'
+    context_object_name = 'result'
+    
+    def get_queryset(self):
+        selectedquestion = Questions.objects.get(questionid = self.kwargs['questionid'])
+        return selectedquestion
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        selectedquestion = Questions.objects.get(questionid = self.kwargs['questionid'])
+
+        questiontopic = QuestionTopic.objects.all().values_list('topicname')
+        context['questiontopic'] = questiontopic
+
+        getthistopicid = (selectedquestion.topicid.topicid)
+        currentquestiontopicname = QuestionTopic.objects.get(topicid=getthistopicid)
+        context['currentquestiontopicname'] = currentquestiontopicname.topicname
+
+        context['questiontypechoices'] = QUESTION_TYPE_CHOICES
+
+        context['points'] = selectedquestion.points
+
+        if selectedquestion.questiontype == 'MCQ':
+            mcqoptions_obj = MCQOptions.objects.get(questionid = selectedquestion)
+            context['optionone'] = mcqoptions_obj.optionone
+            context['optiontwo'] = mcqoptions_obj.optiontwo
+            context['optionthree'] = mcqoptions_obj.optionthree
+            context['optionfour'] = mcqoptions_obj.optionfour
+
+        return context

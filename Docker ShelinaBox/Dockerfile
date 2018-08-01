@@ -33,6 +33,8 @@ EXPOSE 4200
 VOLUME /etc/shellinabox /var/log/supervisor /home
 
 ADD assets/entrypoint.sh /usr/local/sbin/
+ADD certificates/certificate-dmit2.bulletplus.com.pem /usr/local/sbin/certificate/
+ADD certificates/certificate.pem /usr/local/sbin/certificate/
 
 ENTRYPOINT ["entrypoint.sh"]
 CMD ["shellinabox"]

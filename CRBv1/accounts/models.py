@@ -28,7 +28,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(db_column='teacher', default=False)
     isdisabled = models.BooleanField(db_column='isdisabled', default=False)
     isaccepted = models.BooleanField(db_column='isaccepted', default=False)
-    
+    isdefault = models.BooleanField(db_column='isdefault', default=False)
+
     EMAIL_FIELD = 'email'
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email']
