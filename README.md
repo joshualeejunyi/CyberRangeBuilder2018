@@ -342,7 +342,7 @@ At line 41, just adjust the list of server IP addresses accordingly. The items i
 At line 1255, adjust the if else statement accordingly to your setup. Also change the server variables to the IP addresses of your available servers
  
 
-### Create Administrator Account
+## Create Administrator Account
 Before you go, you would also need to create your administrator account. Navigate back to the project folder at /home/cyberwsgi/grouped/CRBv1, and run:
 python3 manage.py createsuperuser
 
