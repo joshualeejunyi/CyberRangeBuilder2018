@@ -5,11 +5,8 @@ We hope that many will use Project Ostrich to train their students in Cyber Secu
 
 ## In Case You Were Wondering...
 Team Ostrich consists of:
-Team Leader: 
-- Joshua Lee
-Assistant Team Leader: 
-- Marcus Kho
-Members:
+- Joshua Lee (Team Leader)
+- Marcus Kho (Assistant Team Leader)
 - Dexter Gui
 - Jonathan Au
 - Wesley Chiau
