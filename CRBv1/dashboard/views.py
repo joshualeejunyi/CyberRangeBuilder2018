@@ -39,6 +39,8 @@ class DashboardView(generic.ListView):
             context['madeit'] = intopfive
             context['ranking'] = ranking
             context['reportboxes'] = self.reportboxes
-            context['latestranges'] = latestrange
+        context['latestranges'] = latestrange
+        if len(self.reportboxes) == 0:
+            context['norange'] = True
 
         return context

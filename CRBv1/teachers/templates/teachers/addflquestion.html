@@ -3,10 +3,6 @@
 <script>
     function changeEvent() {
         var selectedVal = document.getElementById("questiontype").value;
-        if (selectedVal === "FL") {
-            window.location.href = '../FL';
-            return false;
-        }
         if (selectedVal === "SA") {
             window.location.href = '../SA';
             return false;
@@ -14,6 +10,10 @@
         if (selectedVal === "OE") {
             window.location.href = '../OE';
             return false;
+        }
+        if (selectedVal === "MCQ") {
+            window.location.href = '../MCQ';
+            return false;            
         }
         if (selectedVal === "TF") {
             window.location.href = '../TF';
@@ -57,7 +57,7 @@
                     <div class="form-group has-feedback">
                         <label for="questiontype">Question Type: <span style="color:#dd4b39;">*</span></label>
                         <select name="questiontype" id="questiontype" class="form-control" value="" onchange="changeEvent()" required>
-                            <option value="MCQ" selected hidden>Multiple Choice</option>
+                            <option value="FL" selected hidden>Flag</option>
                             {% for x in questiontypechoices %}	
                                 <option value='{{ x.0 }}'>{{ x.1 }}</option>
                             {% endfor %}
@@ -117,26 +117,6 @@
                         {% else %}
                         <input type="number" name="hintpenalty" value=0 class="form-control">
                         {% endif %}
-                    </div>
-
-                    <div class="form-group has-feedback">
-                        <label for="optionone">Option 1: <span style="color:#dd4b39;">*</span></label>
-                        <input type="text" name="optionone" class="form-control">
-                    </div>
-                
-                    <div class="form-group has-feedback">
-                        <label for="optiontwo">Option 2: <span style="color:#dd4b39;">*</span></label>
-                        <input type="text" name="optiontwo" class="form-control">
-                    </div>
-                
-                    <div class="form-group has-feedback">
-                        <label for="optionthree">Option 3: <span style="color:#dd4b39;">*</span></label>
-                        <input type="text" name="optionthree" class="form-control">
-                    </div>
-                
-                    <div class="form-group has-feedback">
-                        <label for="optionfour">Option 4: <span style="color:#dd4b39;">*</span></label>
-                        <input type="text" name="optionfour" class="form-control">
                     </div>
 
                     <div class="form-group has-feedback">

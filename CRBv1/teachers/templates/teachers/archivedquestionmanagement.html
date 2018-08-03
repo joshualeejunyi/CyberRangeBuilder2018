@@ -111,9 +111,8 @@
                 <td> {{x.createdby }} </td>
                 {% if x.createdby == createdby %}
                     <td style="text-align: center">
-                        <a style="width: 100px;" class="btn btn-block btn-info" href="/teachers/questionmanagement/view/{{ x.questionid }}">View</a>
+                        <a style="width: 100px;" class="btn btn-block btn-info" href="/teachers/questionmanagement/archived/view/{{ x.questionid }}">View</a>
                         <a style="width: 100px;" class="btn btn-block btn-primary" href="/teachers/questionmanagement/archived/unarchive/{{ x.questionid }}">Unarchive</a>
-                        <a style="width: 100px;" class="btn btn-block btn-danger" href="/teachers/questionmanagement/archived/delete/{{ x.questionid }}">Delete</a>
                     </td>
                 {% else %}
                     <td style="text-align: center">

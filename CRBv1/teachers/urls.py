@@ -42,6 +42,11 @@ urlpatterns = [
     path('rangemanagement/createrange/', login_required(views.CreateRange.as_view()), name="createrange"),
     path('rangemanagement/createrange/<rangeurl>/createquestion/', login_required(views.CreateQuestion.as_view()), name="createquestion"),
     path('rangemanagement/view/<rangeurl>/createquestion/', login_required(views.CreateQuestion.as_view()), name="createquestion"),
+    path('rangemanagement/view/<rangeurl>/createquestion/MCQ/', login_required(views.CreateMCQQuestion.as_view()), name="createmcqquestion"),
+    path('rangemanagement/view/<rangeurl>/createquestion/TF/', login_required(views.CreateTFQuestion.as_view()), name="createtfquestion"),
+    path('rangemanagement/view/<rangeurl>/createquestion/FL/', login_required(views.CreateFLQuestion.as_view()), name="createflquestion"),
+    path('rangemanagement/view/<rangeurl>/createquestion/SA/', login_required(views.CreateSAQuestion.as_view()), name="createsaquestion"),
+    path('rangemanagement/view/<rangeurl>/createquestion/OE/', login_required(views.CreateOEQuestion.as_view()), name="createoequestion"),
     path('rangemanagement/view/<rangeurl>/', login_required(views.RangeView.as_view()), name="rangeview"),
     path('rangemanagement/view/<rangeurl>/report/<username>/', login_required(views.ReportView.as_view()), name="reportview"),
     path('rangemanagement/view/<rangeurl>/remove/<username>/', login_required(views.RemoveStudentFromRange.as_view()), name="removestudentfromrange"),
@@ -74,12 +79,14 @@ urlpatterns = [
     path('rangemanagement/view/<rangeurl>/exportcsv/', views.ExportCSV.as_view(), name='exportcsv'),
     path('rangemanagement/view/<rangeurl>/isopen/', views.IsOpen.as_view(), name='isopen'),
     path('rangemanagement/view/<rangeurl>/isclose/', views.IsClose.as_view(), name='isopen'),
+    path('rangemanagement/view/<rangeurl>/csvtemplate/', views.DownloadCSVTemplate.as_view(), name='downloadcsvtemplate'),
 
     #QUESTION MANAGEMENT
     path('questionmanagement/', login_required(views.QuestionManagement.as_view()), name='questionmanagement'),
     path('questionmanagement/edit/<questionid>', login_required(views.EditQuestion.as_view()), name='editquestion'),
-    path('questionmanagement/view/<questionid>', login_required(views.ViewArchivedQuestion.as_view()), name='viewquestion'),
+    path('questionmanagement/view/<questionid>', login_required(views.ViewQuestion.as_view()), name='viewquestion'),
     path('questionmanagement/archived', login_required(views.ArchivedQuestionManagement.as_view()), name='archivedquestionmanagement'),
+    path('questionmanagement/archived/view/<questionid>', login_required(views.ViewQuestion.as_view()), name='unarchivefromquestionmanagement'),
     path('questionmanagement/archived/unarchive/<questionid>', login_required(views.UnarchiveFromQuestionManagement.as_view()), name='unarchivefromquestionmanagement'),
     path('<username>/changepassword', login_required(settingview.ResetPassword.as_view()), name='forcechangepassword'),
 

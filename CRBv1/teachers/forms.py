@@ -234,7 +234,6 @@ class ModifyQuestionForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop("request")
-        self.rangeurl = kwargs.pop("rangeurl")
         self.questionid = kwargs.pop("questionid")
         super(ModifyQuestionForm, self).__init__(*args, **kwargs)
     

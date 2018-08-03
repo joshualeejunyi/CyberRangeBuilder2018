@@ -143,6 +143,9 @@
 							<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="10%">
 								Points Awarded
 							</th>
+							<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="10%">
+								Actions
+							</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -155,15 +158,18 @@
 								{{ question.answergiven}}
 							</td>
 							<td>
-								{% if rangeactive %}
-									<b><i>Undisclosed</i></b>
-								{% else %}
-									{{ question.answer }}
-								{% endif %}
+								{{ question.questionid.answer }}
 							</td>
 							<td>{{ question.questionid.points }}</td>
 							<td>
 								{{ question.marksawarded }}
+							</td>
+							<td>
+								{% if question.questionid.questiontype == 'OE' %}
+								<a class="btn btn-block btn-success" onclick="return confirm('Mark {{username}}\'s Question as Correct?')" href="mark/{{question.questionid}}">Remove</a>
+								{% else %}
+								-
+								{% endif %}
 							</td>
 						</tr>
 						{% endfor %}
@@ -174,13 +180,10 @@
 							<td>{{ question.text | safe | cut:"<p>" | cut:"</p>"}}</td>
 							<td> - </td>
 							<td>
-								{% if rangeactive %}
-									<b><i>Undisclosed</i></b>
-								{% else %}
-									{{ question.answer }}
-								{% endif %}
+								{{ question.answer }}
 							</td>
 							<td>{{ question.points }}</td>
+							<td> - </td>
 							<td> - </td>
 						</tr>
 						{% endfor %}

@@ -73,6 +73,9 @@
                 <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
                     Created By
                 </th>
+                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                    Actions
+                </th>
         </thead>
         {% for x in questions %}
             <tr role="row">
@@ -95,13 +98,13 @@
                         {{ m.topicname }}
                         {% endif %}
                     {% endfor %}
-                </td>
+                </td>z
                 <td> {{x.title }} </td>
                 <td> {{x.text | safe | cut:"<p>" | cut:"</p>"}} </td>
                 <td> {{x.hint }} </td>
                 <td> {{x.points }} </td>
                 <td> {{x.createdby }} </td>
-                {% if x.createdby == createdby %}
+                {% if x.createdby == creator %}
                     <td style="text-align: center">
                         <a style="width: 100px;" class="btn btn-block btn-info" href="./view/{{ x.questionid }}">View</a>
                         <a style="width: 100px;" class="btn btn-block btn-primary" href="./edit/{{ x.questionid }}">Edit</a>

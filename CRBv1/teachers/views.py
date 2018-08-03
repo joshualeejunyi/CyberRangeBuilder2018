@@ -727,9 +727,18 @@ class EditQuestion (UpdateView):
     def get_form_kwargs(self):
         kwargs = super(EditQuestion, self).get_form_kwargs()
         kwargs.update({'request': self.request})
-        rangeurl = self.kwargs['rangeurl']
-        kwargs.update({'rangeurl': self.kwargs['rangeurl']})
-        kwargs.update({'questionid': self.kwargs['questionid']})
+        try:
+            rangeurl = self.kwargs['rangeurl']
+            kwargs.update({'rangeurl': self.kwargs['rangeurl']})
+            kwargs.update({'questionid': self.kwargs['questionid']})
+        except:
+            selectedquestionid = self.kwargs['questionid']
+            print(selectedquestionid)
+            questioninstance = Questions.objects.get(questionid = selectedquestionid)
+            rangeid = questioninstance.rangeid
+            rangeurl = rangeid.rangeurl
+            kwargs.update({'questionid': self.kwargs['questionid']})
+            
         return kwargs
 
     def get_object(self):
@@ -1063,120 +1072,74 @@ class CreateQuestion(ListView, ModelFormMixin):
     def post(self, request, *args, **kwargs):
         self.object = None
         self.form = self.get_form(self.form_class)
-        request.session['TF'] = False
 
         if self.form.is_valid():
-            rangeinstance = Range.objects.get(rangeurl = self.kwargs['rangeurl'])
+            # if the form is valid, save the form
+            # return question object and the topic name
             question, topicname = self.form.save()
-            optionone = request.POST.get('optionone',' ')
+            # need to get the range instance to add the score
+            rangeinstance = Range.objects.get(rangeurl = self.kwargs['rangeurl'])
+            # get the points so that can add the score            
             points = request.POST.get('points',' ')
-            answer = request.POST.get('answer',' ')
+            # get the registryid so that we can create the image later
             registryid = self.request.POST.get('registryid','')
+            # get the questionid of the current question for the image creation
             questionid = question.questionid
-            request.session['questionid'] = questionid
+            # get the question instance
             questioninstance = Questions.objects.get(questionid = questionid)
-
+            # get the range url
+            rangeurl = self.kwargs['rangeurl']
+            # get the current range score to append the score
             currentrangescore = rangeinstance.maxscore
+            # check if the score is None
             if currentrangescore is None:
+                # if it is, add the points to 0
                 currentrangescore = 0 + int(points)
             else: 
+                # else, add the points to the current points
                 currentrangescore += int(points)
             
+            # set the maxscore in the object
             rangeinstance.maxscore = currentrangescore
+            # save the object
             rangeinstance.save()
-        
-            request.session['TF'] = False
 
-            rangeurl = self.kwargs['rangeurl']
+            # check if the question uses docker
             if (request.POST.get('usedocker') == 'True'):
-                imageid = request.POST.get('registryid')
+                # if it is, declare imageid as registryid (to not confuse yourself)
+                imageid = registryid
+                # call the createimage class
                 error = CreateImage.get(self, request, rangeurl, questionid, imageid)
+                # check if there is an error
                 if error is not 0:
+                    # if there is an error, show an error message
                    return HttpResponse('ERROR')
 
-
-            if question.questiontype == 'MCQ' and optionone == ' ':
-                rangename = Range.objects.filter(rangeurl = self.kwargs['rangeurl']).values_list('rangename')[0][0]
-                questionobject = Questions.objects.filter(questionid = question.questionid)
-                currentmarks =  Range.objects.filter(rangeurl = self.kwargs['rangeurl']).values_list('maxscore')[0][0]
-                args = {
-                    'rangename' : rangename,
-                    'question' : questionobject,
-                    'currentmarks' : currentmarks,
-                    'points' : points,
-                    'answer' : answer,
-                    'topicname' : topicname,
-                    }
-                return render(request, 'teachers/addmcqquestion.html', args)
-
-            if answer != "True" and answer  != "False" and question.questiontype == 'TF':
-                request.session['TF'] = True
-                rangename = Range.objects.filter(rangeurl = self.kwargs['rangeurl']).values_list('rangename')[0][0]
-                questionobject = Questions.objects.filter(questionid = question.questionid)
-                currentmarks =  Range.objects.filter(rangeurl = self.kwargs['rangeurl']).values_list('maxscore')[0][0]
-                args = {
-                    'rangename' : rangename,
-                    'question' : questionobject,
-                    'currentmarks' : currentmarks,
-                    'points' : points,
-                    'answer' : answer,
-                    'topicname' : topicname,
-                    }
-                return render(request, 'teachers/addtfquestion.html', args)
-                
-                    
+            # return to the form        
             return ListView.get(self, request, *args, **kwargs)
         else:
-            ## IF THE USER IS DONE W CREATING QUESTION THEN WILL REDIRECT THEM TO VIEW RANGE ##
-            if (request.POST.get('done')):
-                rangeurl = self.kwargs['rangeurl']
-                url = "/teachers/rangemanagement/view/" + rangeurl
-                return redirect(url)
-
-            ### IF THE USER WANTS TO SUBMIT NEW TOPIC NAME THEN REFRESHES THE CREATE QNS FOR THEM###
-            elif (request.POST.get('newtopicname')):
-                form_newtopicname = request.POST.get('newtopicname')
-                currenttopicnameavail = QuestionTopic.objects.all().values_list('topicname')
-                topiclist = []
-                for x in range(0, len(currenttopicnameavail)):
-                    topiclist.append(Lower(currenttopicnameavail[x][0]))
-
-                lowercase_form_newtopicname = Lower(form_newtopicname)
-
-                ### CHECKS IF TOPICNAME IS ALREADY IN DATABASE ###
-                if lowercase_form_newtopicname not in topiclist:
-                    QuestionTopic_obj = QuestionTopic(topicname = form_newtopicname)
-                    QuestionTopic_obj.save()
+            # check if the user wants to add a new topic
+            if (request.POST.get('newtopicname')):
+                # conver the topicname to lower
+                newtopicname = request.POST.get('newtopicname')
+                # call the db to filter if there is a similar topic
+                checkdb = QuestionTopic.objects.filter(topicname__iexact = newtopicname)
+                # check if theres any entries
+                if len(checkdb) == 0:
+                    # if no entries, create a new questiontopic object
+                    questiontopicobj = QuestionTopic(topicname = newtopicname)
+                    # save the object
+                    questiontopicobj.save()
+                    # declare a message of success
                     messages.success(request, 'New Question Topic Created ')
-
-                ### IF TOPICNAME IS ALREADY IN DATABASE, THEN WON'T ADD ###
                 else:
+                    # if there is an entry, declare a message to feedback to the user
                     messages.error(request, 'Topic Name Already Exists in Database ')
-
+                # return to the form
                 return ListView.get(self, request, *args, **kwargs)
 
-            elif (request.POST.get('optionone',' ') != ' '):
-                optionone = request.POST.get('optionone', ' ')
-                optiontwo = request.POST.get('optiontwo',' ')
-                optionthree = request.POST.get('optionthree',' ')
-                optionfour = request.POST.get('optionfour',' ')
-                if 'questionid' in request.session:
-                    questionid = request.session['questionid']
-                questioninstance = Questions.objects.get(questionid = questionid)
-                mcqobject = MCQOptions(optionone = optionone, optiontwo = optiontwo, optionthree = optionthree, optionfour = optionfour, questionid = questioninstance)
-                mcqobject.save()
-                return ListView.get(self, request, *args, **kwargs)
-
-            elif (request.session['TF'] == True):
-                answer = self.request.POST.get('answer','')
-                if 'questionid' in request.session:
-                    questionid = request.session['questionid']
-                questioninstance = Questions.objects.get(questionid = questionid)
-                questioninstance.answer = answer
-                questioninstance.save()
-                
-                return ListView.get(self, request, *args, **kwargs)
             else:
+                # return to the form if there is an error in the form
                 return ListView.get(self, request, *args, **kwargs)
 
     def get_queryset(self):
@@ -1196,6 +1159,536 @@ class CreateQuestion(ListView, ModelFormMixin):
         questiontopic = QuestionTopic.objects.all().values_list('topicname')
         context['questiontopic'] = questiontopic
         return context
+
+@method_decorator(change_password, name='dispatch')
+@method_decorator(user_is_staff, name='dispatch')
+class CreateFLQuestion(ListView, ModelFormMixin):
+    template_name = 'teachers/addflquestion.html'
+    context_object_name = 'currentmarks'
+    model = Questions
+    form_class = QuestionForm
+
+    def get(self, request, *args, **kwargs):
+        self.object = None
+        self.form = self.get_form(self.form_class)
+        return ListView.get(self, request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        self.object = None
+        self.form = self.get_form(self.form_class)
+
+        if self.form.is_valid():
+            # if the form is valid, save the form
+            # return question object and the topic name
+            question, topicname = self.form.save()
+            # need to get the range instance to add the score
+            rangeinstance = Range.objects.get(rangeurl = self.kwargs['rangeurl'])
+            # get the points so that can add the score            
+            points = request.POST.get('points',' ')
+            # get the registryid so that we can create the image later
+            registryid = self.request.POST.get('registryid','')
+            # get the questionid of the current question for the image creation
+            questionid = question.questionid
+            # get the question instance
+            questioninstance = Questions.objects.get(questionid = questionid)
+            # get the range url
+            rangeurl = self.kwargs['rangeurl']
+            # get the current range score to append the score
+            currentrangescore = rangeinstance.maxscore
+            # check if the score is None
+            if currentrangescore is None:
+                # if it is, add the points to 0
+                currentrangescore = 0 + int(points)
+            else: 
+                # else, add the points to the current points
+                currentrangescore += int(points)
+            
+            # set the maxscore in the object
+            rangeinstance.maxscore = currentrangescore
+            # save the object
+            rangeinstance.save()
+
+            # check if the question uses docker
+            if (request.POST.get('usedocker') == 'True'):
+                # if it is, declare imageid as registryid (to not confuse yourself)
+                imageid = registryid
+                # call the createimage class
+                error = CreateImage.get(self, request, rangeurl, questionid, imageid)
+                # check if there is an error
+                if error is not 0:
+                    # if there is an error, show an error message
+                   return HttpResponse('ERROR')
+
+            # return to the form        
+            return ListView.get(self, request, *args, **kwargs)
+        else:
+            # check if the user wants to add a new topic
+            if (request.POST.get('newtopicname')):
+                # conver the topicname to lower
+                newtopicname = request.POST.get('newtopicname')
+                # call the db to filter if there is a similar topic
+                checkdb = QuestionTopic.objects.filter(topicname__iexact = newtopicname)
+                # check if theres any entries
+                if len(checkdb) == 0:
+                    # if no entries, create a new questiontopic object
+                    questiontopicobj = QuestionTopic(topicname = newtopicname)
+                    # save the object
+                    questiontopicobj.save()
+                    # declare a message of success
+                    messages.success(request, 'New Question Topic Created ')
+                else:
+                    # if there is an entry, declare a message to feedback to the user
+                    messages.error(request, 'Topic Name Already Exists in Database ')
+                # return to the form
+                return ListView.get(self, request, *args, **kwargs)
+
+            else:
+                # return to the form if there is an error in the form
+                return ListView.get(self, request, *args, **kwargs)
+
+    def get_queryset(self):
+        currentmarks =  Range.objects.filter(rangeurl = self.kwargs['rangeurl']).values_list('maxscore')[0][0]
+        return currentmarks
+
+    def get_form_kwargs(self):
+        kwargs = super(CreateFLQuestion, self).get_form_kwargs()
+        rangeinstance = Range.objects.get(rangeurl = self.kwargs['rangeurl'])
+        kwargs.update({'request': self.request, 'rangeinstance': rangeinstance})
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['questiontypechoices'] = QUESTION_TYPE_CHOICES
+        context['rangename'] = Range.objects.filter(rangeurl = self.kwargs['rangeurl']).values_list('rangename')[0][0]
+        questiontopic = QuestionTopic.objects.all().values_list('topicname')
+        context['questiontopic'] = questiontopic
+        return context
+
+@method_decorator(change_password, name='dispatch')
+@method_decorator(user_is_staff, name='dispatch')
+class CreateMCQQuestion(ListView, ModelFormMixin):
+    template_name = 'teachers/addmcqquestion.html'
+    context_object_name = 'currentmarks'
+    model = Questions
+    form_class = QuestionForm
+
+    def get(self, request, *args, **kwargs):
+        self.object = None
+        self.form = self.get_form(self.form_class)
+        return ListView.get(self, request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        self.object = None
+        self.form = self.get_form(self.form_class)
+
+        if self.form.is_valid():
+            # if the form is valid, save the form
+            # return question object and the topic name
+            question, topicname = self.form.save()
+            # need to get the range instance to add the score
+            rangeinstance = Range.objects.get(rangeurl = self.kwargs['rangeurl'])
+            # get the points so that can add the score            
+            points = request.POST.get('points',' ')
+            # get the registryid so that we can create the image later
+            registryid = self.request.POST.get('registryid','')
+            # get the questionid of the current question for the image creation
+            questionid = question.questionid
+            # get the question instance
+            questioninstance = Questions.objects.get(questionid = questionid)
+            # get the range url
+            rangeurl = self.kwargs['rangeurl']
+            # get the current range score to append the score
+            currentrangescore = rangeinstance.maxscore
+            # check if the score is None
+            if currentrangescore is None:
+                # if it is, add the points to 0
+                currentrangescore = 0 + int(points)
+            else: 
+                # else, add the points to the current points
+                currentrangescore += int(points)
+            
+            # set the maxscore in the object
+            rangeinstance.maxscore = currentrangescore
+            # save the object
+            rangeinstance.save()
+
+            # next, we need to get all the mcq choices
+            optionone = request.POST.get('optionone',' ')
+            optiontwo = request.POST.get('optiontwo',' ')
+            optionthree = request.POST.get('optionthree',' ')
+            optionfour = request.POST.get('optionfour',' ')
+
+            mcqobject = MCQOptions(optionone = optionone, optiontwo = optiontwo, optionthree = optionthree, optionfour = optionfour, questionid = questioninstance)
+            mcqobject.save()
+
+            # check if the question uses docker
+            if (request.POST.get('usedocker') == 'True'):
+                # if it is, declare imageid as registryid (to not confuse yourself)
+                imageid = registryid
+                # call the createimage class
+                error = CreateImage.get(self, request, rangeurl, questionid, imageid)
+                # check if there is an error
+                if error is not 0:
+                    # if there is an error, show an error message
+                   return HttpResponse('ERROR')
+
+            # return to the form        
+            return ListView.get(self, request, *args, **kwargs)
+        else:
+            # check if the user wants to add a new topic
+            if (request.POST.get('newtopicname')):
+                # conver the topicname to lower
+                newtopicname = request.POST.get('newtopicname')
+                # call the db to filter if there is a similar topic
+                checkdb = QuestionTopic.objects.filter(topicname__iexact = newtopicname)
+                # check if theres any entries
+                if len(checkdb) == 0:
+                    # if no entries, create a new questiontopic object
+                    questiontopicobj = QuestionTopic(topicname = newtopicname)
+                    # save the object
+                    questiontopicobj.save()
+                    # declare a message of success
+                    messages.success(request, 'New Question Topic Created ')
+                else:
+                    # if there is an entry, declare a message to feedback to the user
+                    messages.error(request, 'Topic Name Already Exists in Database ')
+                # return to the form
+                return ListView.get(self, request, *args, **kwargs)
+
+            else:
+                # return to the form if there is an error in the form
+                return ListView.get(self, request, *args, **kwargs)
+
+    def get_queryset(self):
+        currentmarks =  Range.objects.filter(rangeurl = self.kwargs['rangeurl']).values_list('maxscore')[0][0]
+        return currentmarks
+
+    def get_form_kwargs(self):
+        kwargs = super(CreateMCQQuestion, self).get_form_kwargs()
+        rangeinstance = Range.objects.get(rangeurl = self.kwargs['rangeurl'])
+        kwargs.update({'request': self.request, 'rangeinstance': rangeinstance})
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['questiontypechoices'] = QUESTION_TYPE_CHOICES
+        context['rangename'] = Range.objects.filter(rangeurl = self.kwargs['rangeurl']).values_list('rangename')[0][0]
+        questiontopic = QuestionTopic.objects.all().values_list('topicname')
+        context['questiontopic'] = questiontopic
+        return context
+
+@method_decorator(change_password, name='dispatch')
+@method_decorator(user_is_staff, name='dispatch')
+class CreateSAQuestion(ListView, ModelFormMixin):
+    template_name = 'teachers/addsaquestion.html'
+    context_object_name = 'currentmarks'
+    model = Questions
+    form_class = QuestionForm
+
+    def get(self, request, *args, **kwargs):
+        self.object = None
+        self.form = self.get_form(self.form_class)
+        return ListView.get(self, request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        self.object = None
+        self.form = self.get_form(self.form_class)
+
+        if self.form.is_valid():
+            # if the form is valid, save the form
+            # return question object and the topic name
+            question, topicname = self.form.save()
+            # need to get the range instance to add the score
+            rangeinstance = Range.objects.get(rangeurl = self.kwargs['rangeurl'])
+            # get the points so that can add the score            
+            points = request.POST.get('points',' ')
+            # get the registryid so that we can create the image later
+            registryid = self.request.POST.get('registryid','')
+            # get the questionid of the current question for the image creation
+            questionid = question.questionid
+            # get the question instance
+            questioninstance = Questions.objects.get(questionid = questionid)
+            # get the range url
+            rangeurl = self.kwargs['rangeurl']
+            # get the current range score to append the score
+            currentrangescore = rangeinstance.maxscore
+            # check if the score is None
+            if currentrangescore is None:
+                # if it is, add the points to 0
+                currentrangescore = 0 + int(points)
+            else: 
+                # else, add the points to the current points
+                currentrangescore += int(points)
+            
+            # set the maxscore in the object
+            rangeinstance.maxscore = currentrangescore
+            # save the object
+            rangeinstance.save()
+
+            # check if the question uses docker
+            if (request.POST.get('usedocker') == 'True'):
+                # if it is, declare imageid as registryid (to not confuse yourself)
+                imageid = registryid
+                # call the createimage class
+                error = CreateImage.get(self, request, rangeurl, questionid, imageid)
+                # check if there is an error
+                if error is not 0:
+                    # if there is an error, show an error message
+                   return HttpResponse('ERROR')
+
+            # return to the form        
+            return ListView.get(self, request, *args, **kwargs)
+        else:
+            # check if the user wants to add a new topic
+            if (request.POST.get('newtopicname')):
+                # conver the topicname to lower
+                newtopicname = request.POST.get('newtopicname')
+                # call the db to filter if there is a similar topic
+                checkdb = QuestionTopic.objects.filter(topicname__iexact = newtopicname)
+                # check if theres any entries
+                if len(checkdb) == 0:
+                    # if no entries, create a new questiontopic object
+                    questiontopicobj = QuestionTopic(topicname = newtopicname)
+                    # save the object
+                    questiontopicobj.save()
+                    # declare a message of success
+                    messages.success(request, 'New Question Topic Created ')
+                else:
+                    # if there is an entry, declare a message to feedback to the user
+                    messages.error(request, 'Topic Name Already Exists in Database ')
+                # return to the form
+                return ListView.get(self, request, *args, **kwargs)
+
+            else:
+                # return to the form if there is an error in the form
+                return ListView.get(self, request, *args, **kwargs)
+
+    def get_queryset(self):
+        currentmarks =  Range.objects.filter(rangeurl = self.kwargs['rangeurl']).values_list('maxscore')[0][0]
+        return currentmarks
+
+    def get_form_kwargs(self):
+        kwargs = super(CreateSAQuestion, self).get_form_kwargs()
+        rangeinstance = Range.objects.get(rangeurl = self.kwargs['rangeurl'])
+        kwargs.update({'request': self.request, 'rangeinstance': rangeinstance})
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['questiontypechoices'] = QUESTION_TYPE_CHOICES
+        context['rangename'] = Range.objects.filter(rangeurl = self.kwargs['rangeurl']).values_list('rangename')[0][0]
+        questiontopic = QuestionTopic.objects.all().values_list('topicname')
+        context['questiontopic'] = questiontopic
+        return context
+
+@method_decorator(change_password, name='dispatch')
+@method_decorator(user_is_staff, name='dispatch')
+class CreateOEQuestion(ListView, ModelFormMixin):
+    template_name = 'teachers/addoequestion.html'
+    context_object_name = 'currentmarks'
+    model = Questions
+    form_class = QuestionForm
+
+    def get(self, request, *args, **kwargs):
+        self.object = None
+        self.form = self.get_form(self.form_class)
+        return ListView.get(self, request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        self.object = None
+        self.form = self.get_form(self.form_class)
+
+        if self.form.is_valid():
+            # if the form is valid, save the form
+            # return question object and the topic name
+            question, topicname = self.form.save()
+            # need to get the range instance to add the score
+            rangeinstance = Range.objects.get(rangeurl = self.kwargs['rangeurl'])
+            # get the points so that can add the score            
+            points = request.POST.get('points',' ')
+            # get the registryid so that we can create the image later
+            registryid = self.request.POST.get('registryid','')
+            # get the questionid of the current question for the image creation
+            questionid = question.questionid
+            # get the question instance
+            questioninstance = Questions.objects.get(questionid = questionid)
+            # get the range url
+            rangeurl = self.kwargs['rangeurl']
+            # get the current range score to append the score
+            currentrangescore = rangeinstance.maxscore
+            # check if the score is None
+            if currentrangescore is None:
+                # if it is, add the points to 0
+                currentrangescore = 0 + int(points)
+            else: 
+                # else, add the points to the current points
+                currentrangescore += int(points)
+            
+            # set the maxscore in the object
+            rangeinstance.maxscore = currentrangescore
+            # save the object
+            rangeinstance.save()
+
+            # check if the question uses docker
+            if (request.POST.get('usedocker') == 'True'):
+                # if it is, declare imageid as registryid (to not confuse yourself)
+                imageid = registryid
+                # call the createimage class
+                error = CreateImage.get(self, request, rangeurl, questionid, imageid)
+                # check if there is an error
+                if error is not 0:
+                    # if there is an error, show an error message
+                   return HttpResponse('ERROR')
+
+            # return to the form        
+            return ListView.get(self, request, *args, **kwargs)
+        else:
+            # check if the user wants to add a new topic
+            if (request.POST.get('newtopicname')):
+                # conver the topicname to lower
+                newtopicname = request.POST.get('newtopicname')
+                # call the db to filter if there is a similar topic
+                checkdb = QuestionTopic.objects.filter(topicname__iexact = newtopicname)
+                # check if theres any entries
+                if len(checkdb) == 0:
+                    # if no entries, create a new questiontopic object
+                    questiontopicobj = QuestionTopic(topicname = newtopicname)
+                    # save the object
+                    questiontopicobj.save()
+                    # declare a message of success
+                    messages.success(request, 'New Question Topic Created ')
+                else:
+                    # if there is an entry, declare a message to feedback to the user
+                    messages.error(request, 'Topic Name Already Exists in Database ')
+                # return to the form
+                return ListView.get(self, request, *args, **kwargs)
+
+            else:
+                # return to the form if there is an error in the form
+                return ListView.get(self, request, *args, **kwargs)
+
+    def get_queryset(self):
+        currentmarks =  Range.objects.filter(rangeurl = self.kwargs['rangeurl']).values_list('maxscore')[0][0]
+        return currentmarks
+
+    def get_form_kwargs(self):
+        kwargs = super(CreateOEQuestion, self).get_form_kwargs()
+        rangeinstance = Range.objects.get(rangeurl = self.kwargs['rangeurl'])
+        kwargs.update({'request': self.request, 'rangeinstance': rangeinstance})
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['questiontypechoices'] = QUESTION_TYPE_CHOICES
+        context['rangename'] = Range.objects.filter(rangeurl = self.kwargs['rangeurl']).values_list('rangename')[0][0]
+        questiontopic = QuestionTopic.objects.all().values_list('topicname')
+        context['questiontopic'] = questiontopic
+        return context
+
+@method_decorator(change_password, name='dispatch')
+@method_decorator(user_is_staff, name='dispatch')
+class CreateTFQuestion(ListView, ModelFormMixin):
+    template_name = 'teachers/addtfquestion.html'
+    context_object_name = 'currentmarks'
+    model = Questions
+    form_class = QuestionForm
+
+    def get(self, request, *args, **kwargs):
+        self.object = None
+        self.form = self.get_form(self.form_class)
+        return ListView.get(self, request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        self.object = None
+        self.form = self.get_form(self.form_class)
+
+        if self.form.is_valid():
+            # if the form is valid, save the form
+            # return question object and the topic name
+            question, topicname = self.form.save()
+            # need to get the range instance to add the score
+            rangeinstance = Range.objects.get(rangeurl = self.kwargs['rangeurl'])
+            # get the points so that can add the score            
+            points = request.POST.get('points',' ')
+            # get the registryid so that we can create the image later
+            registryid = self.request.POST.get('registryid','')
+            # get the questionid of the current question for the image creation
+            questionid = question.questionid
+            # get the question instance
+            questioninstance = Questions.objects.get(questionid = questionid)
+            # get the range url
+            rangeurl = self.kwargs['rangeurl']
+            # get the current range score to append the score
+            currentrangescore = rangeinstance.maxscore
+            # check if the score is None
+            if currentrangescore is None:
+                # if it is, add the points to 0
+                currentrangescore = 0 + int(points)
+            else: 
+                # else, add the points to the current points
+                currentrangescore += int(points)
+            
+            # set the maxscore in the object
+            rangeinstance.maxscore = currentrangescore
+            # save the object
+            rangeinstance.save()
+
+            # check if the question uses docker
+            if (request.POST.get('usedocker') == 'True'):
+                # if it is, declare imageid as registryid (to not confuse yourself)
+                imageid = registryid
+                # call the createimage class
+                error = CreateImage.get(self, request, rangeurl, questionid, imageid)
+                # check if there is an error
+                if error is not 0:
+                    # if there is an error, show an error message
+                   return HttpResponse('ERROR')
+
+            # return to the form        
+            return ListView.get(self, request, *args, **kwargs)
+        else:
+            # check if the user wants to add a new topic
+            if (request.POST.get('newtopicname')):
+                # conver the topicname to lower
+                newtopicname = request.POST.get('newtopicname')
+                # call the db to filter if there is a similar topic
+                checkdb = QuestionTopic.objects.filter(topicname__iexact = newtopicname)
+                # check if theres any entries
+                if len(checkdb) == 0:
+                    # if no entries, create a new questiontopic object
+                    questiontopicobj = QuestionTopic(topicname = newtopicname)
+                    # save the object
+                    questiontopicobj.save()
+                    # declare a message of success
+                    messages.success(request, 'New Question Topic Created ')
+                else:
+                    # if there is an entry, declare a message to feedback to the user
+                    messages.error(request, 'Topic Name Already Exists in Database ')
+                # return to the form
+                return ListView.get(self, request, *args, **kwargs)
+
+            else:
+                # return to the form if there is an error in the form
+                return ListView.get(self, request, *args, **kwargs)
+
+    def get_queryset(self):
+        currentmarks =  Range.objects.filter(rangeurl = self.kwargs['rangeurl']).values_list('maxscore')[0][0]
+        return currentmarks
+
+    def get_form_kwargs(self):
+        kwargs = super(CreateTFQuestion, self).get_form_kwargs()
+        rangeinstance = Range.objects.get(rangeurl = self.kwargs['rangeurl'])
+        kwargs.update({'request': self.request, 'rangeinstance': rangeinstance})
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['questiontypechoices'] = QUESTION_TYPE_CHOICES
+        context['rangename'] = Range.objects.filter(rangeurl = self.kwargs['rangeurl']).values_list('rangename')[0][0]
+        questiontopic = QuestionTopic.objects.all().values_list('topicname')
+        context['questiontopic'] = questiontopic
+        return context
+
 
 @method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
@@ -1228,12 +1721,14 @@ class QuestionManagement(FilterView, ListView):
     filterset_class = QuestionFilter
 
     def get_queryset(self):
-        questions = Questions.objects.all()
+        questions = Questions.objects.filter(isarchived = 0)
         return questions
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['topics'] = QuestionTopic.objects.all()
+        context['creator'] = (self.request.user)
+        
         return context
 
 @method_decorator(change_password, name='dispatch')
@@ -1271,7 +1766,7 @@ class AdminDockerKill(View):
 
 @method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
-class DownloadImportTemplate(View):
+class DownloadCSVTemplate(View):
     def get(self, request, *args, **kwargs):
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="template.csv"'
@@ -1285,10 +1780,13 @@ class DownloadImportTemplate(View):
 @method_decorator(user_is_staff, name='dispatch')
 class ImportCSV(View):
     def get(self, request, *args, **kwargs):
-        return render(request, 'teachers/importqns.html')
+        rangeurl = self.kwargs['rangeurl']
+        redirect = ('/teachers/rangemanagement/view/' + str(rangeurl))
+        return render(request, 'teachers/importqns.html',  {"redirect": redirect})
 
     def post(self, request, *args, **kwargs):
         rangeurl = self.kwargs['rangeurl']
+        redirect = ('/teachers/rangemanagement/view/' + str(rangeurl))
         data = {}
         try:
             csv_file = request.FILES["qnsfile"]
@@ -1307,22 +1805,35 @@ class ImportCSV(View):
             #loop over the lines and save them in db. If error , store as string and then display
             x = 0
             for line in lines:
+                print(str(x) + ' is here')
                 if line and x > 0:
                     marks=0
                     fields = line.split(",")
                     data_dict = {}
-                    questiontype = fields[0]
-                    topicname = fields[1]
-                    title = fields[2]
-                    text = fields[3]
-                    answer = fields[4]
-                    hint = fields[5]
-                    marks = fields[6]
-                    hintpenalty = fields[7]
-                    createdby = self.request.user
-                    usedocker = [8]
-                    registryid = [9]
-
+                    questiontype = fields[1]
+                    print(questiontype)
+                    topicname = fields[2]
+                    print(topicname)
+                    title = fields[3]
+                    print(title)
+                    text = fields[4]
+                    print(text)
+                    answer = fields[5]
+                    print(answer)
+                    hint = fields[6]
+                    print(hint)
+                    marks = fields[7]
+                    print(marks)
+                    hintpenalty = fields[8]
+                    print(hintpenalty)
+                    createdby = fields[9]
+                    if createdby == '':
+                        createdby = self.request.user
+                    print(createdby) 
+                    usedocker = fields[10]
+                    print(usedocker)
+                    registryid = fields[11]
+                    print(registryid)
 
                     docker = False
                     if usedocker == 1:
@@ -1365,10 +1876,10 @@ class ImportCSV(View):
                     
                     if str(questiontype) == 'MCQ':
                         questioninstance = Questions.objects.all().order_by('-questionid')[0]
-                        optionone = fields[10]
-                        optiontwo = fields[11]
-                        optionthree = fields[12]
-                        optionfour = fields[13]
+                        optionone = fields[11]
+                        optiontwo = fields[12]
+                        optionthree = fields[13]
+                        optionfour = fields[14]
                         mcqoptions_obj = MCQOptions(optionone = optionone,
                                                     optiontwo = optiontwo,
                                                     optionthree = optionthree,
@@ -1385,9 +1896,10 @@ class ImportCSV(View):
         except Exception as e:
             logging.getLogger("error_logger").error("Unable to upload file. "+repr(e))
             messages.error(request,"Unable to upload file. "+repr(e))
+            return render(request, 'teachers/importqns.html', {"redirect": redirect})
 
         messages.success(request, 'Questions Successfully Imported From CSV File')    
-        return render(request, 'teachers/importqns.html')
+        return render(request, 'teachers/importqns.html', {"redirect": redirect})
 
 
 @method_decorator(change_password, name='dispatch')
@@ -1789,8 +2301,8 @@ class UnarchiveFromQuestionManagement(View):
 
 @method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
-class ViewArchivedQuestion(ListView):
-    template_name = 'teachers/viewarchivedquestion.html'
+class ViewQuestion(ListView):
+    template_name = 'teachers/viewquestion.html'
     context_object_name = 'result'
     
     def get_queryset(self):
@@ -1809,7 +2321,8 @@ class ViewArchivedQuestion(ListView):
         context['currentquestiontopicname'] = currentquestiontopicname.topicname
 
         context['questiontypechoices'] = QUESTION_TYPE_CHOICES
-
+        context['check'] = selectedquestion.isarchived
+        print(selectedquestion.isarchived)
         context['points'] = selectedquestion.points
 
         if selectedquestion.questiontype == 'MCQ':

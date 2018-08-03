@@ -11,12 +11,12 @@
             window.location.href = '../SA';
             return false;
         }
-        if (selectedVal === "OE") {
-            window.location.href = '../OE';
-            return false;
-        }
         if (selectedVal === "TF") {
             window.location.href = '../TF';
+            return false;
+        }
+        if (selectedVal === "MCQ") {
+            window.location.href = '../MCQ';
             return false;            
         }
     }   
@@ -57,7 +57,7 @@
                     <div class="form-group has-feedback">
                         <label for="questiontype">Question Type: <span style="color:#dd4b39;">*</span></label>
                         <select name="questiontype" id="questiontype" class="form-control" value="" onchange="changeEvent()" required>
-                            <option value="MCQ" selected hidden>Multiple Choice</option>
+                            <option value="OE" selected hidden>Open Ended</option>
                             {% for x in questiontypechoices %}	
                                 <option value='{{ x.0 }}'>{{ x.1 }}</option>
                             {% endfor %}
@@ -120,27 +120,7 @@
                     </div>
 
                     <div class="form-group has-feedback">
-                        <label for="optionone">Option 1: <span style="color:#dd4b39;">*</span></label>
-                        <input type="text" name="optionone" class="form-control">
-                    </div>
-                
-                    <div class="form-group has-feedback">
-                        <label for="optiontwo">Option 2: <span style="color:#dd4b39;">*</span></label>
-                        <input type="text" name="optiontwo" class="form-control">
-                    </div>
-                
-                    <div class="form-group has-feedback">
-                        <label for="optionthree">Option 3: <span style="color:#dd4b39;">*</span></label>
-                        <input type="text" name="optionthree" class="form-control">
-                    </div>
-                
-                    <div class="form-group has-feedback">
-                        <label for="optionfour">Option 4: <span style="color:#dd4b39;">*</span></label>
-                        <input type="text" name="optionfour" class="form-control">
-                    </div>
-
-                    <div class="form-group has-feedback">
-                        <label for="answer">Answer: <span style="color:#dd4b39;">*</span></label>
+                        <label for="answer">Answer (Recommended Answer/Guidelines): <span style="color:#dd4b39;">*</span></label>
                         <input type="text" name="answer" class="form-control" required>
                     </div>
 

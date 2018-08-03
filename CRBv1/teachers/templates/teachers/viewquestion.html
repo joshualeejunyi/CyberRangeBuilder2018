@@ -93,8 +93,11 @@
                                 <label for="remarks">Remarks:</label>
                                 <input type="text" name="remarks" class="form-control" value="{{ result.remarks }}" disabled>
                             </div>
-
+                            {% if check == 1 %}   
                             <a href='/teachers/questionmanagement/archived' class="btn btn-primary btn-block btn-flat pull-left" style="width: 100px; margin-bottom: 2%;">Back</a>
+                            {% else %}
+                            <a href='/teachers/questionmanagement' class="btn btn-primary btn-block btn-flat pull-left" style="width: 100px; margin-bottom: 2%;">Back</a>
+                            {% endif %}
                         </form>
                         <br><br>
 {% endblock %}

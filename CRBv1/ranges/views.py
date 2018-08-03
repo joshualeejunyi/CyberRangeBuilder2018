@@ -22,37 +22,34 @@ class EnterCode(View):
     
     def post(self, request, *args, **kwargs):
         # from the form, get the entered rangecode
-        form_rangecode = request.POST.get('rangecode')
+        rangecode = request.POST.get('rangecode')
         # use a try statement to attempt adding
         try:
             # get the range object identified by the unique rangecode
-            selectedrange = Range.objects.get(rangecode = form_rangecode, isopen=1)
+            selectedrange = Range.objects.get(rangecode = rangecode, isopen=1)
             # get the username of the current user
             user = self.request.user
-            # get the user object of the current user
-            requestuser = User.objects.get(username = user)
             # get the email of the current user
-            requestemail = requestuser.studentID
+            email = user.email
+
+            userobject = User.objects.get(email=email)
 
             try:
                 # use a try statement to get the range student object
-                checkifstudentinrange = RangeStudents.objects.get(rangeid = selectedrange,
-                                                                  email = requestuser)
+                checkifstudentinrange = RangeStudents.objects.get(rangeID = selectedrange, studentID = userobject)
                 #if the record exists, it means that the user is already in the range
                 messages.error(request,'You already belong in the range')
                 # returns the user back to the page to inform them that they are already in the range
-                return render(request, 'ranges/entercode.html')
+                return render(request, 'ranges/joinrange.html')
 
             except RangeStudents.DoesNotExist:
                 # if the user is not in the range already
                 # get the current datetime
                 datetimenow = datetime.datetime.now()
                 # create a rangestudents object
-                rangestudents_obj = RangeStudents(rangeID = selectedrange,
-                                                studentID = requestuser,
-                                                dateJoined = datetimenow)
+                rangestudentsobj = RangeStudents(rangeID = selectedrange, studentID = userobject, dateJoined = datetimenow)
                 # save the object to the database
-                rangestudents_obj.save()
+                rangestudentsobj.save()
                 # informs the user that they hae successfully joined the range
                 messages.success(request, 'Successfully Joined The Range')
                 # returns the user to the page
@@ -135,7 +132,7 @@ class AttemptQuestionView(ListView, ModelFormMixin):
 
     def checkPorts(self):
         # get all the entries of the ports currently being used
-        database = UnavailablePorts.objects.all().values_list('portnumber')
+        database = UnavailablePorts.objects.all().order_by('portnumber').values_list('portnumber')
         # determine the size of the database query
         size = len(database)
 
@@ -183,27 +180,32 @@ class AttemptQuestionView(ListView, ModelFormMixin):
                 # return the port number
                 return result
         elif webserversize < 50:
-            # because the docker server is full, we will now overflow to the web server
-            if int(webserver[webserversize - 1][0]) == 9050:
-                # same logic:
-                # check if the last entry is the last available port. 
-                # if it is not the last available port, it means that there are gaps inbetween the list
-                for x in range(0, 49):
-                    # use a for loop to loop the number of available ports in one server minused one
-                    # this means that because we have 50 ports, we will have to forloop between 0 and 49
-                    if int(webserver[x + 1][0]) - int(webserver[x][0]) != 1:
-                        # using the loop, we take the difference of the next port number and the current port number
-                        # if the difference is one, it means that there is no gap in between
-                        # else if the different is more than one, there is a gap
-                        # so we will take the current portnumber and add one to determine the port number to give
-                        result = int(webserver[x][0]) + 1
-                        # return the port number
-                        return result
+            # we need to check if the web server is currently being used
+            if webserversize != 0:
+                # because the docker server is full, we will now overflow to the web server
+                if int(webserver[webserversize - 1][0]) == 9050:
+                    # same logic:
+                    # check if the last entry is the last available port. 
+                    # if it is not the last available port, it means that there are gaps inbetween the list
+                    for x in range(0, 49):
+                        # use a for loop to loop the number of available ports in one server minused one
+                        # this means that because we have 50 ports, we will have to forloop between 0 and 49
+                        if int(webserver[x + 1][0]) - int(webserver[x][0]) != 1:
+                            # using the loop, we take the difference of the next port number and the current port number
+                            # if the difference is one, it means that there is no gap in between
+                            # else if the different is more than one, there is a gap
+                            # so we will take the current portnumber and add one to determine the port number to give
+                            result = int(webserver[x][0]) + 1
+                            # return the port number
+                            return result
+                else:
+                    # takes the last used port and adds one 
+                    result = int(webserver[webserversize - 1][0]) + 1
+                    # return the port number
+                    return result
             else:
-                # takes the last used port and adds one 
-                result = int(webserver[webserversize - 1][0]) + 1
-                # return the port number
-                return result
+                # if the web server is not currently being used, return the first port 9000
+                return 9000
         else:
             # the server is completely full. return -1 to show an error.
             return -1
@@ -481,7 +483,7 @@ class AttemptMCQQuestionView(ListView, ModelFormMixin):
 
     def checkPorts(self):
         # get all the entries of the ports currently being used
-        database = UnavailablePorts.objects.all().values_list('portnumber')
+        database = UnavailablePorts.objects.all().order_by('portnumber').values_list('portnumber')
         # determine the size of the database query
         size = len(database)
 
@@ -529,27 +531,32 @@ class AttemptMCQQuestionView(ListView, ModelFormMixin):
                 # return the port number
                 return result
         elif webserversize < 50:
-            # because the docker server is full, we will now overflow to the web server
-            if int(webserver[webserversize - 1][0]) == 9050:
-                # same logic:
-                # check if the last entry is the last available port. 
-                # if it is not the last available port, it means that there are gaps inbetween the list
-                for x in range(0, 49):
-                    # use a for loop to loop the number of available ports in one server minused one
-                    # this means that because we have 50 ports, we will have to forloop between 0 and 49
-                    if int(webserver[x + 1][0]) - int(webserver[x][0]) != 1:
-                        # using the loop, we take the difference of the next port number and the current port number
-                        # if the difference is one, it means that there is no gap in between
-                        # else if the different is more than one, there is a gap
-                        # so we will take the current portnumber and add one to determine the port number to give
-                        result = int(webserver[x][0]) + 1
-                        # return the port number
-                        return result
+            # we need to check if the web server is currently being used
+            if webserversize != 0:
+                # because the docker server is full, we will now overflow to the web server
+                if int(webserver[webserversize - 1][0]) == 9050:
+                    # same logic:
+                    # check if the last entry is the last available port. 
+                    # if it is not the last available port, it means that there are gaps inbetween the list
+                    for x in range(0, 49):
+                        # use a for loop to loop the number of available ports in one server minused one
+                        # this means that because we have 50 ports, we will have to forloop between 0 and 49
+                        if int(webserver[x + 1][0]) - int(webserver[x][0]) != 1:
+                            # using the loop, we take the difference of the next port number and the current port number
+                            # if the difference is one, it means that there is no gap in between
+                            # else if the different is more than one, there is a gap
+                            # so we will take the current portnumber and add one to determine the port number to give
+                            result = int(webserver[x][0]) + 1
+                            # return the port number
+                            return result
+                else:
+                    # takes the last used port and adds one 
+                    result = int(webserver[webserversize - 1][0]) + 1
+                    # return the port number
+                    return result
             else:
-                # takes the last used port and adds one 
-                result = int(webserver[webserversize - 1][0]) + 1
-                # return the port number
-                return result
+                # if the web server is not currently being used, return the first port 9000
+                return 9000
         else:
             # the server is completely full. return -1 to show an error.
             return -1
