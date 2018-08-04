@@ -923,6 +923,6 @@ class RangesView(ListView):
         # get the rangeIDs that are assigned to current user (in a queryset)
         assignedranges = RangeStudents.objects.filter(studentID=user, rangeID__rangeactive=1).order_by('-lastaccess', '-dateJoined', '-pk')
         currentranges = RangeStudents.objects.filter(studentID = user).values_list('rangeID')
-        Housekeeping.get(self, request, currentranges)
+        Housekeeping.get(self, currentranges)
 
         return assignedranges
