@@ -856,55 +856,47 @@ class QuestionsView(ListView):
             questions = None
         return questions
 
-class RangesView(ListView):
-    template_name = 'ranges/viewranges.html'
-    context_object_name = 'rangeobject'
-
-    def checkrangeexpiry(self, ranges):
-        for x in ranges:
+class Housekeeping(View):
+    def get(self, request, currentranges):
+        for x in currentranges:
             dateend = Range.objects.filter(rangeid = x[0]).values_list("dateend")[0][0]
             timeend = Range.objects.filter(rangeid = x[0]).values_list("timeend")[0][0]
+            datestart = Range.objects.filter(rangeid = x[0]).values_list('datestart')[0][0]
+            timestart = Range.objects.filter(rangeid = x[0]).values_list('timestart')[0][0]
+
             if dateend != None:
-                datecheck = datetime.date.today() > dateend
-                if datecheck:
-                    timecheck = datetime.datetime.now().time() > timeend
-                    if timecheck:
+                datecheck = datetime.date.today()
+                if (datecheck >= dateend) is True :
+                    timecheck = datetime.datetime.now().time()
+                    if (timecheck >= timeend) is True:
+                        print('got to here for time')
                         checkifalreadyinactive = Range.objects.filter(rangeid = x[0]).values_list("rangeactive")[0][0]
                         if checkifalreadyinactive == 1:
-                            studentobject = RangeStudents.objects.filter(rangeid = x[0])
-                            studentobject.save()
-
                             rangeobject = Range.objects.get(rangeid = x[0])
                             rangeobject.rangeactive = 0
                             rangeobject.save()
-                            
-    def checkrangeactive(self, ranges):
-        for x in ranges:
-            datestart = Range.objects.filter(rangeid = x[0]).values_list('datestart')[0][0]
-            timestart = Range.objects.filter(rangeid = x[0]).values_list('timestart')[0][0]
 
             if datestart != None:
                 datecheck = datetime.date.today() > datestart
                 if datecheck:
                     timecheck = datetime.datetime.now().time() > timestart
                     if timecheck:
-                        checkifalreadyactive = Range.objects.filter(rangeid = x[0]).values_list("rangeactive")[0][0]
-                        if checkifalreadyactive == 0:
-                            rangeobject = Range.objects.get(rangeid = x[0])
-                            rangeobject.rangeactive = 1
-                            rangeobject.save()
+                        dateend = Range.objects.filter(rangeid = x[0]).values_list("dateend")[0][0]
+                        if datestart < datetime.date.today() < dateend:
+                            checkifalreadyactive = Range.objects.filter(rangeid = x[0]).values_list("rangeactive")[0][0]
+                            if checkifalreadyactive == 0:
+                                print('fml it got restarted')
+                                rangeobject = Range.objects.get(rangeid = x[0])
+                                rangeobject.rangeactive = 1
+                                rangeobject.save()
 
-    def checkmanualstart(self, ranges):
-        for x in ranges:
             manualstart = Range.objects.filter(rangeid = x[0]).values_list('manualactive')[0][0]
             if manualstart is 1:
                 rangeobject = Range.objects.get(rangeid = x[0])
                 rangeobject.manualdeactive = 0
                 rangeobject.rangeactive = 1
-                rangeobject.save()
+                rangeobject.save()            
 
-    def checkmanualstop(self, ranges):
-        for x in ranges:
             manualstop = Range.objects.filter(rangeid = x[0]).values_list('manualdeactive')[0][0]
             if manualstop is 1:
                 rangeobject = Range.objects.get(rangeid = x[0])
@@ -912,6 +904,9 @@ class RangesView(ListView):
                 rangeobject.rangeactive = 0
                 rangeobject.save()
 
+class RangesView(ListView):
+    template_name = 'ranges/viewranges.html'
+    context_object_name = 'rangeobject'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -928,10 +923,6 @@ class RangesView(ListView):
         # get the rangeIDs that are assigned to current user (in a queryset)
         assignedranges = RangeStudents.objects.filter(studentID=user, rangeID__rangeactive=1).order_by('-lastaccess', '-dateJoined', '-pk')
         currentranges = RangeStudents.objects.filter(studentID = user).values_list('rangeID')
-
-        self.checkrangeexpiry(currentranges)
-        self.checkrangeactive(currentranges)
-        self.checkmanualstart(currentranges)
-        self.checkmanualstop(currentranges)
+        Housekeeping.get(self)
 
         return assignedranges
