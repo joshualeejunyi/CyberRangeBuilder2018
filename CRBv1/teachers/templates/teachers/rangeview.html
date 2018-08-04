@@ -229,9 +229,11 @@
                                     <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
                                         Registry ID
                                     </th>
+                                    {% if not activated %}
                                     <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
                                         Actions
                                     </th>
+                                    {% endif %}
                                 </tr>
                             </thead>
                             {% for x in result %}
@@ -281,10 +283,12 @@
                                             {{ x.registryid }} 
                                         {% endif %}
                                     </td>
+                                    {% if not activated %}
                                     <td>
                                         <a class="btn btn-block btn-primary" href="edit/{{ x.questionid }}">Edit</a>
                                         <a class="btn btn-block btn-danger"  onclick="return confirm('Archive Question {{ x.questionid}} ?')" href="archive/{{ x.questionid }}">Archive</a>
                                     </td>
+                                    {% endif %}
                                 </tr>
                             </form>
                             {% endfor %}

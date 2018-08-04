@@ -173,7 +173,7 @@ class DockerContainerStart(View):
             }
             execurl = 'http://' + serverip + ':8051/containers/%s/exec' % containerid
             execresponse = requests.post(execurl, json=execcmd)
-            if response.status_code == 201:
+            if execresponse.status_code == 201:
                 execdata = response.json()
                 execconid = execdata['Id']
                 execstarturl = 'http://' + serverip + ':8051/exec/%s/start' % execconid
@@ -923,6 +923,6 @@ class RangesView(ListView):
         # get the rangeIDs that are assigned to current user (in a queryset)
         assignedranges = RangeStudents.objects.filter(studentID=user, rangeID__rangeactive=1).order_by('-lastaccess', '-dateJoined', '-pk')
         currentranges = RangeStudents.objects.filter(studentID = user).values_list('rangeID')
-        Housekeeping.get(self)
+        Housekeeping.get(self, request, currentranges)
 
         return assignedranges
