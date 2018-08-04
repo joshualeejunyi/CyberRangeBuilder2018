@@ -117,11 +117,11 @@ class StudentQuestions(models.Model):
     studentid = models.ForeignKey('accounts.User', models.DO_NOTHING, db_column='email', unique=False)
     rangeid = models.ForeignKey(Range, models.DO_NOTHING, db_column='rangeID',unique=False)
     questionid = models.ForeignKey(Questions, models.DO_NOTHING, db_column='questionid', unique=False)
-    answergiven = models.CharField(db_column='answergiven', max_length=100)
+    answergiven = models.TextField(db_column='answergiven', null=True)
     answercorrect = models.BooleanField(db_column='right/wrong', default=False)
     marksawarded = models.PositiveIntegerField(db_column='marksawarded', default=0)
     attempts = models.PositiveIntegerField(db_column='attempts', default=1)
-
+    ismarked = models.BooleanField(db_column='ismarked', default=False)
 
     class Meta:
         db_table = 'StudentQuestions'

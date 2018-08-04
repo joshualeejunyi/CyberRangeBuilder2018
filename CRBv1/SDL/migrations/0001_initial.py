@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='SDLPost',
             fields=[
-                ('postID', models.AutoField(db_column='postID', primary_key=True, serialize=False)),
+                ('postid', models.AutoField(db_column='postID', primary_key=True, serialize=False)),
                 ('title', models.CharField(db_column='posttitle', max_length=255, null=True)),
                 ('text', tinymce.models.HTMLField(db_column='posttext', default='')),
                 ('datecreated', models.DateField(db_column='dateCreated', null=True)),

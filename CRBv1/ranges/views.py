@@ -391,6 +391,9 @@ class AttemptQuestionView(ListView, ModelFormMixin):
             check = self.form.checkAnswer(user, answergiven, questioninstance, rangeinstance, questionid)
             # return the post form
             return ListView.get(self, request, *args, **kwargs)
+        
+        else:
+            return ListView.get(self, request, *args, **kwargs)
 
     def get_queryset(self):
         # get queryset is to pull from the database to get info for the listview
@@ -470,6 +473,17 @@ class AttemptQuestionView(ListView, ModelFormMixin):
         topicname = QuestionTopic.objects.filter(topicid = questiontopic).values_list('topicname')[0][0]
         # set the context as topicname
         context['topic'] = topicname
+
+        attempted = StudentQuestions.objects.filter(questionid = questionid, studentid = self.request.user, rangeid = rangeid).count()
+        if attempted != 0:
+            latestpoints = StudentQuestions.objects.get(studentid = self.request.user, rangeid = rangeid, questionid = questionid, attempts = attempted)
+            context['latestpoints'] = latestpoints
+            # check if the open ended question is marked
+            if questiontype == 'OE':
+                repeatedcheck = StudentQuestions.objects.filter(questionid = questionid, studentid = self.request.user, rangeid = rangeid).count()
+                checkoemarked = StudentQuestions.objects.get(studentid = self.request.user, rangeid = rangeid, questionid = questionid, attempts = repeatedcheck)
+                marked = checkoemarked.ismarked
+                context['ismarked'] = marked
 
         # return context
         return context
@@ -885,7 +899,7 @@ class QuestionsView(ListView):
         # this is when the user opens the range
         # we need to enter this time as the last access
         rangestudentobj = RangeStudents.objects.get(rangeID = currentrangeid, studentID = email)
-        rangestudentobj.lastaccess = datetime.datetime.now()
+        rangestudentobj.lastaccess = timezone.now()
         rangestudentobj.save()
 
         # i need to find all the topics in a single range.

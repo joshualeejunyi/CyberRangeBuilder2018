@@ -98,16 +98,3 @@ class FakeStudentGroup(models.Model):
         app_label = StudentGroup._meta.app_label
         db_table = StudentGroup._meta.db_table
         managed = False
-
-class GroupRange(models.Model):
-    id = models.AutoField(db_column='ID', primary_key=True)
-    groupid = models.ForeignKey("Group", models.DO_NOTHING, db_column='groupID')
-    rangeid = models.ForeignKey("ranges.Range", models.DO_NOTHING, db_column='rangeID')
-    datecreated = models.DateField(db_column='dateCreated', null=True)
-    timecreated = models.TimeField(db_column='timeCreated', null=True)
-    grouprangepoints = models.IntegerField(db_column='groupRangePoints', null=True, default=0)
-    addedby = models.ForeignKey('accounts.User', models.DO_NOTHING, db_column='addedBy', null=True)
-
-    class Meta:
-        db_table = 'GroupRange'
-        verbose_name_plural = 'GroupRanges'

@@ -108,7 +108,7 @@
                     {% for post in posts %}
                         <tr role="row">
                             <td>{{ post.title }}</td>
-                            <td>{{ post.text | safe | slice:":255"}}</td>
+                            <td>{{ post.text | safe | truncatewords:"25"}}</td>
                             <td>{{ post.postactive }}</td>
                             <td>{{ post.createdby }}</td>
                             <td>{{ post.datecreated }}</td>

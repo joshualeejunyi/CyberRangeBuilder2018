@@ -703,6 +703,8 @@ class AddQuestioninRangeCommit(View):
             questionobj.save()
 
             questionpoints = questionobj.points
+            questionid = questionobj.questionid
+            imageid = questionobj.registryid
             rangeobj.maxscore = rangeobj.maxscore + questionpoints
             rangeobj.save()
 
@@ -2017,6 +2019,43 @@ class ReportView(generic.ListView):
         context['ranking'] = ranking
 
         return context
+
+@method_decorator(change_password, name='dispatch')
+@method_decorator(user_is_staff, name='dispatch')
+class OEMarkCorrect(View):
+    def get(self, request, rangeurl, username, questionid):
+        rangeinstance = Range.objects.get(rangeurl = rangeurl)
+        studentinstance = User.objects.get(username = username)
+        questioninstance = Questions.objects.get(questionid = questionid)
+        repeatedcheck = StudentQuestions.objects.filter(questionid = questionid, studentid = studentinstance, rangeid = rangeinstance).count()
+        studentquestionobj = StudentQuestions.objects.get(rangeid = rangeinstance, questionid = questioninstance, studentid = studentinstance, attempts = repeatedcheck)
+        studentquestionobj.answercorrect = 1
+
+        questionpoints = Questions.objects.filter(questionid = questionid).values_list('points')[0][0]
+        studentquestionobj.marksawarded = questionpoints
+        studentquestionobj.ismarked = True
+        rangestudentsobj = RangeStudents.objects.get(studentID = studentinstance, rangeID = rangeinstance)
+        rangestudentsobj.points += questionpoints
+
+        studentquestionobj.save()
+        rangestudentsobj.save()
+
+        return redirect('../../../')
+
+
+@method_decorator(change_password, name='dispatch')
+@method_decorator(user_is_staff, name='dispatch')
+class OEMarkWrong(View):
+    def get(self, request, rangeurl, username, questionid):
+        rangeinstance = Range.objects.get(rangeurl = rangeurl)
+        studentinstance = User.objects.get(username = username)
+        questioninstance = Questions.objects.get(questionid = questionid)
+        repeatedcheck = StudentQuestions.objects.filter(questionid = questionid, studentid = studentinstance, rangeid = rangeinstance).count()
+        studentquestionobj = StudentQuestions.objects.get(rangeid = rangeinstance, questionid = questioninstance, studentid = studentinstance, attempts = repeatedcheck)
+        studentquestionobj.answercorrect = 0
+        studentquestionobj.ismarked = True
+        studentquestionobj.save()
+        return redirect('../../../')
 
 @method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')

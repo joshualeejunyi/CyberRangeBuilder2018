@@ -98,7 +98,7 @@
                         {{ m.topicname }}
                         {% endif %}
                     {% endfor %}
-                </td>z
+                </td>
                 <td> {{x.title }} </td>
                 <td> {{x.text | safe | cut:"<p>" | cut:"</p>"}} </td>
                 <td> {{x.hint }} </td>
@@ -106,8 +106,8 @@
                 <td> {{x.createdby }} </td>
                 {% if x.createdby == creator %}
                     <td style="text-align: center">
-                        <a style="width: 100px;" class="btn btn-block btn-info" href="./view/{{ x.questionid }}">View</a>
-                        <a style="width: 100px;" class="btn btn-block btn-primary" href="./edit/{{ x.questionid }}">Edit</a>
+                        <a style="width: 100px;" class="btn btn-block btn-primary" href="./view/{{ x.questionid }}">View</a>
+                        <a style="width: 100px;" class="btn btn-block btn-success" href="./edit/{{ x.questionid }}">Edit</a>
                         <a style="width: 100px;" class="btn btn-block btn-danger" href="/delete/{{ x.questionid }}">Delete</a>
                     </td>
                 {% else %}

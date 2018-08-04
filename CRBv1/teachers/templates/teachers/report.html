@@ -39,7 +39,7 @@
         var chart = new google.visualization.PieChart(document.getElementById('piechart'));
         chart.draw(data, options);
       }
-    </script>
+	</script>
 
   </head>
 {% endblock %}
@@ -122,16 +122,19 @@
 				<table id="studentstable" class="table table-bordered table-hover dataTable" role="grid" style="table-layout: fixed; width: 100%; word-wrap: break-word; display: table;">
 					<thead>
 						<tr role="row">
+							<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="3%">
+								ID
+							</th>
 							<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="10%">
 								Topic
 							</th>
 							<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="10%">
 								Question Title
 							</th>
-							<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="30%">
+							<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="20%">
 								Question Text
 							</th>
-							<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="15%">
+							<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="20%">
 								Given Answer
 							</th>
 							<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="15%">
@@ -151,11 +154,14 @@
 					<tbody>
 						{% for question in studentquestionsobj %}
 						<tr role="row">
+							<td>{{ question.questionid.questionid }}</td>
 							<td>{{ question.questionid.topicid.topicname }}</td>
 							<td>{{ question.questionid.title }}</td>
-							<td>{{ question.questionid.text | safe | cut:"<p>" | cut:"</p>"}}</td>
 							<td>
-								{{ question.answergiven}}
+								{{ question.questionid.text | safe | cut:"<p>" | cut:"</p>"}}
+							</td>
+							<td>
+								{{ question.answergiven }}
 							</td>
 							<td>
 								{{ question.questionid.answer }}
@@ -165,16 +171,22 @@
 								{{ question.marksawarded }}
 							</td>
 							<td>
-								{% if question.questionid.questiontype == 'OE' %}
-								<a class="btn btn-block btn-success" onclick="return confirm('Mark {{username}}\'s Question as Correct?')" href="mark/{{question.questionid}}">Remove</a>
+								{% if question.ismarked is False %}
+									{% if question.questionid.questiontype == 'OE' %}
+									<a class="btn btn-block btn-success" onclick="return confirm('Mark {{username}}\'s Question as Correct?')" href="mark/{{question.questionid.questionid}}/correct">Mark As Correct</a>
+									<a class="btn btn-block btn-danger" onclick="return confirm('Mark {{username}}\'s Question as Wrong?')" href="mark/{{question.questionid.questionid}}/wrong">Mark As Wrong</a>
+									{% else %}
+									-
+									{% endif %}
 								{% else %}
-								-
+									-
 								{% endif %}
 							</td>
 						</tr>
 						{% endfor %}
 						{% for question in questionsobject %}
 						<tr role="row">
+							<td>{{ question.questionid }}</td>
 							<td>{{ question.topicid.topicname }}</td>
 							<td>{{ question.title }}</td>
 							<td>{{ question.text | safe | cut:"<p>" | cut:"</p>"}}</td>
