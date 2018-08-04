@@ -15,6 +15,14 @@ class LoginRedirect():
         else:
             return redirect("/dashboard")
 
+class Landing():
+    def redirectuser(request):
+        if request.user.is_anonymous:
+            return redirect("/login")
+        else:
+            return(LoginRedirect.loginsuccess(request))
+            
+
 class RegisterView(ListView, ModelFormMixin):
     template_name = 'accounts/register.html'
     context_object_name = 'classesobject'

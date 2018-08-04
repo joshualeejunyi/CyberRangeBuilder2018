@@ -24,7 +24,7 @@ from accounts.forms import *
 
 urlpatterns = [
     path('login/', authviews.LoginView.as_view(template_name='accounts/login.html', authentication_form=CheckUserDisabled), name='login'), 
-    url(r'^$', authviews.login, {'template_name': 'accounts/login.html'}, name='login'),
+    url(r'^$', account.Landing.redirectuser, name='redirect'),
     url(r'loginsuccess/$', account.LoginRedirect.loginsuccess, name='loginredirect'),
     url(r'^logout/$', authviews.logout, {'next_page': '/login'}, name='logout'),
     url(r'register/$', account.RegisterView.as_view(), name='register'),

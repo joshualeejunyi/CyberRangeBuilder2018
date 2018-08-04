@@ -857,7 +857,7 @@ class QuestionsView(ListView):
         return questions
 
 class Housekeeping(View):
-    def get(self, request, currentranges):
+    def get(self, currentranges):
         for x in currentranges:
             dateend = Range.objects.filter(rangeid = x[0]).values_list("dateend")[0][0]
             timeend = Range.objects.filter(rangeid = x[0]).values_list("timeend")[0][0]
