@@ -85,6 +85,7 @@ urlpatterns = [
 
     #QUESTION MANAGEMENT
     path('questionmanagement/', login_required(views.QuestionManagement.as_view()), name='questionmanagement'),
+    path('questionmanagement/archive/<questionid>', login_required(views.ArchiveQuestioninManagement.as_view()), name='archivequestioninmanagement'),
     path('questionmanagement/edit/<questionid>', login_required(views.EditQuestion.as_view()), name='editquestion'),
     path('questionmanagement/view/<questionid>', login_required(views.ViewQuestion.as_view()), name='viewquestion'),
     path('questionmanagement/archived', login_required(views.ArchivedQuestionManagement.as_view()), name='archivedquestionmanagement'),

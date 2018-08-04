@@ -16,7 +16,7 @@
 {% block content %}
     <section class="content">
         <div class="row">
-            <div class="box">
+            <div class="box box-solid box-primary" style="box-shadow: 1px 2px 5px grey;">
                 <div class="box-header with-border">
                     <h3 class="box-title">Questions</h3>
                     <div class="box-tools pull-right">
@@ -41,10 +41,26 @@
                                     <label for="title">Question Title:</label>
                                     {% render_field filter.form.title class="form-control" %}
                                 </div>
-                                    <button type="submit" class="btn btn-primary btn-flat" style="width: 200px; display: inline-block">
-                                        <span class="glyphicon glyphicon-search"></span> Search
-                                    </button>
-                                    <a href="/teachers/questionmanagement" class="btn btn-primary btn-block btn-flat" style="width: 200px;  display: inline-block;" >Reset Filters</a>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-sm-4 col-md-3">
+                                    <label for="title">Points:</label>
+                                    {% render_field filter.form.points class="form-control" %}
+                                </div>
+                                <div class="form-group col-sm-4 col-md-3">
+                                    <label for="title">Use Docker:</label>
+                                    {% render_field filter.form.usedocker class="form-control" %}
+                                </div>
+                                <div class="form-group col-sm-4 col-md-3">
+                                    <label for="title">Range Active:</label>
+                                    {% render_field filter.form.rangeid__isdisabled class="form-control" %}
+                                </div>
+                            </div>
+                            <div>
+                                <button type="submit" class="btn btn-primary btn-flat" style="width: 200px; display: inline-block">
+                                    <span class="glyphicon glyphicon-search"></span> Search
+                                </button>
+                                <a href="." class="btn btn-primary btn-block btn-flat" style="width: 200px;  display: inline-block;" >Reset Filters</a>
                             </div>
                         </div>
                     </form>
@@ -53,22 +69,37 @@
         <thead>
             <tr role="row">
                 <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                    Question Type
+                    ID
                 </th>
                 <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                    Question Topic
+                    Type
                 </th>
                 <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                    Question Title
+                    Topic
                 </th>
                 <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                    Question Text
+                    Title
                 </th>
                 <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                    Question Hint
+                    Text
                 </th>
                 <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                    Question Marks
+                    Hint 
+                </th>
+                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                    Hint Penalty
+                </th>
+                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                    Points
+                </th>
+                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                    Answer
+                </th>
+                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                    Use Shell
+                </th>
+                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                    Registry ID
                 </th>
                 <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
                     Created By
@@ -76,10 +107,16 @@
                 <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
                     Actions
                 </th>
+            </tr>
         </thead>
-        {% for x in questions %}
+        {% for x in filter.qs %}
+        <form method = 'post'>
+            {% csrf_token %}
             <tr role="row">
-                <td> 
+                <td>
+                    {{ x.questionid }}
+                </td>
+                <td>
                     {% if x.questiontype == 'FL' %}
                         Flag
                     {% elif x.questiontype == 'MCQ' %}
@@ -95,25 +132,38 @@
                 <td>
                     {% for m in topics %}
                         {% if m.topicname == x.topicid.topicname %}
-                        {{ m.topicname }}
+                            {{ m.topicname }}
                         {% endif %}
                     {% endfor %}
                 </td>
                 <td> {{x.title }} </td>
-                <td> {{x.text | safe | cut:"<p>" | cut:"</p>"}} </td>
+                <td> {{x.text | safe | cut:"<p>" | cut:"</p>" }} </td>
                 <td> {{x.hint }} </td>
-                <td> {{x.points }} </td>
-                <td> {{x.createdby }} </td>
-                {% if x.createdby == creator %}
-                    <td style="text-align: center">
-                        <a style="width: 100px;" class="btn btn-block btn-primary" href="./view/{{ x.questionid }}">View</a>
-                        <a style="width: 100px;" class="btn btn-block btn-success" href="./edit/{{ x.questionid }}">Edit</a>
-                        <a style="width: 100px;" class="btn btn-block btn-danger" href="/delete/{{ x.questionid }}">Delete</a>
-                    </td>
+                <td> {{x.hintpenalty }} </td>
+                <td> {{ x.points }} </td>
+                <td> {{ x.answer }} </td>
+                <td>
+                    {% if x.usedocker is True %}
+                        Yes
+                    {% else %}
+                        No
+                    {% endif %}
+                </td>
+                <td>
+                    {% if x.usedocker is False %}
+                        -
+                    {% else %}
+                        {{ x.registryid }} 
+                    {% endif %}
+                </td>
+                <td>{{ x.createdby }}</td>
+                <td>
+                {% if x.createdby == creator %} 
+                    <a class="btn btn-block btn-primary" href="view/{{ x.questionid }}">View</a>
+                    <a class="btn btn-block btn-success" href="edit/{{ x.questionid }}">Edit</a>
+                    <a class="btn btn-block btn-danger" onclick="return confirm('Archive Question {{ x.questionid}} ?')" href="archive/{{ x.questionid }}">Archive</a>
                 {% else %}
-                    <td style="text-align: center">
-                        <a style="width: 100px;" class="btn btn-block btn-info" href="./view/{{ x.questionid }}">View</a>
-                    </td>                                                   
+                    <a class="btn btn-block btn-primary" href="view/{{ x.questionid }}">View</a>                                                  
                 {% endif %}
             </tr>
         {% endfor %}

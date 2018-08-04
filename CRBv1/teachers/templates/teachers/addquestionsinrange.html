@@ -2,10 +2,10 @@
 {% load widget_tweaks %}
 {% block content %}
     <section class="content">
-        <div class="row" style="width: 70%; margin: 0 auto" >
-            <div class="box">
+        <div class="row" style="width: 98%; margin: 0 auto" >
+            <div class="box box-solid box-primary" style="box-shadow: 1px 2px 5px grey;">
                 <div class="box-header with-border">
-                        <h3 class="box-title"> Import Database Questions to: {{ rangename }} </h3>
+                        <h3 class="box-title"> Import Database Questions to {{ rangename }} </h3>
                         <div class="box-tools pull-right">
                             <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
                         </div>
@@ -23,111 +23,138 @@
                         </div>
                     {% endif %}
                     <form method="get">
-                            <div class="well">
-                                <h4 style="margin-top: 0">Filter</h4>
-                                <div class="row">
-                                    <div class="form-group col-sm-4 col-md-3">
-                                        <label for="questiontype">Question Type:</label>
-                                        {% render_field filter.form.questiontype class="form-control" %}
-                                    </div>
-                                    <div class="form-group col-sm-4 col-md-3">
-                                        <label for="topicid">Question Topic:</label>
-                                        {% render_field filter.form.topicid__topicname class="form-control" %}
-                                    </div> 
-                                    <div class="form-group col-sm-4 col-md-3">
-                                        <label for="title">Question Title:</label>
-                                        {% render_field filter.form.title class="form-control" %}
-                                    </div>
-                                        <button type="submit" class="btn btn-primary btn-flat" style="width: 200px; display: inline-block">
-                                            <span class="glyphicon glyphicon-search"></span> Search
-                                        </button>
-                                        <a href="." class="btn btn-primary btn-block btn-flat" style="width: 200px;  display: inline-block;" >Reset Filters</a>
+                        <div class="well">
+                            <h4 style="margin-top: 0">Filter</h4>
+                            <div class="row">
+                                <div class="form-group col-sm-4 col-md-3">
+                                    <label for="questiontype">Question Type:</label>
+                                    {% render_field filter.form.questiontype class="form-control" %}
                                 </div>
+                                <div class="form-group col-sm-4 col-md-3">
+                                    <label for="topicid">Question Topic:</label>
+                                    {% render_field filter.form.topicid__topicname class="form-control" %}
+                                </div> 
+                                <div class="form-group col-sm-4 col-md-3">
+                                    <label for="title">Question Title:</label>
+                                    {% render_field filter.form.title class="form-control" %}
+                                </div>
+                                    <button type="submit" class="btn btn-primary btn-flat" style="width: 200px; display: inline-block">
+                                        <span class="glyphicon glyphicon-search"></span> Search
+                                    </button>
+                                    <a href="." class="btn btn-primary btn-block btn-flat" style="width: 200px;  display: inline-block;" >Reset Filters</a>
                             </div>
-                        </form>
-                    <div class="box">
-                        <table class="table table-bordered table-hover dataTable">
-                            {% if questions is not None %}
-                            <thead>
-                                <tr role="row">
-                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                        Question ID
-                                    </th>
-                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                        Question Type
-                                    </th>
-                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                        Question Title
-                                    </th>
-                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                        Question Text
-                                    </th>
-                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                        Hint 
-                                    </th>
-                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                        Marks
-                                    </th>
-                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                        Topic Name
-                                    </th>
-                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                        Actions
-                                    </th>
-                                </tr>
-                            </thead>
-                            {% for x in filter.qs %}
-                            <form method = 'post'>
-                                {% csrf_token %}
-                                <tr role="row">
-                                    <td>
-                                        {{ x.questionid }}
-                                    </td>
-                                    <td>
-                                        {% if x.questiontype == 'FL' %}
-                                            Flag
-                                        {% elif x.questiontype == 'MCQ' %}
-                                            MCQ
-                                        {% elif x.questiontype == 'SA' %}
-                                            Short Answer
-                                        {% elif x.questiontype == 'OE' %}
-                                            Open Ended
-                                        {% elif x.questiontype == 'TF' %}
-                                            True/False
-                                        {% endif %}
-                                    </td>
-                                    <td> {{x.title }} </td>
-                                    <td> {{x.text | safe | cut:"<p>" | cut:"</p>" }} </td>
-                                    <td> {{x.hint }} </td>
-                                    <td> {{ x.points }} </td>
-                                    <td>
-                                        {% for m in topics %}
-                                            {% if m.topicname == x.topicid.topicname %}
-                                                {{ m.topicname }}
-                                            {% endif %}
-                                        {% endfor %}
-                                    </td>
-                                    <td>
-                                        {% if x.questionid|stringformat:"i" in cart %}
-                                        <a class="btn btn-block btn-danger" href="remove/{{ x.questionid }}">Remove</a>
-                                        {% else %}
-                                        <a class="btn btn-block btn-primary" href="add/{{ x.questionid }}">Add</a>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                            </form>
-                            {% endfor %}
-                        {% else %}
-                            <thead>
-                                <th>
-                                    <h4>No Questions Found In Database</h4>
+                        </div>
+                    </form>
+                    <table class="table table-bordered table-hover dataTable">
+                        {% if questions is not None %}
+                        <thead>
+                            <tr role="row">
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    ID
                                 </th>
-                            </thead>
-                        {% endif %}
-                        </table>
-                    </div>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Type
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Topic
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Title
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Text
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Hint 
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Hint Penalty
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Points
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Answer
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Use Shell
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Registry ID
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        {% for x in filter.qs %}
+                        <form method = 'post'>
+                            {% csrf_token %}
+                            <tr role="row">
+                                <td>
+                                    {{ x.questionid }}
+                                </td>
+                                <td>
+                                    {% if x.questiontype == 'FL' %}
+                                        Flag
+                                    {% elif x.questiontype == 'MCQ' %}
+                                        MCQ
+                                    {% elif x.questiontype == 'SA' %}
+                                        Short Answer
+                                    {% elif x.questiontype == 'OE' %}
+                                        Open Ended
+                                    {% elif x.questiontype == 'TF' %}
+                                        True/False
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% for m in topics %}
+                                        {% if m.topicname == x.topicid.topicname %}
+                                            {{ m.topicname }}
+                                        {% endif %}
+                                    {% endfor %}
+                                </td>
+                                <td> {{x.title }} </td>
+                                <td> {{x.text | safe | cut:"<p>" | cut:"</p>" }} </td>
+                                <td> {{x.hint }} </td>
+                                <td> {{x.hintpenalty }} </td>
+                                <td> {{ x.points }} </td>
+                                <td> {{ x.answer }} </td>
+                                <td>
+                                    {% if x.usedocker is True %}
+                                        Yes
+                                    {% else %}
+                                        No
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if x.usedocker is False %}
+                                        -
+                                    {% else %}
+                                        {{ x.registryid }} 
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if x.questionid|stringformat:"i" in cart %}
+                                    <a class="btn btn-block btn-danger" href="remove/{{ x.questionid }}">Remove</a>
+                                    {% else %}
+                                    <a class="btn btn-block btn-success" href="add/{{ x.questionid }}">Add</a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </form>
+                        {% endfor %}
+                    {% else %}
+                        <thead>
+                            <th>
+                                <h4>No Questions Found In Database</h4>
+                            </th>
+                        </thead>
+                    {% endif %}
+                    </table>
+                </div>
             </div>
-        </div>
         <a class="btn btn-block btn-primary" style="width: 10%;"href="../">Back</a>   
-    </section>
+    </div>        
+</section>
 {% endblock %}

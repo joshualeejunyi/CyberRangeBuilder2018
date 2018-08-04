@@ -15,6 +15,183 @@ from accounts.models import User
 import string
 import random
 
+class CheckPorts(View):
+    def get(self):
+        # get all the entries of the ports currently being used
+        database = UnavailablePorts.objects.all().order_by('portnumber').values_list('portnumber')
+        # determine the size of the database query
+        size = len(database)
+
+        # we need two lists for the two servers that we have
+        dockerserver = []
+        webserver = []
+
+        if size > 0:
+            # check if the database has any values
+            for x in range(0, size):
+                # if the port belongs to databaseserver, append to database list
+                if database[x][0] <= 9050:
+                    webserver.append(database[x])
+                # if the port belongs to dockerserver, append to dockerserver list
+                elif database[x][0] >=9051:
+                    dockerserver.append(database[x])
+        
+        else:
+            #return first available port for docker server
+            return 9051
+
+        # determine the length of both of the webserver and dockerserver lists
+        webserversize = len(webserver)
+        dockerserversize = len(dockerserver)
+        
+        if dockerserversize < 50:
+            # check if the docker server is not full (used all 50 ports)
+            if int(dockerserver[dockerserversize - 1][0]) == 9099:
+                # check if the last entry is the last available port. 
+                # if it is not the last available port, it means that there are gaps inbetween the list
+                for x in range(0, 48):
+                    # use a for loop to loop the number of available ports in one server minused one
+                    # this means that because we have 49 ports, we will have to forloop between 0 and 48
+                    if int(dockerserver[x + 1][0]) - int(dockerserver[x][0]) != 1:
+                        # using the loop, we take the difference of the next port number and the current port number
+                        # if the difference is one, it means that there is no gap in between
+                        # else if the different is more than one, there is a gap
+                        # so we will take the current portnumber and add one to determine the port number to give
+                        result = int(dockerserver[x][0]) + 1
+                        # return the port number
+                        return result
+            else:
+                # takes the last used port and adds one 
+                result = int(dockerserver[dockerserversize - 1][0]) + 1
+                # return the port number
+                return result
+        elif webserversize < 50:
+            # we need to check if the web server is currently being used
+            if webserversize != 0:
+                # because the docker server is full, we will now overflow to the web server
+                if int(webserver[webserversize - 1][0]) == 9050:
+                    # same logic:
+                    # check if the last entry is the last available port. 
+                    # if it is not the last available port, it means that there are gaps inbetween the list
+                    for x in range(0, 49):
+                        # use a for loop to loop the number of available ports in one server minused one
+                        # this means that because we have 50 ports, we will have to forloop between 0 and 49
+                        if int(webserver[x + 1][0]) - int(webserver[x][0]) != 1:
+                            # using the loop, we take the difference of the next port number and the current port number
+                            # if the difference is one, it means that there is no gap in between
+                            # else if the different is more than one, there is a gap
+                            # so we will take the current portnumber and add one to determine the port number to give
+                            result = int(webserver[x][0]) + 1
+                            # return the port number
+                            return result
+                else:
+                    # takes the last used port and adds one 
+                    result = int(webserver[webserversize - 1][0]) + 1
+                    # return the port number
+                    return result
+            else:
+                # if the web server is not currently being used, return the first port 9000
+                return 9000
+        else:
+            # the server is completely full. return -1 to show an error.
+            return -1
+
+
+class DockerContainerStart(View):
+    def get(self):
+                # okay so before we start a new docker container
+        data = {}
+        execdata = {}
+        # calls the checkPorts function from above to get the available port
+        port = CheckPorts.get(self)
+        # declare an empty string for the server ip
+        serverip = ''
+        # checks if the port is -1
+        if port == -1:
+            # if the port is -1, it means that the server is busy, display an error
+            return HttpResponse('SERVER BUSY. PLEASE TRY AGAIN LATER.')
+        # determine the ip address using the port number        
+        elif port >= 9051:
+            # if it is 9051 inclusive, it must be the docker server
+            serverip = '192.168.100.42'
+        elif port <= 9050:
+            # else if it is less than 9050 inclusive, it must be the web server
+            serverip = '192.168.100.43'
+        # convert the port to a string for concatenation later
+        port = str(port)
+        # get the current rangeurl
+        rangename = self.kwargs['rangeurl']
+        # get the current questionid
+        questionnumber = self.kwargs['questionid']
+        # gets the string of the imagename to be converted to
+        # the format is <rangeurl>.<questionid>
+        imagename = str(rangename + '.' + questionnumber)
+        # create the payload for the docker engine api
+        # the imagename used is to determine the image name to be created
+        # the image should be already created in the docker server
+        payload = {
+            'Image':imagename,
+            'HostConfig': {
+                "PortBindings": {
+                    "4200/tcp": [{
+                        "HostIp": "",
+                        "HostPort": port
+                    }]
+                }
+            }
+        }
+        # use the docker engine api to create the container
+        url = 'http://' + serverip + ':8051/containers/create'
+        # request with the payload
+        response = requests.post(url, json=payload)
+        if response.status_code == 201:
+            test = True
+            # get the data from the response
+            data = response.json()
+            # get the container id
+            containerid = data['Id']
+            # get the url to start the container
+            starturl = 'http://' + serverip + ':8051/containers/%s/start' % containerid
+            # request to start the container
+            response = requests.post(starturl)
+            # create a new entry in the database
+            portsdb = UnavailablePorts(portnumber = int(port), studentid = self.request.user, containername = containerid, datetimecreated = timezone.now())
+            # save the object to the database
+            portsdb.save()
+            # get the final url for the iframe
+            finalsiaburl = 'dmit2.bulletplus.com:' + port
+
+            # generate a randompassword for the docker container
+            randompassword = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(6))
+            # attempt to change the password
+            execcmd = {
+                "AttachStdin": "true",
+                "AttachStdout": "true",
+                "AttachStderr": "true",
+                "Tty": "true",
+                "Cmd": '["/bin/bash","-c","echo \"guest:%s\" | chpasswd"]' % randompassword
+            }
+            execurl = 'http://' + serverip + ':8051/containers/%s/exec' % containerid
+            execresponse = requests.post(execurl, json=execcmd)
+            if response.status_code == 201:
+                execdata = response.json()
+                execconid = execdata['Id']
+                execstarturl = 'http://' + serverip + ':8051/exec/%s/start' % execconid
+                startexecres = requests.post(execstarturl)
+            
+
+            return randompassword, finalsiaburl
+
+        elif response.status_code == 400:
+            # return error
+            return -1
+        elif response.status_code == 409:
+            # return error
+            return -2
+        else:
+            # return error
+            return -3
+
 class EnterCode(View):
     def get(self, request, *args, **kwargs):
         # get will render the page.
@@ -130,185 +307,6 @@ class AttemptQuestionView(ListView, ModelFormMixin):
     model = StudentQuestions
     form_class = AnswerForm
 
-    def checkPorts(self):
-        # get all the entries of the ports currently being used
-        database = UnavailablePorts.objects.all().order_by('portnumber').values_list('portnumber')
-        # determine the size of the database query
-        size = len(database)
-
-        # we need two lists for the two servers that we have
-        dockerserver = []
-        webserver = []
-
-        if size > 0:
-            # check if the database has any values
-            for x in range(0, size):
-                # if the port belongs to databaseserver, append to database list
-                if database[x][0] <= 9050:
-                    webserver.append(database[x])
-                # if the port belongs to dockerserver, append to dockerserver list
-                elif database[x][0] >=9051:
-                    dockerserver.append(database[x])
-        
-        else:
-            #return first available port for docker server
-            return 9051
-
-        # determine the length of both of the webserver and dockerserver lists
-        webserversize = len(webserver)
-        dockerserversize = len(dockerserver)
-        
-        if dockerserversize < 50:
-            # check if the docker server is not full (used all 50 ports)
-            if int(dockerserver[dockerserversize - 1][0]) == 9099:
-                # check if the last entry is the last available port. 
-                # if it is not the last available port, it means that there are gaps inbetween the list
-                for x in range(0, 48):
-                    # use a for loop to loop the number of available ports in one server minused one
-                    # this means that because we have 49 ports, we will have to forloop between 0 and 48
-                    if int(dockerserver[x + 1][0]) - int(dockerserver[x][0]) != 1:
-                        # using the loop, we take the difference of the next port number and the current port number
-                        # if the difference is one, it means that there is no gap in between
-                        # else if the different is more than one, there is a gap
-                        # so we will take the current portnumber and add one to determine the port number to give
-                        result = int(dockerserver[x][0]) + 1
-                        # return the port number
-                        return result
-            else:
-                # takes the last used port and adds one 
-                result = int(dockerserver[dockerserversize - 1][0]) + 1
-                # return the port number
-                return result
-        elif webserversize < 50:
-            # we need to check if the web server is currently being used
-            if webserversize != 0:
-                # because the docker server is full, we will now overflow to the web server
-                if int(webserver[webserversize - 1][0]) == 9050:
-                    # same logic:
-                    # check if the last entry is the last available port. 
-                    # if it is not the last available port, it means that there are gaps inbetween the list
-                    for x in range(0, 49):
-                        # use a for loop to loop the number of available ports in one server minused one
-                        # this means that because we have 50 ports, we will have to forloop between 0 and 49
-                        if int(webserver[x + 1][0]) - int(webserver[x][0]) != 1:
-                            # using the loop, we take the difference of the next port number and the current port number
-                            # if the difference is one, it means that there is no gap in between
-                            # else if the different is more than one, there is a gap
-                            # so we will take the current portnumber and add one to determine the port number to give
-                            result = int(webserver[x][0]) + 1
-                            # return the port number
-                            return result
-                else:
-                    # takes the last used port and adds one 
-                    result = int(webserver[webserversize - 1][0]) + 1
-                    # return the port number
-                    return result
-            else:
-                # if the web server is not currently being used, return the first port 9000
-                return 9000
-        else:
-            # the server is completely full. return -1 to show an error.
-            return -1
-
-    def dockerContainerStart(self):
-        # okay so before we start a new docker container
-        # we need to check if there are any open containers
-        # we have stored it in the session
-        data = {}
-        # calls the checkPorts function from above to get the available port
-        port = self.checkPorts()
-        # declare an empty string for the server ip
-        serverip = ''
-        # checks if the port is -1
-        if port == -1:
-            # if the port is -1, it means that the server is busy, display an error
-            return HttpResponse('SERVER BUSY. PLEASE TRY AGAIN LATER.')
-        # determine the ip address using the port number        
-        elif port >= 9051:
-            # if it is 9051 inclusive, it must be the docker server
-            serverip = '192.168.100.42'
-        elif port <= 9050:
-            # else if it is less than 9050 inclusive, it must be the web server
-            serverip = '192.168.100.43'
-        # convert the port to a string for concatenation later
-        port = str(port)
-        # get the current rangeurl
-        rangename = self.kwargs['rangeurl']
-        # get the current questionid
-        questionnumber = self.kwargs['questionid']
-        # gets the string of the imagename to be converted to
-        # the format is <rangeurl>.<questionid>
-        imagename = str(rangename + '.' + questionnumber)
-        # create the payload for the docker engine api
-        # the imagename used is to determine the image name to be created
-        # the image should be already created in the docker server
-        payload = {
-            'Image':imagename,
-            'HostConfig': {
-                "PortBindings": {
-                "4200/tcp": [{
-                    "HostIp": "",
-                    "HostPort": port
-                    }
-                ],
-                "22/tcp": [{
-                    "HostIp": "",
-                    "HostPort": '9052'
-                }]
-                }
-            }
-        }
-        # use the docker engine api to create the container
-        url = 'http://' + serverip + ':8051/containers/create'
-        # request with the payload
-        response = requests.post(url, json=payload)
-        if response.status_code == 201:
-            test = True
-            # get the data from the response
-            data = response.json()
-            # get the container id
-            containerid = data['Id']
-            # get the url to start the container
-            starturl = 'http://' + serverip + ':8051/containers/%s/start' % containerid
-            # request to start the container
-            response = requests.post(starturl)
-            # create a new entry in the database
-            portsdb = UnavailablePorts(portnumber = int(port), studentid = self.request.user, containername = containerid, datetimecreated = timezone.now())
-            # save the object to the database
-            portsdb.save()
-            # get the final url for the iframe
-            finalsiaburl = 'dmit2.bulletplus.com:' + port
-
-            # generate a randompassword for the docker container
-            randompassword = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(6))
-            # attempt to change the password
-            changepassword = '["/bin/bash","-c","echo \"guest:pass\" | chpasswd"]'
-            execcmd = {
-                "AttachStdin":"true", 
-                "AttachStdout":"true", 
-                "AttachStderr":"true", 
-                "Tty":"true", 
-                "Cmd":changepassword
-            }
-            execurl = 'http://'+serverip+':8051/containers/%s/exec' % containerid
-            execresponse = requests.post(execurl, json=execcmd)
-            if response.status_code == 201:
-                execdata = response.json()
-                execconid = execdata['Id']
-                execstarturl = 'http://' + serverip + ':8051/exec/%s/start' % execconid
-                startexecres = requests.post(execstarturl)
-
-            return randompassword, finalsiaburl
-
-        elif response.status_code == 400:
-            # return error
-            return -1
-        elif response.status_code == 409:
-            # return error
-            return -2
-        else:
-            # return error
-            return -3
 
 
     def checkattemptlimit(self):
@@ -417,7 +415,7 @@ class AttemptQuestionView(ListView, ModelFormMixin):
         usedocker = Questions.objects.filter(questionid = questionid).values_list('usedocker')[0][0]
         if usedocker is True:
             # if it is true, call the dockercontainerstart function
-            password, siab = self.dockerContainerStart()
+            password, siab = DockerContainerStart.get(self)
             # set siab and password as context
             context['siab'] = siab
             context['password'] = password
@@ -494,187 +492,6 @@ class AttemptMCQQuestionView(ListView, ModelFormMixin):
     context_object_name = 'question'
     model = StudentQuestions
     form_class = AnswerMCQForm
-
-    def checkPorts(self):
-        # get all the entries of the ports currently being used
-        database = UnavailablePorts.objects.all().order_by('portnumber').values_list('portnumber')
-        # determine the size of the database query
-        size = len(database)
-
-        # we need two lists for the two servers that we have
-        dockerserver = []
-        webserver = []
-
-        if size > 0:
-            # check if the database has any values
-            for x in range(0, size):
-                # if the port belongs to databaseserver, append to database list
-                if database[x][0] <= 9050:
-                    webserver.append(database[x])
-                # if the port belongs to dockerserver, append to dockerserver list
-                elif database[x][0] >=9051:
-                    dockerserver.append(database[x])
-        
-        else:
-            #return first available port for docker server
-            return 9051
-
-        # determine the length of both of the webserver and dockerserver lists
-        webserversize = len(webserver)
-        dockerserversize = len(dockerserver)
-        
-        if dockerserversize < 50:
-            # check if the docker server is not full (used all 50 ports)
-            if int(dockerserver[dockerserversize - 1][0]) == 9099:
-                # check if the last entry is the last available port. 
-                # if it is not the last available port, it means that there are gaps inbetween the list
-                for x in range(0, 48):
-                    # use a for loop to loop the number of available ports in one server minused one
-                    # this means that because we have 49 ports, we will have to forloop between 0 and 48
-                    if int(dockerserver[x + 1][0]) - int(dockerserver[x][0]) != 1:
-                        # using the loop, we take the difference of the next port number and the current port number
-                        # if the difference is one, it means that there is no gap in between
-                        # else if the different is more than one, there is a gap
-                        # so we will take the current portnumber and add one to determine the port number to give
-                        result = int(dockerserver[x][0]) + 1
-                        # return the port number
-                        return result
-            else:
-                # takes the last used port and adds one 
-                result = int(dockerserver[dockerserversize - 1][0]) + 1
-                # return the port number
-                return result
-        elif webserversize < 50:
-            # we need to check if the web server is currently being used
-            if webserversize != 0:
-                # because the docker server is full, we will now overflow to the web server
-                if int(webserver[webserversize - 1][0]) == 9050:
-                    # same logic:
-                    # check if the last entry is the last available port. 
-                    # if it is not the last available port, it means that there are gaps inbetween the list
-                    for x in range(0, 49):
-                        # use a for loop to loop the number of available ports in one server minused one
-                        # this means that because we have 50 ports, we will have to forloop between 0 and 49
-                        if int(webserver[x + 1][0]) - int(webserver[x][0]) != 1:
-                            # using the loop, we take the difference of the next port number and the current port number
-                            # if the difference is one, it means that there is no gap in between
-                            # else if the different is more than one, there is a gap
-                            # so we will take the current portnumber and add one to determine the port number to give
-                            result = int(webserver[x][0]) + 1
-                            # return the port number
-                            return result
-                else:
-                    # takes the last used port and adds one 
-                    result = int(webserver[webserversize - 1][0]) + 1
-                    # return the port number
-                    return result
-            else:
-                # if the web server is not currently being used, return the first port 9000
-                return 9000
-        else:
-            # the server is completely full. return -1 to show an error.
-            return -1
-
-    def dockerContainerStart(self):
-        # okay so before we start a new docker container
-        # we need to check if there are any open containers
-        # we have stored it in the session
-        data = {}
-        # calls the checkPorts function from above to get the available port
-        port = self.checkPorts()
-        # declare an empty string for the server ip
-        serverip = ''
-        # checks if the port is -1
-        if port == -1:
-            # if the port is -1, it means that the server is busy, display an error
-            return HttpResponse('SERVER BUSY. PLEASE TRY AGAIN LATER.')
-        # determine the ip address using the port number        
-        elif port >= 9051:
-            # if it is 9051 inclusive, it must be the docker server
-            serverip = '192.168.100.42'
-        elif port <= 9050:
-            # else if it is less than 9050 inclusive, it must be the web server
-            serverip = '192.168.100.43'
-        # convert the port to a string for concatenation later
-        port = str(port)
-        # get the current rangeurl
-        rangename = self.kwargs['rangeurl']
-        # get the current questionid
-        questionnumber = self.kwargs['questionid']
-        # gets the string of the imagename to be converted to
-        # the format is <rangeurl>.<questionid>
-        imagename = str(rangename + '.' + questionnumber)
-        # create the payload for the docker engine api
-        # the imagename used is to determine the image name to be created
-        # the image should be already created in the docker server
-        payload = {
-            'Image':imagename,
-            'HostConfig': {
-                "PortBindings": {
-                "4200/tcp": [{
-                    "HostIp": "",
-                    "HostPort": port
-                    }
-                ],
-                "22/tcp": [{
-                    "HostIp": "",
-                    "HostPort": '9052'
-                }]
-                }
-            }
-        }
-        # use the docker engine api to create the container
-        url = 'http://' + serverip + ':8051/containers/create'
-        # request with the payload
-        response = requests.post(url, json=payload)
-        if response.status_code == 201:
-            test = True
-            # get the data from the response
-            data = response.json()
-            # get the container id
-            containerid = data['Id']
-            # get the url to start the container
-            starturl = 'http://' + serverip + ':8051/containers/%s/start' % containerid
-            # request to start the container
-            response = requests.post(starturl)
-            # create a new entry in the database
-            portsdb = UnavailablePorts(portnumber = int(port), studentid = self.request.user, containername = containerid, datetimecreated = timezone.now())
-            # save the object to the database
-            portsdb.save()
-            # get the final url for the iframe
-            finalsiaburl = 'dmit2.bulletplus.com:' + port
-
-            # generate a randompassword for the docker container
-            randompassword = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(6))
-            # attempt to change the password
-            changepassword = '["/bin/bash","-c","echo \"guest:pass\" | chpasswd"]'
-            execcmd = {
-                "AttachStdin":"true", 
-                "AttachStdout":"true", 
-                "AttachStderr":"true", 
-                "Tty":"true", 
-                "Cmd":changepassword
-            }
-            execurl = 'http://'+serverip+':8051/containers/%s/exec' % containerid
-            execresponse = requests.post(execurl, json=execcmd)
-            if response.status_code == 201:
-                execdata = response.json()
-                execconid = execdata['Id']
-                execstarturl = 'http://' + serverip + ':8051/exec/%s/start' % execconid
-                startexecres = requests.post(execstarturl)
-
-            return randompassword, finalsiaburl
-
-        elif response.status_code == 400:
-            # return error
-            return -1
-        elif response.status_code == 409:
-            # return error
-            return -2
-        else:
-            # return error
-            return -3
-
 
     def checkattemptlimit(self):
         # this function is to determine if the user has reached his attempt limit
@@ -798,7 +615,7 @@ class AttemptMCQQuestionView(ListView, ModelFormMixin):
         usedocker = Questions.objects.filter(questionid = questionid).values_list('usedocker')[0][0]
         if usedocker is True:
             # if it is true, call the dockercontainerstart function
-            password, siab = self.dockerContainerStart()
+            password, siab = DockerContainerStart.get(self)
             # set siab and password as context
             context['siab'] = siab
             context['password'] = password

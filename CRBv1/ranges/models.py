@@ -15,8 +15,8 @@ class Range(models.Model):
     maxscore = models.PositiveIntegerField(db_column='maxScore', default=0, blank=True, null=True)
     lastmodifieddate = models.DateField(db_column='lastModifiedDate', blank=True, null=True)
     rangecode = models.IntegerField(db_column='rangeCode', blank=True, null=True, unique=True)
-    lastmodifiedby = models.ForeignKey('accounts.User', models.DO_NOTHING, db_column='lastModifiedBy', blank=True, null=True, related_name='LMBR')
-    createdbyusername = models.ForeignKey('accounts.User', models.DO_NOTHING, db_column='createdby', related_name='CBR', default='super')
+    lastmodifiedby = models.ForeignKey('accounts.User', on_delete=models.SET_NULL, db_column='lastModifiedBy', blank=True, null=True, related_name='LMBR')
+    createdbyusername = models.ForeignKey('accounts.User', on_delete=models.CASCADE, db_column='createdby', related_name='CBR', default='super')
     rangeurl = models.CharField(db_column='rangeURL', max_length=50, null=True, unique=True)
     studentsinrange = models.PositiveIntegerField(db_column='studentsInRange', default=0,null=True)
     isdisabled = models.BooleanField(db_column='isDisabled', default=False)
@@ -43,14 +43,16 @@ class FakeRange(models.Model):
     maxscore = models.PositiveIntegerField(db_column='maxScore', default=0, blank=True, null=True)
     lastmodifieddate = models.DateField(db_column='lastModifiedDate', blank=True, null=True)
     rangecode = models.IntegerField(db_column='rangeCode', blank=True, null=True, unique=True)
-    lastmodifiedby = models.ForeignKey('accounts.User', models.DO_NOTHING, db_column='lastModifiedBy', blank=True, null=True, related_name='fLMBR')
-    createdbyusername = models.ForeignKey('accounts.User', models.DO_NOTHING, db_column='createdby', related_name='fCBR', default='super')
+    lastmodifiedby = models.ForeignKey('accounts.User', on_delete=models.SET_NULL, db_column='lastModifiedBy', blank=True, null=True, related_name='fLMBR')
+    createdbyusername = models.ForeignKey('accounts.User', on_delete=models.CASCADE, db_column='createdby', related_name='fCBR', default='super')
     rangeurl = models.CharField(db_column='rangeURL', max_length=50, null=True, unique=True)
     studentsinrange = models.PositiveIntegerField(db_column='studentsInRange', default=0,null=True)
     isdisabled = models.BooleanField(db_column='isDisabled', default=False)
     isopen = models.BooleanField(db_column='isOpen', default=False)
     rangeinfo = HTMLField(db_column='rangeInfo', default="")
     attempts = models.PositiveIntegerField(db_column='attempts', default=0)
+    manualactive = models.BooleanField(db_column = 'manualactive', default=0)
+    manualdeactive = models.BooleanField(db_column = 'manualdeactive', default=0)
 
     class Meta:
         app_label = Range._meta.app_label
@@ -62,8 +64,8 @@ class RangeStudents(models.Model):
     dateJoined = models.DateTimeField(db_column='dateJoined', max_length=45, blank=True, null=True)
     points = models.IntegerField(db_column='points', default=0)
     datecompleted = models.DateTimeField(db_column='datecompleted', null=True)
-    rangeID = models.ForeignKey(Range, models.DO_NOTHING, db_column='rangeID',unique=False)
-    studentID = models.ForeignKey('accounts.User', models.DO_NOTHING, db_column='email', unique=False)
+    rangeID = models.ForeignKey(Range, on_delete=models.CASCADE, db_column='rangeID',unique=False)
+    studentID = models.ForeignKey('accounts.User', on_delete=models.CASCADE, db_column='email', unique=False)
     lastaccess = models.DateTimeField(db_column='lastaccess', null=True)
     groupid = models.ForeignKey('accounts.Group', on_delete=models.CASCADE, db_column="groupid", null=True, blank=True)
 
@@ -88,12 +90,12 @@ class Questions(models.Model):
     text = HTMLField(db_column='questiontext', default="")
     hint = models.TextField(db_column='hint')
     hintpenalty = models.PositiveIntegerField(db_column='hintpenalty', default=0)
-    topicid = models.ForeignKey(QuestionTopic, models.DO_NOTHING, db_column='topicid', unique=False, related_name='catid', null=True)
-    createdby = models.ForeignKey('accounts.User', on_delete=models.DO_NOTHING, db_column='createdby', related_name="questioncreatedby", null=True)
+    topicid = models.ForeignKey(QuestionTopic, on_delete=models.SET_NULL, db_column='topicid', unique=False, related_name='catid', null=True)
+    createdby = models.ForeignKey('accounts.User', on_delete=models.SET_NULL, db_column='createdby', related_name="questioncreatedby", null=True)
     datecreated = models.DateTimeField(db_column='dateCreated', blank=True, null=True)
     points = models.PositiveIntegerField(db_column='points', default=0)
     answer = models.TextField(db_column='answer', null=True)
-    rangeid = models.ForeignKey(Range, db_column = 'rangeid', on_delete=models.DO_NOTHING, null=True)
+    rangeid = models.ForeignKey(Range, db_column = 'rangeid', on_delete=models.CASCADE, null=True)
     usedocker = models.BooleanField(db_column='usedocker', default=False)
     registryid = models.CharField(db_column='registryID', max_length=255, null=True)
     isarchived = models.BooleanField(db_column='isArchived', default=False)
@@ -114,9 +116,9 @@ class MCQOptions(models.Model):
         verbose_name_plural = 'MCQOptions'
 
 class StudentQuestions(models.Model):
-    studentid = models.ForeignKey('accounts.User', models.DO_NOTHING, db_column='email', unique=False)
-    rangeid = models.ForeignKey(Range, models.DO_NOTHING, db_column='rangeID',unique=False)
-    questionid = models.ForeignKey(Questions, models.DO_NOTHING, db_column='questionid', unique=False)
+    studentid = models.ForeignKey('accounts.User', on_delete=models.CASCADE, db_column='email', unique=False)
+    rangeid = models.ForeignKey(Range, on_delete=models.CASCADE, db_column='rangeID',unique=False)
+    questionid = models.ForeignKey(Questions, on_delete=models.CASCADE, db_column='questionid', unique=False)
     answergiven = models.TextField(db_column='answergiven', null=True)
     answercorrect = models.BooleanField(db_column='right/wrong', default=False)
     marksawarded = models.PositiveIntegerField(db_column='marksawarded', default=0)
@@ -131,7 +133,7 @@ class StudentQuestions(models.Model):
 class StudentHints(models.Model):
     studentid = models.ForeignKey('accounts.User', on_delete=models.CASCADE, db_column='studentid', unique=False)
     rangeid = models.ForeignKey(Range, on_delete=models.CASCADE, db_column='rangeid', unique=False)
-    questionid = models.ForeignKey(Questions, models.DO_NOTHING, db_column='questionid', unique=False)
+    questionid = models.ForeignKey(Questions, on_delete=models.CASCADE, db_column='questionid', unique=False)
     hintactivated = models.BooleanField(db_column='hintactivated', default=False)
 
     class Meta:
@@ -140,7 +142,7 @@ class StudentHints(models.Model):
 
 class UnavailablePorts(models.Model):
     portnumber = models.PositiveIntegerField(db_column='portNumber', primary_key=True)
-    studentid = models.ForeignKey('accounts.User', models.DO_NOTHING, db_column='studentid')
+    studentid = models.ForeignKey('accounts.User', on_delete=models.CASCADE, db_column='studentid')
     containername = models.TextField(db_column='containerName', null=True)
     datetimecreated = models.DateTimeField(db_column='dateTimeCreated', null=True)
 

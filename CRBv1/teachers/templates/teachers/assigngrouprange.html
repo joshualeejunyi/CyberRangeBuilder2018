@@ -15,11 +15,10 @@
 
 {% block content %}
     <section class="content">
-        <div class="row" style="width: 50%; margin: 0 auto" >
-                
-            <div class="box">
+        <div class="row" style="width: 98%; margin: 0 auto" >
+            <div class="box box-solid box-primary" style="box-shadow: 1px 2px 5px grey;">
                 <div class="box-header with-border">
-                        <h3 class="box-title">Add Groups to {{ groupname }}</h3>
+                        <h3 class="box-title">Add Groups to {{ rangename }}</h3>
                         <div class="box-tools pull-right">
                             <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
                         </div>
@@ -41,44 +40,18 @@
                                   <h4 style="margin-top: 0">Filter</h4>
                                   <div class="row">
                                     <div class="form-group col-sm-4 col-md-3">
-                                        <label for="username">Username:</label>
-                                      {% render_field filter.form.username class="form-control" %}
+                                        <label for="username">Group Name:</label>
+                                      {% render_field filter.form.groupname class="form-control" %}
                                     </div>
-                                    <div class="form-group col-sm-4 col-md-3">
-                                            <label for="name">Full Name:</label>
-                                      {% render_field filter.form.name class="form-control" %}
                                     </div>
-                                    <div class="form-group col-sm-4 col-md-3">
-                                        <label for="email">Email:</label>
-                                      {% render_field filter.form.email class="form-control" %}
-                                    </div>
-                                    <div class="form-group col-sm-4 col-md-3">
-                                        <label for="userclass">Class:</label>
-                                        <select name="userclass" class="form-control" placeholder="Class">
-                                            <option value="" selected></option>
-                                            {% for class in classesobject %}	
-                                            <option value='{{ class.0 }}'>{{ class.0 }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                    <div class="form-group col-sm-8 col-md-6">
-                                      {{ filter.form.groups.label_tag }}
-                                      <div>
-                                        {% for choice in filter.form.groups %}
-                                          <label class="checkbox-inline">
-                                            {{ choice.tag }} {{ choice.choice_label }}
-                                          </label>
-                                        {% endfor %}
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <button type="submit" class="btn btn-primary btn-flat">
-                                    <span class="glyphicon glyphicon-search"></span> Search
-                                  </button>
-                                  <a href="./addusers" class="btn btn-primary btn-block btn-flat" style="width: 100px; margin-top: 0.2%;">Reset Filters</a>
+                                    <button type="submit" class="btn btn-primary btn-flat" style="width: 200px; display: inline-block">
+                                        <span class="glyphicon glyphicon-search"></span> Search
+                                    </button>
+                                    <a href="." class="btn btn-primary btn-block btn-flat" style="width: 200px;  display: inline-block;" >Reset Filters</a>
                                 </div>
                               </form>
                     <table id="studentstable" class="table table-bordered table-hover dataTable" role="grid">
+                    {% if groupcount != 0 %}
                     <thead>
                         <tr role="row">
                             <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
@@ -113,6 +86,13 @@
                         </tr>
                     {% endfor %}
                     </tbody>
+                    {% else %}
+                    <thead>
+                        <th>
+                            <h4>No Groups Found</h4>
+                        </th>
+                    </thead>
+                    {% endif %}
                 </table>
 
                 {% if is_paginated %}
@@ -140,6 +120,7 @@
                 {% endif %}
             </div>
         </div>
+        <a class="btn btn-block btn-primary" style="width: 10%;"href="../">Back</a>
     </section>
 {% endblock %}
 

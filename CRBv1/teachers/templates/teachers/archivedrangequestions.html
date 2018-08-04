@@ -2,9 +2,8 @@
 {% load widget_tweaks %}
 {% block content %}
     <section class="content">
-        <div class="row" style="width: 70%; margin: 0 auto" >
-                
-            <div class="box">
+        <div class="row" style="width: 98%; margin: 0 auto" >
+            <div class="box box-solid box-primary" style="box-shadow: 1px 2px 5px grey;">
                 <div class="box-header with-border">
                         <h3 class="box-title">{{ rangename }} </h3>
                         <div class="box-tools pull-right">
@@ -65,7 +64,7 @@
                 </div>
             </div>
 
-            <div class="box">
+            <div class="box box-solid box-primary" style="box-shadow: 1px 2px 5px grey;">
                 <div class="box-header with-border">
                     <h3 class="box-title">Archived Questions in {{ rangename }}</h3>
                     <div class="box-tools pull-right">
@@ -78,58 +77,88 @@
                         <thead>
                             <tr role="row">
                                 <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                    Question Type
+                                    ID
                                 </th>
                                 <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                    Question Topic
+                                    Type
                                 </th>
                                 <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                    Question Title
+                                    Topic
                                 </th>
                                 <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                    Question Text
+                                    Title
                                 </th>
                                 <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                    Question Hint
+                                    Text
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Hint 
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Hint Penalty
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Points
                                 </th>
                                 <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
                                     Answer
                                 </th>
                                 <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                    Question Marks
+                                    Use Shell
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Registry ID
                                 </th>
                                 <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
                                     Actions
                                 </th>
+                            </tr>
                         </thead>
                             {% for x in result %}
-                                <tr role="row">
-                                    <td> 
-                                        {% if x.questiontype == 'FL' %}
-                                            Flag
-                                        {% elif x.questiontype == 'MCQ' %}
-                                            MCQ
-                                        {% elif x.questiontype == 'SA' %}
-                                            Short Answer
-                                        {% elif x.questiontype == 'OE' %}
-                                            Open Ended
-                                        {% elif x.questiontype == 'TF' %}
-                                            True/False
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% for m in topics %}
-                                            {% if m.topicname == x.topicid.topicname %}
+                            <tr role="row">
+                                <td>
+                                    {{ x.questionid }}
+                                </td>
+                                <td>
+                                    {% if x.questiontype == 'FL' %}
+                                        Flag
+                                    {% elif x.questiontype == 'MCQ' %}
+                                        MCQ
+                                    {% elif x.questiontype == 'SA' %}
+                                        Short Answer
+                                    {% elif x.questiontype == 'OE' %}
+                                        Open Ended
+                                    {% elif x.questiontype == 'TF' %}
+                                        True/False
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% for m in topics %}
+                                        {% if m.topicname == x.topicid.topicname %}
                                             {{ m.topicname }}
-                                            {% endif %}
-                                        {% endfor %}
-                                    </td>
-                                    <td> {{x.title}}</td>
-                                    <td> {{ x.text | safe | cut:"<p>"| cut:"</p>"}} </td>
-                                    <td> {{x.hint }} </td>
-                                    <td> 
-                                        {{x.answer}}
-                                    </td>
+                                        {% endif %}
+                                    {% endfor %}
+                                </td>
+                                <td> {{x.title }} </td>
+                                <td> {{x.text | safe | cut:"<p>" | cut:"</p>" }} </td>
+                                <td> {{x.hint }} </td>
+                                <td> {{x.hintpenalty }} </td>
+                                <td> {{ x.points }} </td>
+                                <td> {{ x.answer }} </td>
+                                <td>
+                                    {% if x.usedocker is True %}
+                                        Yes
+                                    {% else %}
+                                        No
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if x.usedocker is False %}
+                                        -
+                                    {% else %}
+                                        {{ x.registryid }} 
+                                    {% endif %}
+                                </td>
                                     <td style="text-align: center">
                                         <a class="btn btn-block btn-success" onclick="return confirm('Unarchive Question {{ x.questionid}} ?')" href="unarchive/{{ x.questionid }}">Unarchive</a>
                                         <a class="btn btn-block btn-danger" onclick="return confirm('Permanently Delete Question {{ x.questionid}} ?')" href="delete/{{ x.questionid }}">Permanently Delete</a>

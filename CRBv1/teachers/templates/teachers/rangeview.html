@@ -2,23 +2,17 @@
 {% load widget_tweaks %}
 {% block content %}
     <section class="content">
-        <div class="row" style="width: 70%; margin: 0 auto" >
-                
-            <div class="box">
+        <div class="row" style="width: 98%; margin: 0 auto" >
+            {% if activated %}
+            <div class="box box-solid box-success" style="box-shadow: 1px 2px 5px grey;">
+            {% else %}
+            <div class="box box-solid box-danger" style="box-shadow: 1px 2px 5px grey;">
+            {% endif %}
                 <div class="box-header with-border">
-                        <h1 class="box-title">{{ rangename }} </h1>
-
-                        {% if activated is True %}
-                        <div class="bg-green color-palette" style="text-align: center; height:5px;"></div>
-                        {% endif %}
-
-                        {% if activated is False %}
-                        <div class="bg-red color-palette" style="text-align: center; height:5px;"></div>
-                        {% endif %}
-
-                        <div class="box-tools pull-right">
-                            <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
-                        </div>
+                    <h1 class="box-title">{{ rangename }} </h1>
+                    <div class="box-tools pull-right">
+                        <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                    </div>
                 </div>
                 
                 
@@ -49,7 +43,7 @@
                                 <i class="fa fa-thumbs-o-up"></i>
                                 <b>Activate Range</b>
                         </a>
-
+                        <br>
                         <a class="btn btn-app" href="assignusers" style="height: 70px; font-size: 1em; min-width: 15%;">
                                 <i class="fa fa-user"></i>
                                 <b>Assign Users to Range</b>
@@ -92,7 +86,6 @@
                         {% endif %}
                     </div>
                     <table class="table table-bordered table-hover dataTable">
-                        
                         <thead>
                             <tr role="row">
                                 <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
@@ -186,8 +179,12 @@
                     </table>
                 </div>
             </div>
-
-            <div class="box">
+            
+            {% if activated %}
+                <div class="box box-success" style="box-shadow: 1px 2px 5px grey;">
+            {% else %}
+                <div class="box box-danger" style="box-shadow: 1px 2px 5px grey;">
+            {% endif %}
                 <div class="box-header with-border">
                     <h3 class="box-title">Questions in {{ rangename }}</h3>
                     <div class="box-tools pull-right">
@@ -198,38 +195,53 @@
                     <table class="table table-bordered table-hover dataTable">
                         {% if result is not None%}
                         <thead>
-                            <tr role="row">
-                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                    Question Type
-                                </th>
-                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                    Question Topic
-                                </th>
-                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                    Question Title
-                                </th>
-                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                    Question Text
-                                </th>
-                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                    Question Hint
-                                </th>
-                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                    Answer
-                                </th>
-                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                    Question Marks
-                                </th>
-                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                    Hint Penalty
-                                </th>
-                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                    Actions
-                                </th>
-                        </thead>
-                            {% for x in result %}
                                 <tr role="row">
-                                    <td> 
+                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                        ID
+                                    </th>
+                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                        Type
+                                    </th>
+                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                        Topic
+                                    </th>
+                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                        Title
+                                    </th>
+                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                        Text
+                                    </th>
+                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                        Hint 
+                                    </th>
+                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                        Hint Penalty
+                                    </th>
+                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                        Points
+                                    </th>
+                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                        Answer
+                                    </th>
+                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                        Use Shell
+                                    </th>
+                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                        Registry ID
+                                    </th>
+                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                        Actions
+                                    </th>
+                                </tr>
+                            </thead>
+                            {% for x in result %}
+                            <form method = 'post'>
+                                {% csrf_token %}
+                                <tr role="row">
+                                    <td>
+                                        {{ x.questionid }}
+                                    </td>
+                                    <td>
                                         {% if x.questiontype == 'FL' %}
                                             Flag
                                         {% elif x.questiontype == 'MCQ' %}
@@ -245,39 +257,54 @@
                                     <td>
                                         {% for m in topics %}
                                             {% if m.topicname == x.topicid.topicname %}
-                                            {{ m.topicname }}
+                                                {{ m.topicname }}
                                             {% endif %}
                                         {% endfor %}
                                     </td>
                                     <td> {{x.title }} </td>
                                     <td> {{x.text | safe | cut:"<p>" | cut:"</p>" }} </td>
                                     <td> {{x.hint }} </td>
+                                    <td> {{x.hintpenalty }} </td>
+                                    <td> {{ x.points }} </td>
+                                    <td> {{ x.answer }} </td>
                                     <td>
-                                        {{x.answer}}
+                                        {% if x.usedocker is True %}
+                                            Yes
+                                        {% else %}
+                                            No
+                                        {% endif %}
                                     </td>
-                                    <td> 
-                                        {{x.points}}
+                                    <td>
+                                        {% if x.usedocker is False %}
+                                            -
+                                        {% else %}
+                                            {{ x.registryid }} 
+                                        {% endif %}
                                     </td>
-                                    <td>{{x.hintpenalty}}</td>
-                                    <td style="text-align: center">
+                                    <td>
                                         <a class="btn btn-block btn-primary" href="edit/{{ x.questionid }}">Edit</a>
                                         <a class="btn btn-block btn-danger"  onclick="return confirm('Archive Question {{ x.questionid}} ?')" href="archive/{{ x.questionid }}">Archive</a>
                                     </td>
                                 </tr>
+                            </form>
                             {% endfor %}
                         {% else %}
-                        <thead>
-                            <th>
-                                <h4>No Questions Found in {{ rangename }}</h4>
-                            </th>
-                        </thead>
+                            <thead>
+                                <th>
+                                    <h4>No Questions Found In Database</h4>
+                                </th>
+                            </thead>
                         {% endif %}
-                    </table>
+                        </table>
                     <br>
-                    <a class="btn btn-block btn-danger" style="width: 30%" href="./archived">View Archived Questions</a>
+                    <a class="btn btn-block btn-danger" style="width: 20%" href="archived">View Archived Questions</a>
                 </div>
             </div>
-            <div class="box">
+            {% if activated %}
+                <div class="box box-success" style="box-shadow: 1px 2px 5px grey;">
+            {% else %}
+                <div class="box box-danger" style="box-shadow: 1px 2px 5px grey;">
+            {% endif %}
                 <div class="box-header with-border">
                         <h3 class="box-title">Groups in {{ rangename }} </h3>
                         <div class="box-tools pull-right">
@@ -323,12 +350,16 @@
                     </table>
             </div>
             </div>
-            <div class="box">
+            {% if activated %}
+                <div class="box box-success" style="box-shadow: 1px 2px 5px grey;">
+            {% else %}
+                <div class="box box-danger" style="box-shadow: 1px 2px 5px grey;">
+            {% endif %}
                 <div class="box-header with-border">
-                        <h3 class="box-title">Students in {{ rangename }} </h3>
-                        <div class="box-tools pull-right">
-                            <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
-                        </div>
+                    <h3 class="box-title">Students in {{ rangename }} </h3>
+                    <div class="box-tools pull-right">
+                        <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                    </div>
                 </div>
                 <div class="box-body">
                     <table id="studentstable" class="table table-bordered table-hover dataTable" role="grid">

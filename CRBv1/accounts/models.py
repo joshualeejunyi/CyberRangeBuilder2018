@@ -17,12 +17,12 @@ class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(db_column='username', max_length=45, unique=True)
     password = models.CharField(db_column='password', max_length=100,)
     name = models.CharField(db_column='name', max_length=100)
-    userclass = models.ForeignKey('accounts.UserClass', on_delete=models.DO_NOTHING, db_column='UserClass', blank=True, null=True, related_name='UC')
+    userclass = models.ForeignKey('accounts.UserClass', on_delete=models.SET_NULL, db_column='UserClass', blank=True, null=True, related_name='UC')
     datejoined = models.DateField(db_column='dateJoined', blank=True, null=True)
     lastmodifieddate = models.DateField(db_column='lastModifiedDate', blank=True, null=True)
     lastmodifiedtime = models.TimeField(db_column='lastModifiedTime', null=True)
-    lastmodifiedby = models.ForeignKey('accounts.User', on_delete=models.DO_NOTHING, db_column='lastModifiedBy', blank=True, null=True, related_name="LMB")
-    acceptedby = models.ForeignKey('accounts.User', on_delete=models.DO_NOTHING, db_column='acceptedBy', related_name="AB", null=True) 
+    lastmodifiedby = models.ForeignKey('accounts.User', on_delete=models.SET_NULL, db_column='lastModifiedBy', blank=True, null=True, related_name="LMB")
+    acceptedby = models.ForeignKey('accounts.User', on_delete=models.SET_NULL, db_column='acceptedBy', related_name="AB", null=True) 
     last_login = models.DateTimeField(db_column='lastlogin', blank=True, null=True)
     is_superuser = models.BooleanField(db_column='admin', default=False)
     is_staff = models.BooleanField(db_column='teacher', default=False)
@@ -67,14 +67,14 @@ class FakeUser(models.Model):
 class Group(models.Model):
     groupid = models.AutoField(db_column='groupID', primary_key=True)
     groupname = models.CharField(db_column='groupName', max_length=45, unique=True)
-    groupleader = models.ForeignKey("User", on_delete=models.DO_NOTHING, db_column='groupLeader', null=True, related_name="groupleader")
+    groupleader = models.ForeignKey("User", on_delete=models.SET_NULL, db_column='groupLeader', null=True, related_name="groupleader")
     datecreated = models.DateField(db_column='dateCreated', null=True)
     timecreated = models.TimeField(db_column='timeCreated', null=True)
     grouppoints = models.IntegerField(db_column='groupPoints', null=True, default=0)
-    createdby = models.ForeignKey('accounts.User', on_delete=models.DO_NOTHING, db_column='createdBy', related_name="groupcreatedby", null=True)
+    createdby = models.ForeignKey('accounts.User', on_delete=models.SET_NULL, db_column='createdBy', related_name="groupcreatedby", null=True)
     lastmodifieddate = models.DateField(db_column='lastModifiedDate', blank=True, null=True)
     lastmodifiedtime = models.TimeField(db_column='lastModifiedTime', null=True)
-    lastmodifiedby = models.ForeignKey('accounts.User', on_delete=models.DO_NOTHING, db_column='lastModifiedBy', blank=True, null=True, related_name="GLMB")
+    lastmodifiedby = models.ForeignKey('accounts.User', on_delete=models.SET_NULL, db_column='lastModifiedBy', blank=True, null=True, related_name="GLMB")
     
     class Meta:
         db_table = 'Group'
@@ -83,7 +83,7 @@ class Group(models.Model):
 class StudentGroup(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True)
     studentid = models.ForeignKey("User", on_delete=models.CASCADE, db_column='studentID')
-    groupid = models.ForeignKey("Group", on_delete=models.DO_NOTHING, db_column='groupID')
+    groupid = models.ForeignKey("Group", on_delete=models.CASCADE, db_column='groupID')
 
     class Meta:
         db_table = 'StudentGroup'
@@ -91,8 +91,8 @@ class StudentGroup(models.Model):
 
 class FakeStudentGroup(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True)
-    studentid = models.ForeignKey("User", models.DO_NOTHING, db_column='studentID')
-    groupid = models.ForeignKey("Group", models.DO_NOTHING, db_column='groupID')
+    studentid = models.ForeignKey("User", models.CASCADE, db_column='studentID')
+    groupid = models.ForeignKey("Group", models.CASCADE, db_column='groupID')
 
     class Meta:
         app_label = StudentGroup._meta.app_label

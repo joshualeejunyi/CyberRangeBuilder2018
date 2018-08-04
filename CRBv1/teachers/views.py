@@ -911,7 +911,7 @@ class DeleteQuestionFromRange(View):
 
 @method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
-class AssignUser(ListView, FilterView):
+class AssignUser(FilterView, ListView):
     template_name = 'teachers/assignuserrange.html'
     context_object_name = 'usersobject'
     paginate_by = 10
@@ -986,7 +986,7 @@ class UserRangeCommit(View):
 
 @method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
-class AssignGroup(ListView, FilterView):
+class AssignGroup(FilterView, ListView):
     template_name = 'teachers/assigngrouprange.html'
     context_object_name = 'groupobject'
     paginate_by = 10
@@ -996,10 +996,13 @@ class AssignGroup(ListView, FilterView):
         rangeid = Range.objects.filter(rangeurl = self.kwargs['rangeurl']).values_list('rangeid')[0][0]
         groupsinrange = RangeStudents.objects.filter(rangeID = rangeid, studentID = None).values_list('groupid')
         allgroups = Group.objects.exclude(groupid__in = groupsinrange).order_by('-lastmodifieddate')
+        self.allgroups = allgroups
         return allgroups
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['rangename'] = Range.objects.filter(rangeurl = self.kwargs['rangeurl']).values_list('rangename')[0][0]
+        context['groupcount'] = len(self.allgroups)
 
         if "grouprangecart" in self.request.session:
             cart = self.request.session.get('grouprangecart', {})
@@ -1735,6 +1738,86 @@ class QuestionManagement(FilterView, ListView):
 
 @method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
+class ArchiveQuestioninManagement(View):
+    def get(self, request, questionid):
+        questioninstance = Questions.objects.get(questionid = questionid)
+        questioninstance.isarchived = 1
+        questioninstance.save()
+        
+        previousurl = request.META.get('HTTP_REFERER')
+        return redirect(previousurl)
+
+@method_decorator(change_password, name='dispatch')
+@method_decorator(user_is_staff, name='dispatch')
+class ArchivedQuestionManagement(FilterView, ListView):
+    template_name = 'teachers/archivedquestionmanagement.html'
+    context_object_name = 'questions'
+    paginate_by = 10
+    filterset_class = QuestionFilter
+
+    def get_queryset(self):
+        questions = Questions.objects.filter(isarchived = 1)
+        for x in questions:
+            print(x.createdby)
+        return questions
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['topics'] = QuestionTopic.objects.all()
+        print(context['topics'])
+        questions_obj = Questions.objects.filter(isarchived = 1)
+        context['createdby'] = self.request.user
+        return context
+
+@method_decorator(change_password, name='dispatch')
+@method_decorator(user_is_staff, name='dispatch')
+class UnarchiveFromQuestionManagement(View):
+    def get(self, request, *args, **kwargs):
+        selectedquestionid = self.kwargs['questionid']
+        selectedquestioninstance = Questions.objects.get(questionid = selectedquestionid)
+        selectedquestioninstance.isarchived = 0
+        selectedquestioninstance.save()
+        
+        previousurl = request.META.get('HTTP_REFERER')
+        return redirect(previousurl)
+
+@method_decorator(change_password, name='dispatch')
+@method_decorator(user_is_staff, name='dispatch')
+class ViewQuestion(ListView):
+    template_name = 'teachers/viewquestion.html'
+    context_object_name = 'result'
+    
+    def get_queryset(self):
+        selectedquestion = Questions.objects.get(questionid = self.kwargs['questionid'])
+        return selectedquestion
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        selectedquestion = Questions.objects.get(questionid = self.kwargs['questionid'])
+
+        questiontopic = QuestionTopic.objects.all().values_list('topicname')
+        context['questiontopic'] = questiontopic
+
+        getthistopicid = (selectedquestion.topicid.topicid)
+        currentquestiontopicname = QuestionTopic.objects.get(topicid=getthistopicid)
+        context['currentquestiontopicname'] = currentquestiontopicname.topicname
+
+        context['questiontypechoices'] = QUESTION_TYPE_CHOICES
+        context['check'] = selectedquestion.isarchived
+        print(selectedquestion.isarchived)
+        context['points'] = selectedquestion.points
+
+        if selectedquestion.questiontype == 'MCQ':
+            mcqoptions_obj = MCQOptions.objects.get(questionid = selectedquestion)
+            context['optionone'] = mcqoptions_obj.optionone
+            context['optiontwo'] = mcqoptions_obj.optiontwo
+            context['optionthree'] = mcqoptions_obj.optionthree
+            context['optionfour'] = mcqoptions_obj.optionfour
+
+        return context
+        
+@method_decorator(change_password, name='dispatch')
+@method_decorator(user_is_staff, name='dispatch')
 class DockerManagement(ListView):
     template_name = 'teachers/dockermanagement.html'
     context_object_name = 'dockerobjects'
@@ -2302,73 +2385,3 @@ class DeleteComment(View):
         url = '/teachers/SDLmanagement/view/' + postid
         return redirect(url)
 
-
-
-@method_decorator(change_password, name='dispatch')
-@method_decorator(user_is_staff, name='dispatch')
-class ArchivedQuestionManagement(FilterView, ListView):
-    template_name = 'teachers/archivedquestionmanagement.html'
-    context_object_name = 'questions'
-    paginate_by = 10
-    filterset_class = QuestionFilter
-
-    def get_queryset(self):
-        questions = Questions.objects.filter(isarchived = 1)
-        for x in questions:
-            print(x.createdby)
-        return questions
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['topics'] = QuestionTopic.objects.all()
-        print(context['topics'])
-        questions_obj = Questions.objects.filter(isarchived = 1)
-        context['createdby'] = self.request.user
-        return context
-
-@method_decorator(change_password, name='dispatch')
-@method_decorator(user_is_staff, name='dispatch')
-class UnarchiveFromQuestionManagement(View):
-    def get(self, request, *args, **kwargs):
-        selectedquestionid = self.kwargs['questionid']
-        selectedquestioninstance = Questions.objects.get(questionid = selectedquestionid)
-        selectedquestioninstance.isarchived = 0
-        selectedquestioninstance.save()
-        
-        previousurl = request.META.get('HTTP_REFERER')
-        return redirect(previousurl)
-
-@method_decorator(change_password, name='dispatch')
-@method_decorator(user_is_staff, name='dispatch')
-class ViewQuestion(ListView):
-    template_name = 'teachers/viewquestion.html'
-    context_object_name = 'result'
-    
-    def get_queryset(self):
-        selectedquestion = Questions.objects.get(questionid = self.kwargs['questionid'])
-        return selectedquestion
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        selectedquestion = Questions.objects.get(questionid = self.kwargs['questionid'])
-
-        questiontopic = QuestionTopic.objects.all().values_list('topicname')
-        context['questiontopic'] = questiontopic
-
-        getthistopicid = (selectedquestion.topicid.topicid)
-        currentquestiontopicname = QuestionTopic.objects.get(topicid=getthistopicid)
-        context['currentquestiontopicname'] = currentquestiontopicname.topicname
-
-        context['questiontypechoices'] = QUESTION_TYPE_CHOICES
-        context['check'] = selectedquestion.isarchived
-        print(selectedquestion.isarchived)
-        context['points'] = selectedquestion.points
-
-        if selectedquestion.questiontype == 'MCQ':
-            mcqoptions_obj = MCQOptions.objects.get(questionid = selectedquestion)
-            context['optionone'] = mcqoptions_obj.optionone
-            context['optiontwo'] = mcqoptions_obj.optiontwo
-            context['optionthree'] = mcqoptions_obj.optionthree
-            context['optionfour'] = mcqoptions_obj.optionfour
-
-        return context
