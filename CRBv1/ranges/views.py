@@ -817,7 +817,7 @@ class QuestionsView(ListView):
         points = Questions.objects.filter(rangeid = currentrangeid)
         context['questionpoints'] = points
         context['rangeinfo'] = Range.objects.filter(rangeurl= rangeurl).values_list('rangeinfo')[0][0]
-        adminemail = Range.objects.filter(rangeurl= rangeurl).values_list('createdbyusername')[0][0]
+        adminemail = Range.objects.filter(rangeurl= rangeurl).values_list('createdby')[0][0]
         adminusername = User.objects.filter(email=adminemail).values_list('username')[0][0]
         context['rangeadmin'] = adminusername
         context['attempts'] = Range.objects.filter(rangeurl=rangeurl).values_list('attempts')[0][0]
@@ -863,42 +863,29 @@ class Housekeeping(View):
             timeend = Range.objects.filter(rangeid = x[0]).values_list("timeend")[0][0]
             datestart = Range.objects.filter(rangeid = x[0]).values_list('datestart')[0][0]
             timestart = Range.objects.filter(rangeid = x[0]).values_list('timestart')[0][0]
-
-            if dateend != None:
-                datecheck = datetime.date.today()
-                if (datecheck >= dateend) is True :
-                    timecheck = datetime.datetime.now().time()
-                    if (timecheck >= timeend) is True:
-                        print('got to here for time')
-                        checkifalreadyinactive = Range.objects.filter(rangeid = x[0]).values_list("rangeactive")[0][0]
-                        if checkifalreadyinactive == 1:
-                            rangeobject = Range.objects.get(rangeid = x[0])
-                            rangeobject.rangeactive = 0
-                            rangeobject.save()
+            rangeobject = Range.objects.get(rangeid = x[0])
 
             if datestart != None:
-                datecheck = datetime.date.today() > datestart
-                if datecheck:
-                    timecheck = datetime.datetime.now().time() > timestart
-                    if timecheck:
-                        dateend = Range.objects.filter(rangeid = x[0]).values_list("dateend")[0][0]
-                        if datestart < datetime.date.today() < dateend:
-                            checkifalreadyactive = Range.objects.filter(rangeid = x[0]).values_list("rangeactive")[0][0]
-                            if checkifalreadyactive == 0:
-                                print('fml it got restarted')
-                                rangeobject = Range.objects.get(rangeid = x[0])
-                                rangeobject.rangeactive = 1
-                                rangeobject.save()
+                datecheck = datetime.date.today() >= datestart and datetime.date.today() <= dateend
+                if datecheck is True:
+                    timecheck = datetime.datetime.now().time() >= timestart and datetime.datetime.now().time() <= timeend
+                    if timecheck is True:
+                        rangeobject.rangeactive = True
+                        rangeobject.save()
+                    else:
+                        rangeobject.rangeactive = False
 
+            rangeobject.save()
+                
             manualstart = Range.objects.filter(rangeid = x[0]).values_list('manualactive')[0][0]
-            if manualstart is 1:
+            if manualstart is True:
                 rangeobject = Range.objects.get(rangeid = x[0])
                 rangeobject.manualdeactive = 0
                 rangeobject.rangeactive = 1
                 rangeobject.save()            
 
             manualstop = Range.objects.filter(rangeid = x[0]).values_list('manualdeactive')[0][0]
-            if manualstop is 1:
+            if manualstop is True:
                 rangeobject = Range.objects.get(rangeid = x[0])
                 rangeobject.manualactive = 0
                 rangeobject.rangeactive = 0

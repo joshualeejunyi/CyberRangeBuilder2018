@@ -8,12 +8,16 @@ from django.utils.dateparse import parse_date
 
 import datetime
 
+from ranges.views import Housekeeping
+
 class ProgressView(generic.ListView):
     template_name='progress/progress.html'
     context_object_name = 'rangesobject'
     def get_queryset(self):
         user = self.request.user
-        assignedranges = RangeStudents.objects.filter(studentID=user, rangeID__rangeactive=1).order_by('-lastaccess', '-dateJoined', '-pk')[:5]
+        assignedranges = RangeStudents.objects.filter(studentID=user).order_by('-lastaccess', '-dateJoined', '-pk')[:5]
+        currentranges = RangeStudents.objects.filter(studentID = user).values_list('rangeID')
+        Housekeeping.get(self, currentranges)
         return assignedranges
 
     def get_context_data(self, **kwargs):
@@ -121,11 +125,11 @@ class ReportView(generic.ListView):
         canshowquestions = False
         
         if dateend is not None:
-            if dateend >= datetime.date.today():
+            if dateend <= datetime.date.today():
                 currenttime = datetime.datetime.now().time()
-                if currenttime >= timeend:
+                if currenttime <= timeend:
                     canshowquestions = True
-        print(canshowquestions)
+        
         context['canshowquestions'] = canshowquestions
         ranking = RangeStudents.objects.filter(rangeID=rangeid).order_by('-points')
         context['username'] = user

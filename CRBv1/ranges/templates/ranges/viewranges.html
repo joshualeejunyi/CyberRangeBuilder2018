@@ -63,7 +63,7 @@
 								<td>{{ range.rangeID.dateend }}</td>
 								<td>{{ range.rangeID.timeend }}</td>
 								<td>{{ range.points }}/{{range.rangeID.maxscore}}</td>
-								<td><a style="width: 100px;" class="btn btn-block btn-primary" href="{{ range.rangeID.rangeurl }}/play">Play Range</a></td>
+								<td><a class="btn btn-block btn-primary" href="{{ range.rangeID.rangeurl }}/play">Play Range</a></td>
 							{% endfor %}
 							</tbody>
 						</table>
@@ -87,31 +87,31 @@
 				<div class="box-body">
 					{% if inactive %}
 						<table class="table table-bordered table-hover dataTable" role="grid">
-							<thead>
-								<tr role="row">
-									<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-										Range Name
-									</th>
-									<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-										Date Start
-									</th>
-									<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">	
-										Time Start
-									</th>
-									<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-										Date End
-									</th>
-									<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-										Time End
-									</th>
-									<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-										Final Score
-									</th>
-									<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-										Actions
-									</th>
-								</tr>
-							</thead>
+								<thead>
+										<tr role="row">
+											<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+												Range Name
+											</th>
+											<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+												Date Start
+											</th>
+											<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">	
+												Time Start
+											</th>
+											<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+												Date End
+											</th>
+											<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+												Time Ended
+											</th>
+											<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+												Final Score
+											</th>
+											<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+												Actions
+											</th>
+										</tr>
+									</thead>
 							<tbody>
 								{% for range in inactive %}
 									<tr role="row">
@@ -121,7 +121,7 @@
 										<td>{{ range.rangeID.dateend }}</td>
 										<td>{{ range.rangeID.timeend }}</td>
 										<td>{{ range.points }}/{{range.rangeID.maxscore}}</td>
-										<td><a style="width: 150px;" class="btn btn-block btn-primary" href="/progress/{{ range.rangeID.rangeurl }}/report">Range Report</a></td>
+										<td><a class="btn btn-block btn-primary" href="/progress/{{ range.rangeID.rangeurl }}/report">Range Report</a></td>
 									</tr>
 								{% endfor %}
 							</tbody>

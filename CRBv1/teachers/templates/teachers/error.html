@@ -1,0 +1,16 @@
+{% extends 'adminlte/login.html' %}
+{% load i18n admin_urls static admin_modify %}
+{% block title %}Login{% endblock %}
+
+{% block logo %}
+<div class="login-logo">
+	<a href="{% block logo_href %}{% endblock %}">{% block logo_text %}ERROR<b>404</b>{% endblock %}</a>
+</div>
+{% endblock %}
+
+{% block login_form %}
+	<h3 style="text-align: center;">
+        Looks like we got an error!
+    </h3>
+	<div style="padding-bottom: 2%;"></div>
+{% endblock %}

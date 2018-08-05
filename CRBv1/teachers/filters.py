@@ -44,14 +44,9 @@ class TeacherFilter(django_filters.FilterSet):
         model = User
         fields = ['email', 'name', 'username']
 
-class BigQuestionFilter(django_filters.FilterSet):
-    text = django_filters.CharFilter(lookup_expr='icontains')
-    hint = django_filters.CharFilter(lookup_expr='icontains')
-    answer = django_filters.CharFilter(lookup_expr='icontains')
-    title = django_filters.CharFilter(lookup_expr='icontains')
-    questiontype = django_filters.CharFilter(lookup_expr='icontains')
-    topicid__topicname = django_filters.CharFilter(lookup_expr='icontains')
-
+class ClassFilter(django_filters.FilterSet):
+    userclass = django_filters.CharFilter(lookup_expr='icontains')
+    createdby__username = django_filters.CharFilter(lookup_expr='icontains')
     class Meta:
-        model = Questions
-        fields = ['questiontype', 'text', 'hint','answer', 'title']
+        model = UserClass
+        fields = ['userclass', 'createdby__username']

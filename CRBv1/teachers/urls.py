@@ -76,7 +76,7 @@ urlpatterns = [
     path('rangemanagement/archived/', login_required(views.ArchivedRangeManagement.as_view()), name='archivedrangemanagement'),
     path('rangemanagement/archived/unarchive/<rangeurl>/', login_required(views.UnarchiveRange.as_view()), name='unarchiverange'),
     path('rangemanagement/archived/delete/<rangeurl>/', login_required(views.DeleteRange.as_view()), name='deleterange'),
-    path('rangemanagement/view/<rangeurl>/edit/<questionid>/', login_required(views.EditQuestion.as_view()), name="editquestion"),
+    path('rangemanagement/view/<rangeurl>/edit/<questionid>/', login_required(views.EditRangeQuestion.as_view()), name="editrangequestion"),
     path('rangemanagement/view/<rangeurl>/importcsv/', views.ImportCSV.as_view(), name='importcsv'),
     path('rangemanagement/view/<rangeurl>/exportcsv/', views.ExportCSV.as_view(), name='exportcsv'),
     path('rangemanagement/view/<rangeurl>/isopen/', views.IsOpen.as_view(), name='isopen'),
@@ -85,13 +85,14 @@ urlpatterns = [
 
     #QUESTION MANAGEMENT
     path('questionmanagement/', login_required(views.QuestionManagement.as_view()), name='questionmanagement'),
-    path('questionmanagement/archive/<questionid>', login_required(views.ArchiveQuestioninManagement.as_view()), name='archivequestioninmanagement'),
-    path('questionmanagement/edit/<questionid>', login_required(views.EditQuestion.as_view()), name='editquestion'),
-    path('questionmanagement/view/<questionid>', login_required(views.ViewQuestion.as_view()), name='viewquestion'),
-    path('questionmanagement/archived', login_required(views.ArchivedQuestionManagement.as_view()), name='archivedquestionmanagement'),
-    path('questionmanagement/archived/view/<questionid>', login_required(views.ViewQuestion.as_view()), name='unarchivefromquestionmanagement'),
-    path('questionmanagement/archived/unarchive/<questionid>', login_required(views.UnarchiveFromQuestionManagement.as_view()), name='unarchivefromquestionmanagement'),
-    path('<username>/changepassword', login_required(settingview.ResetPassword.as_view()), name='forcechangepassword'),
+    path('questionmanagement/archive/<questionid>/', login_required(views.ArchiveQuestioninManagement.as_view()), name='archivequestioninmanagement'),
+    path('questionmanagement/edit/<questionid>/', login_required(views.EditQuestion.as_view()), name='editquestion'),
+    path('questionmanagement/view/<questionid>/', login_required(views.ViewQuestion.as_view()), name='viewquestion'),
+    path('questionmanagement/archived/', login_required(views.ArchivedQuestionManagement.as_view()), name='archivedquestionmanagement'),
+    path('questionmanagement/archived/view/<questionid>/', login_required(views.ViewQuestion.as_view()), name='unarchivefromquestionmanagement'),
+    path('questionmanagement/archived/unarchive/<questionid>/', login_required(views.UnarchiveFromQuestionManagement.as_view()), name='unarchivefromquestionmanagement'),
+    
+    path('<username>/changepassword/', login_required(settingview.ResetPassword.as_view()), name='forcechangepassword'),
 
     #DOCKER MANAGEMENT
     path('dockermanagement/', login_required(views.DockerManagement.as_view()), name='dockermanagement'),
@@ -113,4 +114,6 @@ urlpatterns = [
     path('SDLmanagement/delete/<postid>/', login_required(views.DeletePost.as_view()), name="deletepost"),
     path('SDLmanagement/view/<postid>/', login_required(views.ViewPost.as_view()), name="viewpost"),
     path('SDLmanagement/view/<postid>/deletecomment/<commentid>', login_required(views.DeleteComment.as_view()), name="deletecomment"),
+
+    path('error/', views.Error.as_view()),
 ]  

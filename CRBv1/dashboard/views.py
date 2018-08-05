@@ -1,6 +1,7 @@
 from django.views import generic
 from ranges.models import RangeStudents, StudentQuestions, Range
 from accounts.models import User
+from ranges.views import Housekeeping
 
 class DashboardView(generic.ListView):
     template_name='dashboard/dashboard.html'
@@ -11,6 +12,8 @@ class DashboardView(generic.ListView):
         assignedranges = RangeStudents.objects.filter(studentID=user, rangeID__rangeactive=1).order_by('-lastaccess', '-dateJoined', '-pk')[:5]
         self.reportboxes = assignedranges[:4]
         latestfive = assignedranges[:5]
+        currentranges = RangeStudents.objects.filter(studentID = user).values_list('rangeID')
+        Housekeeping.get(self, currentranges)
         return latestfive
 
     def get_context_data(self, **kwargs):

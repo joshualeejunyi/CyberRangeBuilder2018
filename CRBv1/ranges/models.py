@@ -16,7 +16,7 @@ class Range(models.Model):
     lastmodifieddate = models.DateField(db_column='lastModifiedDate', blank=True, null=True)
     rangecode = models.IntegerField(db_column='rangeCode', blank=True, null=True, unique=True)
     lastmodifiedby = models.ForeignKey('accounts.User', on_delete=models.SET_NULL, db_column='lastModifiedBy', blank=True, null=True, related_name='LMBR')
-    createdbyusername = models.ForeignKey('accounts.User', on_delete=models.CASCADE, db_column='createdby', related_name='CBR', default='super')
+    createdby = models.ForeignKey('accounts.User', on_delete=models.CASCADE, db_column='createdby', related_name='CBR', default='super')
     rangeurl = models.CharField(db_column='rangeURL', max_length=50, null=True, unique=True)
     studentsinrange = models.PositiveIntegerField(db_column='studentsInRange', default=0,null=True)
     isdisabled = models.BooleanField(db_column='isDisabled', default=False)
@@ -99,6 +99,7 @@ class Questions(models.Model):
     usedocker = models.BooleanField(db_column='usedocker', default=False)
     registryid = models.CharField(db_column='registryID', max_length=255, null=True)
     isarchived = models.BooleanField(db_column='isArchived', default=False)
+    remarks = models.CharField(db_column='remarks', max_length=255, null=True)
 
     class Meta:
         db_table = 'Questions'

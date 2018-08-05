@@ -35,30 +35,72 @@
                             <div class="row">
                                 <div class="form-group col-sm-4 col-md-3">
                                     <label for="questiontype">Class:</label>
-                                    {% render_field filter.form.class class="form-control" %}
+                                    {% render_field filter.form.userclass class="form-control" %}
                                 </div>
-                                
-                                    <button type="submit" class="btn btn-primary btn-flat" style="width: 200px; display: inline-block">
-                                        <span class="glyphicon glyphicon-search"></span> Search
-                                    </button>
-                                    <a href="{{ rangeurl }}" class="btn btn-primary btn-block btn-flat" style="width: 200px;  display: inline-block;" >Reset Filters</a>
+                                <div class="form-group col-sm-4 col-md-3">
+                                    <label for="questiontype">Created By:</label>
+                                    {% render_field filter.form.createdby__username class="form-control" %}
+                                </div>
+                            </div>
+                            <div>
+                                <button type="submit" class="btn btn-primary btn-flat" style="width: 200px; display: inline-block">
+                                    <span class="glyphicon glyphicon-search"></span> Search
+                                </button>
+                                <a href="." class="btn btn-primary btn-block btn-flat" style="width: 200px;  display: inline-block;" >Reset Filters</a>
                             </div>
                         </div>
                     </form>
 
-    <table class="table table-bordered table-hover dataTable">
-        <thead>
-            <tr role="row">
-                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                    Classes
-                </th>
-        </thead>
-        {% for x in classobjects %}
-            <tr role="row">
-                <td> {{ x.userclass }} </td>
-            </tr>
-        {% endfor %}
-    </table>
+                    <table class="table table-bordered table-hover dataTable">
+                        {% if classobjects.all %}
+                        <thead>
+                            <tr role="row">
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Class
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Student Count
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Date Created
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Time Created
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Created By
+                                </th>
+                            </tr>
+                        </thead>
+                        {% for x in filter.qs %}
+                        <form method = 'post'>
+                            {% csrf_token %}
+                            <tr role="row">
+                                <td>
+                                    {{ x.userclass }}
+                                </td>
+                                <td>
+                                    {{ x.studentcount }}
+                                </td>
+                                <td>
+                                    {{ x.datecreated }}
+                                </td>
+                                <td>
+                                    {{ x.timecreated }}
+                                </td>
+                                <td>
+                                    {{ x.createdby }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        {% else %}
+                            <thead>
+                                <th>
+                                    <h4>No Classes Found</h4>
+                                </th>
+                            </thead>
+                        {% endif %}
+                    </table>
             </div>
         </div>
     </section>

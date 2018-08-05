@@ -6,6 +6,10 @@ from ranges.models import Range
 
 class UserClass(models.Model):
     userclass = models.CharField(db_column='class', max_length=45, unique=True)
+    studentcount = models.PositiveIntegerField(db_column='studentcount', default=0)
+    createdby = models.ForeignKey('accounts.User', on_delete=models.SET_NULL, db_column='createdby', null=True, related_name='ucCB')
+    datecreated = models.DateField(db_column='dateCreated', null=True)
+    timecreated = models.TimeField(db_column='timeCreated', null=True)
 
     class Meta:
         db_table = 'UserClass'

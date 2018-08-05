@@ -97,6 +97,10 @@ class UserCreationForm(forms.ModelForm):
         user.set_password(self.cleaned_data["password1"])
         user.isdisabled = True
         user.isaccepted = False
+        userclass = self.cleaned_data.get("userclass")
+        userclassobj = UserClass.objects.get(userclass = userclass.userclass)
+        userclassobj.studentcount += 1
+        userclassobj.save()
         if commit:
             user.save()
         return user
@@ -139,6 +143,7 @@ class AdminRegisterForm(UserCreationForm):
         user.isdisabled = False
         user.isaccepted = True
         user.isacceptedby = User.objects.get(username = admin)
+
         if commit:
             user.save()
         return user
@@ -244,8 +249,6 @@ class AdminModifyForm(AdminModifyModelForm):
     def save(self, commit=True):
         user = super().save(commit=False)
         if commit:
-            print(user)
-            print(type(user))
             user.lastmodifieddate = datetime.date.today()
             admin = self.request.user
             user.lastmodifiedby = User.objects.get(username = admin)

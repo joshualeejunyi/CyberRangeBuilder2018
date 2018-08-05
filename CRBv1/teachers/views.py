@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic.list import ListView
 from django.views.generic.edit import FormView, ModelFormMixin, UpdateView, DeleteView, CreateView
+from django.views.generic.base import TemplateView
 from django.views import generic 
 from django.http import HttpResponse, HttpResponseRedirect
 from accounts.forms import *
@@ -29,6 +30,15 @@ from SDL.forms import *
 from SDL.filters import *
 from SDL.models import *
 
+class Error(TemplateView):
+    template_name = "teachers/error.html"
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['errorcode'] = kwargs
+        return context
+        
+        return render(request, 'teachers/error.html')
 
 # Create your views here.
 @method_decorator(change_password, name='dispatch')
@@ -243,7 +253,12 @@ class AcceptUser(View):
 class RejectUser(View):
     def get(self, request, username):
         selecteduser = User.objects.get(username = username)
+        userclass = selecteduser.userclass
+        userclassobj = UserClass.objects.get(userclass = userclass)
+        userclassobj.studentcount = userclassobj.studentcount - 1
+        userclassobj.save()
         selecteduser.delete()
+        
         return redirect('/teachers/')
 
 @method_decorator(change_password, name='dispatch')
@@ -497,7 +512,7 @@ class RangeManagement(FilterView, ListView):
 
     def get_queryset(self):
         user = self.request.user
-        ranges = Range.objects.all().filter(isdisabled = False, createdbyusername=user).order_by('-lastmodifieddate', '-datecreated')
+        ranges = Range.objects.all().filter(isdisabled = False, createdby=user).order_by('-lastmodifieddate', '-datecreated')
         return ranges
 
 @method_decorator(change_password, name='dispatch')
@@ -711,7 +726,7 @@ class AddQuestioninRangeCommit(View):
             if questionobj.usedocker is True:
                 error = CreateImage.get(self, request, rangeurl, questionid, imageid)
                 if error is not 0:
-                    return HttpResponse('ERROR')
+                    Error.get(self, request, error)
         
         url = '/teachers/rangemanagement/view/' + rangeurl
         del request.session['questionscart']
@@ -729,40 +744,57 @@ class EditQuestion (UpdateView):
     def get_form_kwargs(self):
         kwargs = super(EditQuestion, self).get_form_kwargs()
         kwargs.update({'request': self.request})
-        try:
-            rangeurl = self.kwargs['rangeurl']
-            kwargs.update({'rangeurl': self.kwargs['rangeurl']})
-            kwargs.update({'questionid': self.kwargs['questionid']})
-        except:
-            selectedquestionid = self.kwargs['questionid']
-            print(selectedquestionid)
-            questioninstance = Questions.objects.get(questionid = selectedquestionid)
-            rangeid = questioninstance.rangeid
-            rangeurl = rangeid.rangeurl
-            kwargs.update({'questionid': self.kwargs['questionid']})
+        questionid = self.kwargs['questionid']
+        kwargs.update({'questionid': self.kwargs['questionid']})
+        return kwargs
+
+    def get_object(self):
+        questionobj = Questions.objects.get(questionid = self.kwargs['questionid'])
+        return questionobj
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        questionobj = Questions.objects.get(questionid = self.kwargs['questionid'])
+        context['questionid'] = questionobj.questionid
+        questiontopic = QuestionTopic.objects.all().values_list('topicname')
+        context['questiontopic'] = questiontopic
+        if questionobj.questiontype == 'MCQ':
+            mcqoptions_obj = MCQOptions.objects.get(questionid = selectedquestion)
+            context['optionone'] = mcqoptions_obj.optionone
+            context['optiontwo'] = mcqoptions_obj.optiontwo
+            context['optionthree'] = mcqoptions_obj.optionthree
+            context['optionfour'] = mcqoptions_obj.optionfour
+
+        return context
+
+@method_decorator(change_password, name='dispatch')
+@method_decorator(user_is_staff, name='dispatch')
+class EditRangeQuestion (UpdateView):
+    form_class = ModifyRangeQuestionForm
+    model = Questions
+    template_name = 'teachers/editquestion.html'
+    success_url = '../../'
+    context_object_name = 'result'
+
+    def get_form_kwargs(self):
+        kwargs = super(EditRangeQuestion, self).get_form_kwargs()
+        kwargs.update({'request': self.request})
+        rangeurl = self.kwargs['rangeurl']
+        kwargs.update({'rangeurl': self.kwargs['rangeurl']})
             
         return kwargs
 
     def get_object(self):
-        selectedquestion = Questions.objects.get(questionid = self.kwargs['questionid'])
-        selectedquestionid = selectedquestion.questionid
-        return selectedquestion
+        questionobj = Questions.objects.get(questionid = self.kwargs['questionid'])
+        return questionobj
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        selectedquestion = Questions.objects.get(questionid = self.kwargs['questionid'])
-        selectedrangequestion = Questions.objects.get(questionid = self.kwargs['questionid'])
-        context['rangequestions'] = selectedrangequestion
+        questionobj = Questions.objects.get(questionid = self.kwargs['questionid'])
+        context['questionid'] = questionobj.questionid
         questiontopic = QuestionTopic.objects.all().values_list('topicname')
         context['questiontopic'] = questiontopic
-
-        getthistopicid = (selectedquestion.topicid.topicid)
-        currentquestiontopicname = QuestionTopic.objects.get(topicid=getthistopicid)
-        context['currentquestiontopicname'] = currentquestiontopicname.topicname
-
-        context['questiontypechoices'] = QUESTION_TYPE_CHOICES
-
-        if selectedquestion.questiontype == 'MCQ':
+        if questionobj.questiontype == 'MCQ':
             mcqoptions_obj = MCQOptions.objects.get(questionid = selectedquestion)
             context['optionone'] = mcqoptions_obj.optionone
             context['optiontwo'] = mcqoptions_obj.optiontwo
@@ -1757,8 +1789,6 @@ class ArchivedQuestionManagement(FilterView, ListView):
 
     def get_queryset(self):
         questions = Questions.objects.filter(isarchived = 1)
-        for x in questions:
-            print(x.createdby)
         return questions
 
     def get_context_data(self, **kwargs):
@@ -2178,13 +2208,19 @@ class AddTeacher(ListView, ModelFormMixin):
 
 @method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
-class ClassView(ListView):
+class ClassView(FilterView, ListView):
     template_name = 'teachers/classmanagement.html'
     context_object_name = 'classobjects'
+    filterset_class = ClassFilter
 
     def get_queryset(self):
         alluserclass = UserClass.objects.all()
         return alluserclass
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['classcount'] = UserClass.objects.all().count()
+        return context
 
 @method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')

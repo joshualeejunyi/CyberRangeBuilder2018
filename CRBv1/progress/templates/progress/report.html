@@ -109,7 +109,7 @@
 		</div>
     </div>
 	
-	{% if rangeactive is False %}
+	{% if canshowquestions is True %}
 	<div class="row">
 		<div class="col" style="width: 95%; margin: 0 auto; margin-top: 3%;">
 			<div class="box box-solid box-primary" style="box-shadow: 1px 2px 5px grey;">
@@ -123,16 +123,19 @@
 				<table id="studentstable" class="table table-bordered table-hover dataTable" role="grid" style="table-layout: fixed; width: 100%; word-wrap: break-word; display: table;">
 					<thead>
 						<tr role="row">
+							<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="3%">
+								ID
+							</th>
 							<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="10%">
 								Topic
 							</th>
 							<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="10%">
 								Question Title
 							</th>
-							<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="30%">
+							<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="20%">
 								Question Text
 							</th>
-							<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="15%">
+							<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="20%">
 								Given Answer
 							</th>
 							<th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="15%">
@@ -149,14 +152,17 @@
 					<tbody>
 						{% for question in studentquestionsobj %}
 						<tr role="row">
+							<td>{{ question.questionid.questionid }}</td>
 							<td>{{ question.questionid.topicid.topicname }}</td>
 							<td>{{ question.questionid.title }}</td>
-							<td>{{ question.questionid.text | safe | cut:"<p>" | cut:"</p>"}}</td>
 							<td>
-								{{ question.answergiven}}
+								{{ question.questionid.text | safe | cut:"<p>" | cut:"</p>"}}
 							</td>
 							<td>
-								{{ question.answer }}
+								{{ question.answergiven }}
+							</td>
+							<td>
+								{{ question.questionid.answer }}
 							</td>
 							<td>{{ question.questionid.points }}</td>
 							<td>
@@ -166,6 +172,7 @@
 						{% endfor %}
 						{% for question in questionsobject %}
 						<tr role="row">
+							<td>{{ question.questionid }}</td>
 							<td>{{ question.topicid.topicname }}</td>
 							<td>{{ question.title }}</td>
 							<td>{{ question.text | safe | cut:"<p>" | cut:"</p>"}}</td>
@@ -174,6 +181,7 @@
 								{{ question.answer }}
 							</td>
 							<td>{{ question.points }}</td>
+							<td> - </td>
 							<td> - </td>
 						</tr>
 						{% endfor %}

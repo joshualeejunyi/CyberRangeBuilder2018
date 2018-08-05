@@ -101,7 +101,7 @@ class RangeForm(ModelForm):
         createdrange.rangecode = randint(10 ** (6 - 1), (10 ** (6) - 1))
         admin = self.request.user
         email = User.objects.get(username = admin)
-        createdrange.createdbyusername = email
+        createdrange.createdby = email
 
         if self.startdate is not None and self.enddate is not None:
             if self.timestart is None and self.timeend is None:
@@ -230,8 +230,58 @@ class QuestionForm(ModelForm):
         model = Questions
         fields = ('questiontype', 'title', 'text', 'hint', 'hintpenalty', 'answer', 'usedocker', 'points',)
 
-class ModifyQuestionForm(ModelForm):
+class ModifyRangeQuestionForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop("request")
+        self.rangeurl = kwargs.pop("rangeurl")
+        super(ModifyRangeQuestionForm, self).__init__(*args, **kwargs)
+    
+    def clean(self):
+        cleaned_data = super(ModifyRangeQuestionForm, self).clean()
+        usedocker = cleaned_data.get('usedocker')
+        imagename = cleaned_data.get('registryid')
+        registryid = self.request.POST.get('registryid','')
+        points = cleaned_data.get('points')
+        hintpenalty = cleaned_data.get('hintpenalty')
+        
+        self.usedocker = usedocker
 
+        if usedocker is True and registryid == "":
+            msg = u"Please enter the Registry Image Name!"
+            self._errors["usedocker"] = self.error_class([msg])
+        
+        if hintpenalty is not None and points is not None:
+            if int(hintpenalty) > int(points):
+                msg = u"Hint Penalty should not be more than Points awarded!"
+                self._errors["hintpenalty"] = self.error_class([msg])
+
+
+    def save(self, commit=True):
+        question = super().save(commit=False)
+        topicname = self.request.POST.get('topicname',' ')
+        registryid = self.request.POST.get('registryid','')
+        topicid = QuestionTopic.objects.get(topicname = topicname)
+        question.topicid = topicid
+        remarks = self.request.POST.get('remarks','')
+        question.remarks = remarks
+
+        if self.usedocker is True:
+            question.registryid = registryid
+            imageid = registryid
+            error = teachersview.CreateImage.get(self, self.request, self.rangeurl, self.questionid, imageid)
+            if error is not 0:
+                return HttpResponse('ERROR')
+
+        if commit:
+            question.save()
+        return question
+
+    class Meta:
+        model = Questions
+        fields = ('title', 'text', 'hint', 'hintpenalty', 'answer', 'usedocker', 'points',)
+
+
+class ModifyQuestionForm(ModelForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop("request")
         self.questionid = kwargs.pop("questionid")
@@ -251,7 +301,7 @@ class ModifyQuestionForm(ModelForm):
             msg = u"Please enter the Registry Image Name!"
             self._errors["usedocker"] = self.error_class([msg])
         
-        if hintpenalty is not None or points is not None:
+        if hintpenalty is not None and points is not None:
             if int(hintpenalty) > int(points):
                 msg = u"Hint Penalty should not be more than Points awarded!"
                 self._errors["hintpenalty"] = self.error_class([msg])
@@ -263,6 +313,8 @@ class ModifyQuestionForm(ModelForm):
         registryid = self.request.POST.get('registryid','')
         topicid = QuestionTopic.objects.get(topicname = topicname)
         question.topicid = topicid
+        remarks = self.request.POST.get('remarks','')
+        question.remarks = remarks
 
         if self.usedocker is True:
             question.registryid = registryid
@@ -279,8 +331,6 @@ class ModifyQuestionForm(ModelForm):
         model = Questions
         fields = ('title', 'text', 'hint', 'hintpenalty', 'answer', 'usedocker', 'points',)
 
-
-
 class ClassForm(ModelForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop("request")
@@ -288,6 +338,11 @@ class ClassForm(ModelForm):
     
     def save(self, commit=True):
         newclass = super().save(commit=False)
+        newclass.datecreated = datetime.date.today()
+        newclass.timecreated = datetime.datetime.now().time()
+        admin = self.request.user
+        newclass.createdby = User.objects.get(username = admin)
+
         if commit:
             newclass.save()
         return newclass

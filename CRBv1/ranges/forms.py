@@ -27,13 +27,18 @@ class AnswerForm(forms.ModelForm):
             keywords = len(saanswer)
             distributedpoints = float(points)/float(keywords)
             
-            setdifference = saanswerset.symmetric_difference(givenanswerset)
+            setdifference = saanswerset.difference(givenanswerset)
+            print(setdifference)
             diffcount = len(setdifference)
-
+            print(diffcount)
             if diffcount == 0:
                 check = True
             else:
+                print(points)
+                print(distributedpoints)
                 points = points - (distributedpoints * diffcount)
+            print('--------------------------')
+            print(points)
 
         elif isthisashortanswer == 'OE':
             check = False
@@ -57,16 +62,21 @@ class AnswerForm(forms.ModelForm):
                 if isthisashortanswer == 'SA':
                     previousanswerobject = StudentQuestions.objects.get(rangeid = rangeinstance, questionid = questioninstance, studentid = user, attempts = repeatedcheck)
                     pointsobject.points = pointsobject.points - previousanswerobject.marksawarded
+                    
                 
             pointsobject.points += points
+            studentobject.save()
+
             checkcompletion = len(StudentQuestions.objects.filter(rangeid = rangeinstance, studentid = user, answercorrect = 1))
 
             if checkcompletion == numberofrangequestions:
                 pointsobject.datecompleted = timezone.now()
 
-            studentobject.save()
             pointsobject.save()
-        
+            
+            print(checkcompletion)
+            print(numberofrangequestions)
+            
             return True
         else:
 
@@ -123,15 +133,14 @@ class AnswerMCQForm(forms.ModelForm):
             studentobject.marksawarded = points
             pointsobject = RangeStudents.objects.get(rangeID = rangeinstance, studentID = user)
             pointsobject.points += points
+            studentobject.save()
 
             checkcompletion = len(StudentQuestions.objects.filter(rangeid = rangeinstance, studentid = user, answercorrect = 1))
 
             if checkcompletion == numberofrangequestions:
                 pointsobject.datecompleted = timezone.now()
-
-            studentobject.save()
             pointsobject.save()
-        
+
             return True
         else:
             studentobject.marksawarded = 0
