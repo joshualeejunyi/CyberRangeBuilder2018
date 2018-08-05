@@ -73,7 +73,7 @@ class AnswerForm(forms.ModelForm):
                 pointsobject.datecompleted = timezone.now()
 
             pointsobject.save()
-            
+
             print(checkcompletion)
             print(numberofrangequestions)
             
