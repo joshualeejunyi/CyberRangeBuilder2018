@@ -21,6 +21,9 @@ from accounts import views as account
 from ranges import views as rangesview
 from django.contrib.auth.decorators import login_required
 from accounts.forms import *
+from dashboard import views as dashboardviews
+from django.conf.urls.static import static
+from django.conf import settings
 
 urlpatterns = [
     path('login/', authviews.LoginView.as_view(template_name='accounts/login.html', authentication_form=CheckUserDisabled), name='login'), 
@@ -36,4 +39,5 @@ urlpatterns = [
     url(r'^settings/', include('settings.urls'), name='settings'),
     url(r'^tinymce/', include('tinymce.urls')),
     url(r'^selfdirected/', include('SDL.urls'), name='SDL'),
-]
+    url(r'^ostrichVPN/', dashboardviews.VPNTutorial.as_view(), name='openvpn'),
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

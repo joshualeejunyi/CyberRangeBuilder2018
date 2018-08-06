@@ -45,49 +45,49 @@
                             </div>
                         </div>
                     </form>
-                    <table class="table table-bordered table-hover dataTable">
+                    <table class="table table-bordered table-hover dataTable" style="table-layout: fixed; width: 100%; word-wrap: break-word; display: table;">
                         {% if questions is not None %}
                         <thead>
                             <tr role="row">
-                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                    ID
-                                </th>
-                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                    Type
-                                </th>
-                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                    Topic
-                                </th>
-                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                    Title
-                                </th>
-                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                    Text
-                                </th>
-                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                    Hint 
-                                </th>
-                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                    Hint Penalty
-                                </th>
-                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                    Points
-                                </th>
-                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                    Answer
-                                </th>
-                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                    Use Shell
-                                </th>
-                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                    Registry ID
-                                </th>
-                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                    Actions
-                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="3%">
+                                        ID
+                                    </th>
+                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="8%">
+                                        Type
+                                    </th>
+                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="5%">
+                                        Topic
+                                    </th>
+                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="5%">
+                                        Title
+                                    </th>
+                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="20%">
+                                        Text
+                                    </th>
+                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="10%">
+                                        Hint 
+                                    </th>
+                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="5%">
+                                        Hint Penalty
+                                    </th>
+                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="5%">
+                                        Points
+                                    </th>
+                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="10%">
+                                        Answer
+                                    </th>
+                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="5%">
+                                        Use Shell
+                                    </th>
+                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="10%">
+                                        Registry ID
+                                    </th>
+                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="5%">
+                                        Actions
+                                    </th>
                             </tr>
                         </thead>
-                        {% for x in filter.qs %}
+                        {% for x in questions %}
                         <form method = 'post'>
                             {% csrf_token %}
                             <tr role="row">
@@ -152,6 +152,29 @@
                         </thead>
                     {% endif %}
                     </table>
+                    {% if is_paginated %}
+                        <ul class="pagination">
+                            {% if page_obj.has_previous %}
+                                <li><a href="?page={{ page_obj.previous_page_number }}">&laquo;</a></li>
+                            {% else %}
+                                <li class="disabled"><span>&laquo;</span></li>
+                            {% endif %}
+                                
+                            {% for i in paginator.page_range %}
+                                {% if page_obj.number == i %}
+                                    <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+                                {% else %}
+                                    <li><a href="?page={{ i }}">{{ i }}</a></li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if page_obj.has_next %}
+                                <li><a href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>
+                            {% else %}
+                                <li class="disabled"><span>&raquo;</span></li>
+                            {% endif %}
+                        </ul>
+                    {% endif %}
                 </div>
             </div>
         <a class="btn btn-block btn-primary" style="width: 10%;"href="../">Back</a>   

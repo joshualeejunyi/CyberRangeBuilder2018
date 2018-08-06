@@ -64,7 +64,7 @@
                             </div>
                         </div>
                     </form>
-    <table class="table table-bordered table-hover dataTable">
+    <table class="table table-bordered table-hover dataTable"  style="table-layout: fixed; width: 100%; word-wrap: break-word; display: table;">
         {% if questions.all %}
         <thead>
             <tr role="row">
@@ -109,8 +109,7 @@
                 </th>
             </tr>
         </thead>
-        {% for x in filter.qs %}
-        <form method = 'post'>
+        {% for x in questions %}
             {% csrf_token %}
             <tr role="row">
                 <td>
@@ -176,31 +175,31 @@
         {% endif %}
     </table>
     {% if is_paginated %}
-                <ul class="pagination">
-                    {% if page_obj.has_previous %}
-                        <li><a href="?page={{ page_obj.previous_page_number }}">&laquo;</a></li>
-                    {% else %}
-                        <li class="disabled"><span>&laquo;</span></li>
-                    {% endif %}
-                        
-                    {% for i in paginator.page_range %}
-                        {% if page_obj.number == i %}
-                            <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
-                        {% else %}
-                            <li><a href="?page={{ i }}">{{ i }}</a></li>
-                        {% endif %}
-                    {% endfor %}
-                    
-                    {% if page_obj.has_next %}
-                        <li><a href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>
-                    {% else %}
-                        <li class="disabled"><span>&raquo;</span></li>
-                    {% endif %}
-                </ul>
+        <ul class="pagination">
+            {% if page_obj.has_previous %}
+                <li><a href="?page={{ page_obj.previous_page_number }}">&laquo;</a></li>
+            {% else %}
+                <li class="disabled"><span>&laquo;</span></li>
+            {% endif %}
+                
+            {% for i in paginator.page_range %}
+                {% if page_obj.number == i %}
+                    <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+                {% else %}
+                    <li><a href="?page={{ i }}">{{ i }}</a></li>
                 {% endif %}
-            </div>
-        </div>
-        <a class="btn btn-block btn-danger" style="width: 20%;"href="/teachers/questionmanagement/archived">View Archived Questions</a>
-    </section>
+            {% endfor %}
+            
+            {% if page_obj.has_next %}
+                <li><a href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>
+            {% else %}
+                <li class="disabled"><span>&raquo;</span></li>
+            {% endif %}
+        </ul>
+    {% endif %}
+    </div>
+</div>
+<a class="btn btn-block btn-danger" style="width: 20%;"href="/teachers/questionmanagement/archived">View Archived Questions</a>
+</section>
 
 {% endblock %}

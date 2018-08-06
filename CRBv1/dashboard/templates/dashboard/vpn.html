@@ -1,0 +1,114 @@
+{% extends 'dashboard/base.html' %}
+
+{% block content_header%}
+	<section class="content-header">
+		<h1>
+			{% block page_name %}Ostrich VPN{% endblock %}
+			<small>{% block page_description %}{% endblock %}</small>
+		</h1>
+		{% block breadcrumbs %}
+
+		{% endblock %}
+	</section>
+{% endblock%}
+
+{% block title_outer %}
+	<title>
+		{%block title %}
+			Project Ostrich
+		{% endblock %}
+	</title>
+
+{% endblock %}
+
+{% block content %}
+{% load static %}
+    <div class="row">
+        <div style="width:98%; margin: 0 auto;">
+            <div class="box box-widget">
+                <div class="box-header with-border">
+                    <div class="user-block">
+                        <h4>Configuring Ostrich VPN</h4>
+                    </div>
+                </div>
+                <div class="box-body" style="text-align: justify; padding: 1%;">
+                    <p style="font-size: 13pt;">
+                        <b>If you are using your own VM:</b>
+                        <br>
+                        Install OpenVPN on your machine:
+                        <br>
+                        <i>sudo apt-get install openvpn network-manager-openvpn network-manager-openvpn-gnome</i>
+                    </p>
+                    <p style="font-size: 13pt;">
+                        <b>Steps to Configure OpenVPN:</b>
+                        <br>
+                        On your Kali Linux:
+                        <br>
+                        <ol style="font-size: 13pt;">
+                            <li>
+                                Open Wired Settings
+                                <br>
+                                &emsp; <img src="{% static "dashboard/1.png" %}" alt="Open Wired Settings" style="padding: 1%;" width="300px">
+                            </li>
+                            <li>
+                                Add a new VPN Connection
+                                <br>
+                                &emsp; <img src="{% static "dashboard/2.png" %}" alt="Add New VPN Connection" style="padding: 1%;" width="800px">
+                            </li>
+                            <li>
+                                Click Import from File...
+                                <br>
+                                &emsp; <img src="{% static "dashboard/3.png" %}" alt="Import from File" style="padding: 1%;" width="800px">
+                            </li>
+                            <li>
+                                Select the .ovpn file you downloaded from the question
+                            </li>
+                            <li>
+                                Once done, you should see something like this, ensure that the gateway is correct, then enter the username and password as specified in the question.
+                                <br>
+                                &emsp; <img src="{% static "dashboard/4.png" %}" alt="OVPN configuration" style="padding: 1%;" width="800px">
+                            </li>
+                            <li>
+                                Click Add
+                                <br>
+                                &emsp; <img src="{% static "dashboard/5.png" %}" alt="Click Add" style="padding: 1%;" width="800px">
+                            </li>
+                            <li>
+                                Lastly, to connect, click on the connect button
+                                <br>
+                                &emsp; <img src="{% static "dashboard/6.png" %}" alt="Connect using the Connect Button" style="padding: 1%;" width="800px">
+                            </li>
+                            <li>
+                                Once connected, you should see something like this:
+                                <br>
+                                &emsp; <img src="{% static "dashboard/7.png" %}" alt="You will see the configuration in the Network Settings" style="padding: 1%;" width="300px">
+                            </li>
+                        </ol>
+                    </p>
+                    <p style="font-size: 13pt;">
+                        <b>Troubleshooting:</b>
+                        <br>
+                        If you see something like this:
+                        <br>
+                        &emsp; <img src="{% static "dashboard/8.png" %}" alt="Connection Error" style="padding: 1%;" width="300px">
+                        <br>
+                        Check the following:
+                        <br>
+                        <ul style="font-size: 13pt;">
+                            <li>
+                                Ensure that you have internet connection by pinging Google.com
+                            </li>
+                            <li>
+                                Ensure that the VPN Gateway as shown in Step 5 is correct.
+                            </li>
+                            <li>
+                                Ensure that you have used the correct .ovpn file.
+                            </li>
+                        </ul>
+                    </p>
+                </div>
+            </div>
+            <a href="/dashboard/" class="btn btn-primary btn-block btn-flat" style="width: 100px">Back</a>
+        </div>
+    </div>
+{% endblock %}

@@ -2,6 +2,7 @@ from django.views import generic
 from ranges.models import RangeStudents, StudentQuestions, Range
 from accounts.models import User
 from ranges.views import Housekeeping
+from django.views.generic.base import TemplateView
 
 class DashboardView(generic.ListView):
     template_name='dashboard/dashboard.html'
@@ -47,3 +48,6 @@ class DashboardView(generic.ListView):
             context['norange'] = True
 
         return context
+
+class VPNTutorial(TemplateView):
+    template_name = 'dashboard/vpn.html'

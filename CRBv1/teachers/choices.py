@@ -1,10 +1,4 @@
-from django.utils.translation import gettext_lazy as _
-
-DOCKER_CHOICES = (
-    (1, _("YES")),
-    (2, _("NO")),
-)
-
+# choice.py will store the choices for the question type
 FLAG = 'FL'
 MCQ = 'MCQ'
 SHORTANS = 'SA'

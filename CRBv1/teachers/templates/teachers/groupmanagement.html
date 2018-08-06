@@ -44,7 +44,6 @@
                                         <a href="." class="btn btn-primary btn-block btn-flat" style="width: 200px;  display: inline-block;" >Reset Filters</a>
                                     </div>
                                 </div>
-                            </div>
                         </form>
                     <table id="studentstable" class="table table-bordered table-hover dataTable" role="grid">
                     {% if groupobjects.all %}
@@ -83,7 +82,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                    {% for group in filter.qs %}
+                    {% for group in groupobjects %}
                         <tr role="row">
                             <td>{{ group.groupname }}</td>
                             <td>{{ group.groupleader }}</td>
@@ -95,8 +94,8 @@
                             <td>{{ group.lastmodifiedby }}</td>
                             <td>{{ group.grouppoints }}</td>
                             <td style="text-align: center">
-                                <a style="width: 100px;" class="btn btn-block btn-primary" href="{{ group.groupname }}">View Group</a>
-                                <a style="width: 100px;" class="btn btn-block btn-danger" onclick="return confirm('Delete {{group.groupname}}?')" href="deletegroup/{{ group.groupname }}">Delete</a>
+                                <a class="btn btn-block btn-primary" href="{{ group.groupname }}">View Group</a>
+                                <a class="btn btn-block btn-danger" onclick="return confirm('Delete {{group.groupname}}?')" href="deletegroup/{{ group.groupname }}">Delete</a>
                             </td>
                         </tr>
                     {% endfor %}
@@ -109,6 +108,29 @@
                     </thead>
                     {% endif %}
                 </table>
+                {% if is_paginated %}
+                    <ul class="pagination">
+                        {% if page_obj.has_previous %}
+                            <li><a href="?page={{ page_obj.previous_page_number }}">&laquo;</a></li>
+                        {% else %}
+                            <li class="disabled"><span>&laquo;</span></li>
+                        {% endif %}
+                            
+                        {% for i in paginator.page_range %}
+                            {% if page_obj.number == i %}
+                                <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+                            {% else %}
+                                <li><a href="?page={{ i }}">{{ i }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if page_obj.has_next %}
+                            <li><a href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>
+                        {% else %}
+                            <li class="disabled"><span>&raquo;</span></li>
+                        {% endif %}
+                    </ul>
+                {% endif %}
             </div>
         </div>
     </section>

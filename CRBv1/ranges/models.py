@@ -104,6 +104,7 @@ class Questions(models.Model):
     class Meta:
         db_table = 'Questions'
         verbose_name_plural = 'Questions'
+        ordering = ['-questionid']
 
 class MCQOptions(models.Model):
     questionid = models.OneToOneField(Questions, models.CASCADE, db_column='questionid', unique=True)

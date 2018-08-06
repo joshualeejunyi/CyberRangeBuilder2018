@@ -1,3 +1,6 @@
+# teachers forms.py will store all the forms that will be processed. 
+
+# imports
 from django import forms
 from accounts.models import *
 import datetime
@@ -11,12 +14,15 @@ import re
 from tinymce import TinyMCE
 from teachers import views as teachersview
 
+# AddGroup form 
 class AddGroup(ModelForm):
     groupname = forms.CharField(label = "Group Name", widget=forms.TextInput(attrs={'class' : 'form-group has-feedback'})),
     class Meta:
         model = Group
         fields = ('groupname',)
 
+# AddGroupCommit form
+# 
 class AddGroupCommit(AddGroup):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop("request")
@@ -70,9 +76,10 @@ class RangeForm(ModelForm):
                 self._errors["dateend"] = self.error_class([msg])
 
             if startdate == enddate:
-                if timeend < timestart:
-                    msg = u"End Time should be after Start Time for a one day range!"
-                    self._errors["timeend"] = self.error_class([msg])
+                if timeend is not None or timestart is not None:
+                    if timeend < timestart:
+                        msg = u"End Time should be after Start Time for a one day range!"
+                        self._errors["timeend"] = self.error_class([msg])
         
         if startdate is None and enddate is not None:
             msg = u"Please enter a Start Date!"

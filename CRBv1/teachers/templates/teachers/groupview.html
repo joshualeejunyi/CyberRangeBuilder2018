@@ -13,62 +13,62 @@
                         </div>
                 </div>
                 <div class="box-body">
-                        
-                        <table id="grouptable" class="table table-bordered table-hover dataTable" role="grid">
-                            <thead>
-                                <tr role="row">
+                    <table id="grouptable" class="table table-bordered table-hover dataTable" role="grid">
+                        <thead>
+                            <tr role="row">
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Group Name
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Group Leader
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Created By
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Date Created
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Time Created
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Last Modified Date
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Last Modified Time
+                                </th>
+                                </th>
                                     <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                        Group Name
-                                    </th>
-                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                        Group Leader
-                                    </th>
-                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                        Created By
-                                    </th>
-                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                        Date Created
-                                    </th>
-                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                        Time Created
-                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                        Last Modified Date
-                                    </th>
-                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                        Last Modified Time
-                                    </th>
-                                    </th>
-                                        <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                        Last Modified By
-                                    </th>
-                                    <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                        Group Points
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            {% for group in groupobjects %}
-                                <tr role="row">
-                                    <td>{{ group.groupname }}</td>
-                                    <td>{{ group.groupleader }}</td>
-                                    <td>{{ group.createdby }}</td>
-                                    <td>{{ group.datecreated }}</td>
-                                    <td>{{ group.timecreated }}</td>
-                                    <td>{{ group.lastmodifieddate }}</td>
-                                    <td>{{ group.lastmodifiedtime }}</td>
-                                    <td>{{ group.lastmodifiedby }}</td>
-                                    <td>{{ group.grouppoints }}</td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                        <div style="margin-bottom: 1%; margin-top: 1%;">
-                            <a class="btn btn-app" href="addusers" style="width: 300px;">
-                                <i class="fa fa-plus"></i>
-                                <b>Add Student in {{ groupname }}</b>
-                        </a>
-                        </div>
+                                    Last Modified By
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Group Points
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for group in groupobjects %}
+                            <tr role="row">
+                                <td>{{ group.groupname }}</td>
+                                <td>{{ group.groupleader }}</td>
+                                <td>{{ group.createdby }}</td>
+                                <td>{{ group.datecreated }}</td>
+                                <td>{{ group.timecreated }}</td>
+                                <td>{{ group.lastmodifieddate }}</td>
+                                <td>{{ group.lastmodifiedtime }}</td>
+                                <td>{{ group.lastmodifiedby }}</td>
+                                <td>{{ group.grouppoints }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                    <div style="margin-bottom: 1%; margin-top: 1%;">
+                        <a class="btn btn-app" href="addusers" style="width: 300px;">
+                            <i class="fa fa-plus"></i>
+                            <b>Add Student in {{ groupname }}</b>
+                    </a>
+                    </div>
                     <table id="studentstable" class="table table-bordered table-hover dataTable" role="grid">
+                        {% if usersobject is not None %}
                         <thead>
                             <tr role="row">
                                 <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
@@ -101,6 +101,13 @@
                                 </td>
                             </tr>
                         {% endfor %}
+                        {% else %}
+                            <thead>
+                                <th>
+                                    <h4>No Users Found</h4>
+                                </th>
+                            </thead>
+                        {% endif %}
                         </tbody>
                     </table>
             </div>
