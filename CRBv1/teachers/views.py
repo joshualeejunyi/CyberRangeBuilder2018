@@ -1955,10 +1955,16 @@ class GroupRangeCommit(View):
                 datejoined = datetime.date.today()
                 # get the group object
                 groupobj = Group.objects.get(groupname = groupname)
-                # createa new rangestudents object
-                obj = RangeStudents(studentID = studentobj, rangeID = rangeid, dateJoined = datejoined, groupid = groupobj)
-                # save the object
-                obj.save()
+                # before creating, we need to check if there is the student already in the range
+                checkobj = RangeStudents.objects.filter(studentID = studentobj, rangeID = rangeid).count()
+                print(checkobj)
+                # check if count is 0
+                if checkobj == 0:
+                    # then can save
+                    # create a new rangestudents object
+                    obj = RangeStudents(studentID = studentobj, rangeID = rangeid, dateJoined = datejoined, groupid = groupobj)
+                    # save the object
+                    obj.save()
 
         messages.success(request, 'Group(s) Successfully Added to Range')
         # set the url to redirect to 

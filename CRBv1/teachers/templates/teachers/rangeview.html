@@ -326,10 +326,7 @@
                                 <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
                                     Group Leader
                                 </th>
-                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                    Date Joined
-                                </th>
-                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="10%">
                                     Actions
                                 </th>
                             </tr>
@@ -339,7 +336,6 @@
                             <tr role="row">
                                 <td>{{ group.groupname }}</td>
                                 <td>{{ group.groupleader }}</td>
-                                <td>{{ group.datejoined }}</td>
                                 <td>
                                     <a class="btn btn-block btn-danger" onclick="return confirm('Remove {{ group.groupname }} from {{rangename}}?')" href="removegroup/{{ group.groupname }}">Remove</a>
                                 </td>
@@ -383,9 +379,12 @@
                                     Class
                                 </th>
                                 <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
-                                    Group
+                                    Added by Group
                                 </th>
                                 <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                                    Date Joined
+                                </th>
+                                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding" width="10%">
                                     Actions
                                 </th>
                             </tr>
@@ -403,6 +402,9 @@
                                             {{ student.groupid.groupname }}
                                         {% endif %}
                                     {% endfor %}
+                                </td>
+                                <td>
+                                    {{ user.datejoined }}
                                 </td>
                                 <td>
                                     <a class="btn btn-block btn-success" href="report/{{ user.username }}">User Report</a>
