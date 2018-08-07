@@ -485,7 +485,7 @@ class GroupManagement(FilterView, ListView):
     # get_queryset
     def get_queryset(self):
         # retrieve all groups from the database
-        allgroups = Group.objects.all().order_by('-lastmodifieddate')
+        allgroups = Group.objects.all().order_by('-lastmodifieddate', '-lastmodifiedtime', '-datecreated', '-timecreated')
         # return the queryset
         return allgroups
 
@@ -1819,6 +1819,7 @@ class UserRangeCommit(View):
         return redirect(url)
 
 # AssignGroup View
+# assign groups a range
 @method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class AssignGroup(FilterView, ListView):
@@ -1835,7 +1836,7 @@ class AssignGroup(FilterView, ListView):
         # get the rangeid
         rangeid = Range.objects.filter(rangeurl = self.kwargs['rangeurl']).values_list('rangeid')[0][0]
         # get the groups in the range
-        groupsinrange = RangeStudents.objects.filter(rangeID = rangeid, studentID = None).values_list('groupid')
+        groupsinrange = RangeStudents.objects.filter(rangeID = rangeid, groupid__isnull=False).values_list('groupid')
         # get all the groups excluding the groups already in the ranges
         allgroups = Group.objects.exclude(groupid__in = groupsinrange).order_by('-lastmodifieddate')
         # set the self.allgroups for context below
@@ -1930,8 +1931,7 @@ class GroupRangeCommit(View):
         # forloop the students in the range
         for student in studentsinrange:
             # append the studentID to list
-            print(student.studentID)
-            rangestudentslist.append(student.studentID)
+            rangestudentslist.append(student.studentID.email)
 
         # check if the grouprangecart in session
         if 'grouprangecart' in request.session:
@@ -1979,10 +1979,13 @@ class RemoveStudentFromRange(View):
         studentid = User.objects.get(username = username)
         # get the rangeinstance
         rangeinstance = Range.objects.get(rangeurl = rangeurl)
-        # get the selected user instance
-        selecteduser = RangeStudents.objects.get(rangeID = rangeinstance, studentID = studentid)
+        # get the selected user instances (hotfix incase a user has multiple ranges)
+        selecteduser = RangeStudents.objects.filter(rangeID = rangeinstance, studentID = studentid)
+        # use a forloop to loop the objects
+        for selectedobject in selecteduser:
+            # delete the objects
+            selectedobject.delete()
         # delete the user
-        selecteduser.delete()
         # set the url to redirect to
         url = '/teachers/rangemanagement/view/' + rangeurl
         # redirect to the range view
@@ -3340,7 +3343,7 @@ class SDLManagement(FilterView, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # set the teachers as context
-        context['teachers'] = User.objects.filter(is_staff=1).values_list('username', flat=True)
+        context['teachers'] = User.objects.filter(is_staff=1)
         # return context
         return context
 

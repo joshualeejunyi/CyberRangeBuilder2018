@@ -37,12 +37,12 @@
                                 </div>
                                 
                                 <div class="form-group col-sm-4 col-md-3">
-                                    <label for="createdby">Created By:</label>
-                                    <select name="postactive" class="form-control" placeholder="Post Status">
+                                    <label for="createdby__username">Created By:</label>
+                                    <select name="createdby__username" class="form-control" placeholder="Created By">
                                         {% for name in teachers %}
-                                            <option value='{{ name }}'>{{ name }}</option>
+                                            <option value='{{ name.username }}'>{{ name.username }}</option>
                                         {% endfor %}
-                                      </select>
+                                    </select>
                                 </div>
 
                                     <div class="form-group col-sm-4 col-md-3">
@@ -107,7 +107,7 @@
                             <td>{{ post.title }}</td>
                             <td>{{ post.text | safe | truncatewords:"25"}}</td>
                             <td>{{ post.postactive }}</td>
-                            <td>{{ post.createdby }}</td>
+                            <td>{{ post.createdby.username }}</td>
                             <td>{{ post.datecreated }}</td>
                             <td>{{ post.timecreated }}</td>
                             <td>{{ post.dateposted }}</td>

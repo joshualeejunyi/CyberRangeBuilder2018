@@ -6,4 +6,4 @@ class SDLPostFilter(django_filters.FilterSet):
 
     class Meta:
         model = SDLPost
-        fields = ['title', 'createdby', 'postactive']
+        fields = ['title', 'createdby__username', 'postactive']

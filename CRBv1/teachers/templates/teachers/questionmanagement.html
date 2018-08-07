@@ -44,16 +44,19 @@
                             </div>
                             <div class="row">
                                 <div class="form-group col-sm-4 col-md-3">
-                                    <label for="title">Points:</label>
+                                    <label for="points">Points:</label>
                                     {% render_field filter.form.points class="form-control" %}
                                 </div>
                                 <div class="form-group col-sm-4 col-md-3">
-                                    <label for="title">Use Docker:</label>
+                                    <label for="usedocker">Use Docker:</label>
                                     {% render_field filter.form.usedocker class="form-control" %}
                                 </div>
                                 <div class="form-group col-sm-4 col-md-3">
-                                    <label for="title">Range Active:</label>
-                                    {% render_field filter.form.rangeid__isdisabled class="form-control" %}
+                                    <label for="rangeactive">Range Active:</label>
+                                    <select name="rangeid__rangeactive" class="form-control">
+                                        <option value="True">Yes</option>
+                                        <option value="False">No</option>
+                                    </select>
                                 </div>
                             </div>
                             <div>

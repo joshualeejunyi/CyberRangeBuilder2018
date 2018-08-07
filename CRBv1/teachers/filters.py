@@ -33,7 +33,7 @@ class QuestionFilter(django_filters.FilterSet):
     rangeid__rangeurl = django_filters.CharFilter(lookup_expr='icontains')
     class Meta:
         model = Questions
-        fields = ['questiontype', 'topicid__topicname', 'title', 'rangeid__isdisabled', 'points', 'usedocker']
+        fields = ['questiontype', 'topicid__topicname', 'title', 'rangeid__rangeactive', 'points', 'usedocker']
         
 
 class TeacherFilter(django_filters.FilterSet):
