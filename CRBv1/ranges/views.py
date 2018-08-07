@@ -14,7 +14,11 @@ from django.contrib import messages
 from accounts.models import User
 import string
 import random
+from .decorators import *
+from django.utils.decorators import method_decorator
 
+@method_decorator(change_password, name='dispatch')
+@method_decorator(user_is_student, name='dispatch')
 class CheckPorts(View):
     def get(self):
         # get all the entries of the ports currently being used
@@ -97,6 +101,8 @@ class CheckPorts(View):
             return -1
 
 
+@method_decorator(change_password, name='dispatch')
+@method_decorator(user_is_student, name='dispatch')
 class DockerContainerStart(View):
     def get(self):
                 # okay so before we start a new docker container
@@ -209,6 +215,8 @@ class DockerContainerStart(View):
             # return error
             return -3
 
+@method_decorator(change_password, name='dispatch')
+@method_decorator(user_is_student, name='dispatch')
 class EnterCode(View):
     def get(self, request, *args, **kwargs):
         # get will render the page.
@@ -257,6 +265,8 @@ class EnterCode(View):
             # returns the user to the page
             return render(request, 'ranges/joinrange.html')
 
+@method_decorator(change_password, name='dispatch')
+@method_decorator(user_is_student, name='dispatch')
 class DockerKill(View):
     # function to delete old ports and dockers 
     def get(self, request):
@@ -318,6 +328,8 @@ class DockerKill(View):
                     deleteportsdb = UnavailablePorts.objects.filter(studentid = self.request.user)
                     deleteportsdb.delete()
 
+@method_decorator(change_password, name='dispatch')
+@method_decorator(user_is_student, name='dispatch')
 class AttemptQuestionView(ListView, ModelFormMixin):
     template_name = 'ranges/attemptquestion.html'
     context_object_name = 'question'
@@ -511,6 +523,8 @@ class AttemptQuestionView(ListView, ModelFormMixin):
         return context
 
 
+@method_decorator(change_password, name='dispatch')
+@method_decorator(user_is_student, name='dispatch')
 class AttemptMCQQuestionView(ListView, ModelFormMixin):
     template_name = 'ranges/attemptquestion.html'
     context_object_name = 'question'
@@ -699,6 +713,8 @@ class AttemptMCQQuestionView(ListView, ModelFormMixin):
         # return context
         return context
 
+@method_decorator(change_password, name='dispatch')
+@method_decorator(user_is_student, name='dispatch')
 class ActivateHint(View):
     # this class is to activate the hint as a student
     def get(self, request, questionid, rangeurl):
@@ -724,6 +740,8 @@ class ActivateHint(View):
         return redirect('./')
 
 
+@method_decorator(change_password, name='dispatch')
+@method_decorator(user_is_student, name='dispatch')
 class QuestionsView(ListView):
     template_name = 'ranges/questions.html'
     context_object_name = 'questionobject'
@@ -885,6 +903,8 @@ class QuestionsView(ListView):
 # 1. activate ranges when the start date and time has passed
 # 2. deactivate ranges when end date and time has passed
 # 3. check if the teacher override the activation
+@method_decorator(change_password, name='dispatch')
+@method_decorator(user_is_student, name='dispatch')
 class Housekeeping(View):
     # get the currentranges from the previous view that called this view
     def get(self, currentranges):
@@ -941,6 +961,8 @@ class Housekeeping(View):
 
 # RangesView
 # get all the ranges and list out for students to scroll through
+@method_decorator(change_password, name='dispatch')
+@method_decorator(user_is_student, name='dispatch')
 class RangesView(ListView):
     template_name = 'ranges/viewranges.html'
     context_object_name = 'rangeobject'

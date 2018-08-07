@@ -11,7 +11,11 @@ from .forms import *
 import re
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
+from django.utils.decorators import method_decorator
+from ranges.decorators import *
 
+@method_decorator(change_password, name='dispatch')
+@method_decorator(user_is_student, name='dispatch')
 class SDLView(FilterView, ListView):
     template_name = 'SDL/SDL.html'
     context_object_name = 'posts'
@@ -30,6 +34,8 @@ class SDLView(FilterView, ListView):
         context['teachers'] = User.objects.filter(is_staff=1).values_list('username', flat=True)
         return context
 
+@method_decorator(change_password, name='dispatch')
+@method_decorator(user_is_student, name='dispatch')
 class ViewPost(ListView, ModelFormMixin):
     template_name='SDL/viewpost.html'
     context_object_name = 'post'
@@ -77,6 +83,8 @@ class ViewPost(ListView, ModelFormMixin):
         
         return context
 
+@method_decorator(change_password, name='dispatch')
+@method_decorator(user_is_student, name='dispatch')
 class DeleteComment(View):
     # After a user deletes their comment, they will simply be redirected to their own page.
     def get(self, request, commentid):

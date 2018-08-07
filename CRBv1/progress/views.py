@@ -9,7 +9,11 @@ from django.utils.dateparse import parse_date
 import datetime
 
 from ranges.views import Housekeeping
+from ranges.decorators import *
+from django.utils.decorators import method_decorator
 
+@method_decorator(change_password, name='dispatch')
+@method_decorator(user_is_student, name='dispatch')
 class ProgressView(generic.ListView):
     template_name='progress/progress.html'
     context_object_name = 'rangesobject'
@@ -70,6 +74,8 @@ class ProgressView(generic.ListView):
         context['graphdata'] = graphdata
         return context
 
+@method_decorator(change_password, name='dispatch')
+@method_decorator(user_is_student, name='dispatch')
 class ReportView(generic.ListView):
     template_name='progress/report.html'
     context_object_name = 'questionsobject'
