@@ -3502,7 +3502,7 @@ class ViewPost(ListView, ModelFormMixin):
             # save the form
             self.form.save(postinstance, user)
             # set the url redirect to
-            url = '/selfdirected/view/' + postid
+            url = '/teachers/SDLmanagement/view/' + postid
             # return to the post 
             return redirect(url)
         else:
