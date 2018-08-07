@@ -953,6 +953,169 @@ class RangeView(ListView, FilterView):
         # return context
         return context
 
+# ReportView
+# Displays the selected user's report of the range
+@method_decorator(change_password, name='dispatch')
+@method_decorator(user_is_staff, name='dispatch')
+class ReportView(generic.ListView):
+    # use template teachers/report.html
+    template_name='teachers/report.html'
+    # set contextobjectname as questionsobject
+    context_object_name = 'questionsobject'
+    def get_queryset(self):
+        # get the rangeurl
+        rangeurl = self.kwargs['rangeurl']
+        # get the username
+        username = self.kwargs['username']
+        # get the rangeid 
+        rangeid = Range.objects.filter(rangeurl=rangeurl).values_list('rangeid')[0][0]
+        # get the user email
+        useremail = User.objects.filter(username=username).values_list('email')[0][0]
+        # get the rangestudents object
+        rangestudentobj = RangeStudents.objects.filter(studentID=useremail, rangeID__rangeid=rangeid)
+
+        # get the studentquestionsobject
+        studentquestionsobj = StudentQuestions.objects.filter(rangeid=rangeid, studentid=useremail)
+        # create new list
+        answeredquestionlist = []
+        # forloop the studentquestions object
+        for question in studentquestionsobj:
+            # get the questionid
+            questionid = question.questionid.questionid
+            # check if the questionid is not in the list
+            if questionid not in answeredquestionlist:
+                # append the questionid into the list
+                answeredquestionlist.append(questionid)
+
+        # get the questionsobject excluding the questions in the list
+        questionsobj = Questions.objects.filter(rangeid=rangeid).exclude(questionid__in=answeredquestionlist)
+        # return object
+        return questionsobj
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # get the rangeurl
+        rangeurl = self.kwargs['rangeurl']
+        # get the username
+        username = self.kwargs['username']
+        # get the rangeid
+        rangeid = Range.objects.filter(rangeurl=rangeurl).values_list('rangeid')[0][0]
+        # get the useremail
+        useremail = User.objects.filter(username=username).values_list('email')[0][0]
+        # get the rangeobject
+        rangeobj = Range.objects.get(rangeurl=rangeurl)
+        # get the rangestudents object
+        rangestudentsobj = RangeStudents.objects.get(studentID=useremail, rangeID=rangeid)
+        # get the studentquestions object
+        studentquestionsobj = StudentQuestions.objects.filter(studentid=useremail, rangeid=rangeid)
+ 
+        # set the rangename as context
+        context['rangename'] = rangeobj.rangename
+        # set the maxscore as context
+        context['maxscore'] = rangeobj.maxscore
+        # set the points awarded as context
+        pointsawarded = rangestudentsobj.points
+        context['pointsawarded'] = pointsawarded
+
+        # get the hintpenaly queryset
+        hintpenaltyqueryset = StudentHints.objects.filter(studentid=username, rangeid = rangeid, hintactivated = True).values_list('questionid')
+        # set the number to 0
+        totalhintpenalty = 0
+        
+        # forloop the number of hintused
+        for x in range(0, len(hintpenaltyqueryset)):
+            # get the hintpenalty
+            points = Questions.objects.filter(questionid = hintpenaltyqueryset[x][0]).values_list('hintpenalty')[0][0]
+            # append to the hintpenalty
+            totalhintpenalty = totalhintpenalty + int(points)
+
+        # set hintpenalty as context
+        context['hintpenalty'] = totalhintpenalty
+        # get the unobtained points
+        unobtained = rangeobj.maxscore - totalhintpenalty - pointsawarded
+        # set as context
+        context['unobtained'] = unobtained
+        # set the rangestudents object as context
+        context['rangestudentsobj'] = rangestudentsobj
+        # set the studentquestions object as context
+        context['studentquestionsobj'] = studentquestionsobj
+        # set all the quetions as context
+        context['allquestions'] = Questions.objects.filter(rangeid=rangeid)
+        # get the rangeactive as context
+        context['rangeactive'] = Range.objects.filter(rangeid=rangeid).values_list('rangeactive')[0][0]
+
+        # get the rankings of all the students
+        ranking = RangeStudents.objects.filter(rangeID=rangeid).order_by('-points')
+        # set the username as context
+        context['username'] = username
+        # set the ranking as context
+        context['ranking'] = ranking
+        # return context
+        return context
+
+# OEMarkCorrect View
+# This will process to mark a student's openended answer as correct
+@method_decorator(change_password, name='dispatch')
+@method_decorator(user_is_staff, name='dispatch')
+class OEMarkCorrect(View):
+    # get the rangeurl, username and questionid
+    def get(self, request, rangeurl, username, questionid):
+        # get the range object
+        rangeinstance = Range.objects.get(rangeurl = rangeurl)
+        # get the student object
+        studentinstance = User.objects.get(username = username)
+        # get the question object
+        questioninstance = Questions.objects.get(questionid = questionid)
+        # check the number of times the student attempted this question
+        repeatedcheck = StudentQuestions.objects.filter(questionid = questionid, studentid = studentinstance, rangeid = rangeinstance).count()
+        # get the studentquestion object
+        studentquestionobj = StudentQuestions.objects.get(rangeid = rangeinstance, questionid = questioninstance, studentid = studentinstance, attempts = repeatedcheck)
+        # set the answer correct flag to 1
+        studentquestionobj.answercorrect = 1
+
+        # get the question points
+        questionpoints = Questions.objects.filter(questionid = questionid).values_list('points')[0][0]
+        # set the marks awarded
+        studentquestionobj.marksawarded = questionpoints
+        # set the ismarked flag to True
+        studentquestionobj.ismarked = True
+        # get the rangestudents object
+        rangestudentsobj = RangeStudents.objects.get(studentID = studentinstance, rangeID = rangeinstance)
+        # add the questoin points
+        rangestudentsobj.points += questionpoints
+
+        # save the objects
+        studentquestionobj.save()
+        rangestudentsobj.save()
+
+        # redirect back to the report
+        return redirect('../../../')
+
+# OEMarkWrong View
+# This will process to mark a student's openended answer as wrong
+@method_decorator(change_password, name='dispatch')
+@method_decorator(user_is_staff, name='dispatch')
+class OEMarkWrong(View):
+    def get(self, request, rangeurl, username, questionid):
+        # get the range object
+        rangeinstance = Range.objects.get(rangeurl = rangeurl)
+        # get the student instance
+        studentinstance = User.objects.get(username = username)
+        # get the question instance
+        questioninstance = Questions.objects.get(questionid = questionid)
+        # get the number of times the student attempted the question
+        repeatedcheck = StudentQuestions.objects.filter(questionid = questionid, studentid = studentinstance, rangeid = rangeinstance).count()
+        # get the studentquestions object
+        studentquestionobj = StudentQuestions.objects.get(rangeid = rangeinstance, questionid = questioninstance, studentid = studentinstance, attempts = repeatedcheck)
+        # set the answer correct flag to 0
+        studentquestionobj.answercorrect = 0
+        # set the ismarked flag as True
+        studentquestionobj.ismarked = True
+        # save the object
+        studentquestionobj.save()
+        # redirect to the report
+        return redirect('../../../')
+
 # ArchivedRangeQuestions View
 # Manage all the archived range questions
 @method_decorator(change_password, name='dispatch')
@@ -2788,112 +2951,220 @@ class ExportCSV(View):
                 
         return response
 
+# IsOpen View
+# This will allow the teacher to set whether the rangecode can be used to add the range
+# whether the range 'IsOpen' to be added by range code
+@method_decorator(change_password, name='dispatch')
+@method_decorator(user_is_staff, name='dispatch')
+class IsOpen(View):
+    def get(self, request, *args, **kwargs):
+        # get the current rangeurl
+        rangeurl = self.kwargs['rangeurl']
+        # get the range object
+        selectedrangeinstance = Range.objects.get(rangeurl = rangeurl)
+        # set the isopen flag to 1
+        selectedrangeinstance.isopen = 1
+        # save the range object
+        selectedrangeinstance.save()
+
+        # set the url to return to
+        returnurl = ('/teachers/rangemanagement/view/' + str(rangeurl))
+        # redirect to the range view
+        return HttpResponseRedirect(returnurl)
+
+# IsClose View
+# Opposite of the IsOpen View, allow the teacher to disable adding range by range code
+@method_decorator(change_password, name='dispatch')
+@method_decorator(user_is_staff, name='dispatch')
+class IsClose(View):
+    def get(self, request, *args, **kwargs):
+        # get the current rangeurl
+        rangeurl = self.kwargs['rangeurl']
+        # get the range object
+        selectedrangeinstance = Range.objects.get(rangeurl = rangeurl)
+        # set the isopen flag to 0
+        selectedrangeinstance.isopen = 0
+        # save the rangeobject
+        selectedrangeinstance.save()
+        # set the url to redirect to
+        returnurl = ('/teachers/rangemanagement/view/' + str(rangeurl))
+        # redirect to the group view
+        return HttpResponseRedirect(returnurl)
+
+#################################################################
+# The following will support the question management functionalities of Ostrich
+
+# QuestionManagement View
+# Displays all the (active) questions as a table
 @method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class QuestionManagement(FilterView, ListView):
+    # use the template teachers/questionmanagement.html
     template_name = 'teachers/questionmanagement.html'
+    # set contextobjectname as questions
     context_object_name = 'questions'
+    # paginate by 10
     paginate_by = 10
+    # use the QuestionFilter
     filterset_class = QuestionFilter
 
     def get_queryset(self):
+        # query all the questions that are not archived
         questions = Questions.objects.filter(isarchived = 0)
+        # return queryset
         return questions
 
     def get_context_data(self, **kwargs):
+        # call super
         context = super().get_context_data(**kwargs)
+        # set the topics as context
         context['topics'] = QuestionTopic.objects.all()
-        context['creator'] = (self.request.user)
-        
+        # set the currentuser as context
+        context['creator'] = self.request.user
+        # return the context
         return context
 
+# ArchiveQuestioninManagement View
+# This view will archive the question selected by the teacher
 @method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class ArchiveQuestioninManagement(View):
+    # get the questionid
     def get(self, request, questionid):
+        # get the question object using the questionid
         questioninstance = Questions.objects.get(questionid = questionid)
+        # set the archived flag to 1
         questioninstance.isarchived = 1
+        # save the object
         questioninstance.save()
-        
+        # get the previous url
         previousurl = request.META.get('HTTP_REFERER')
+        # redirect back
         return redirect(previousurl)
 
+# ArchivedQuestionManagement
+# displays all the archived questions
 @method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class ArchivedQuestionManagement(FilterView, ListView):
+    # use the template teachers/archivedquestionmanagement.html
     template_name = 'teachers/archivedquestionmanagement.html'
+    # set the contextobjectname as questions
     context_object_name = 'questions'
+    # paginate by 10
     paginate_by = 10
+    # use the QuestionFilter
     filterset_class = QuestionFilter
 
     def get_queryset(self):
+        # query all the questions that are archived
         questions = Questions.objects.filter(isarchived = 1)
+        # return queryset
         return questions
 
     def get_context_data(self, **kwargs):
+        # call super 
         context = super().get_context_data(**kwargs)
+        # set the question topics as context
         context['topics'] = QuestionTopic.objects.all()
-        questions_obj = Questions.objects.filter(isarchived = 1)
+        # set the createdby as context
         context['createdby'] = self.request.user
+        # return context
         return context
 
+# UnarchiveFromQuestionmanagement View
+# This will unarchive the question selected by the teacher
 @method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class UnarchiveFromQuestionManagement(View):
     def get(self, request, *args, **kwargs):
+        # get the questionid 
         selectedquestionid = self.kwargs['questionid']
+        # get the question object
         selectedquestioninstance = Questions.objects.get(questionid = selectedquestionid)
+        # set the archived flag to 0
         selectedquestioninstance.isarchived = 0
+        # save the question object
         selectedquestioninstance.save()
-        
+        # get the previous url
         previousurl = request.META.get('HTTP_REFERER')
+        # redirect back
         return redirect(previousurl)
 
+# ViewQuestion View
+# teachers can view the question and all its details with this view
 @method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class ViewQuestion(ListView):
+    # use the template teachers/viewquestion.html
     template_name = 'teachers/viewquestion.html'
+    # set the contextobjectname as result
     context_object_name = 'result'
     
     def get_queryset(self):
+        # get the question object
         selectedquestion = Questions.objects.get(questionid = self.kwargs['questionid'])
+        # return the object
         return selectedquestion
     
     def get_context_data(self, **kwargs):
+        # call super
         context = super().get_context_data(**kwargs)
+        # get the question object
         selectedquestion = Questions.objects.get(questionid = self.kwargs['questionid'])
-
+        # get all the questiontopics
         questiontopic = QuestionTopic.objects.all().values_list('topicname')
+        # set the questiontopics as context
         context['questiontopic'] = questiontopic
-
+        # get the question topic id
         getthistopicid = (selectedquestion.topicid.topicid)
+        # get the questiontopic name
         currentquestiontopicname = QuestionTopic.objects.get(topicid=getthistopicid)
+        # set the questiontopic name as context
         context['currentquestiontopicname'] = currentquestiontopicname.topicname
-
+        # set the question type choices as context
         context['questiontypechoices'] = QUESTION_TYPE_CHOICES
+        # set the archived flag as context
         context['check'] = selectedquestion.isarchived
+        # set the question points as context
         context['points'] = selectedquestion.points
 
+        # check if the question is MCQ
         if selectedquestion.questiontype == 'MCQ':
+            # get the mcqoptions object
             mcqoptions_obj = MCQOptions.objects.get(questionid = selectedquestion)
+            # set all the options as context
             context['optionone'] = mcqoptions_obj.optionone
             context['optiontwo'] = mcqoptions_obj.optiontwo
             context['optionthree'] = mcqoptions_obj.optionthree
             context['optionfour'] = mcqoptions_obj.optionfour
 
+        # return context
         return context
-        
+
+#################################################################
+# The following will support the docker management 
+
+# Docker Management
+# Lists all the dockers currently being opened, allows the teachers to manually kill dockers
 @method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class DockerManagement(ListView):
+    # use template teachers/dockermanagement.html
     template_name = 'teachers/dockermanagement.html'
+    # set context object name as dockerobjects
     context_object_name = 'dockerobjects'
-    paginate_by = 10
+    # paginate_by = 10
+    paginate_by = 20
 
     def get_queryset(self):
+        # get the queryset of all the opened dockers
         dockers = UnavailablePorts.objects.all()
+        # return the queryset
         return dockers
 
+# AdminDockerKill
+# kills the selected container
 @method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class AdminDockerKill(View):
@@ -2912,105 +3183,16 @@ class AdminDockerKill(View):
         response = requests.delete(endpoint)
         # need to delete from containernamed
         deleteportsdb = UnavailablePorts.objects.filter(containername = containername)
+        # delete the entry
         deleteportsdb.delete()
-
+        # redirect back to dockermanagement
         return redirect('/teachers/dockermanagement/')
 
-@method_decorator(change_password, name='dispatch')
-@method_decorator(user_is_staff, name='dispatch')
-class ReportView(generic.ListView):
-    template_name='teachers/report.html'
-    context_object_name = 'questionsobject'
-    def get_queryset(self):
-        rangeurl = self.kwargs['rangeurl']
-        username = self.kwargs['username']
-        rangeid = Range.objects.filter(rangeurl=rangeurl).values_list('rangeid')[0][0]
-        useremail = User.objects.filter(username=username).values_list('email')[0][0]
-        rangestudentobj = RangeStudents.objects.filter(studentID=useremail, rangeID__rangeid=rangeid)
+#################################################################
+# The following will support the teacher management functionalities
 
-        studentquestionsobj = StudentQuestions.objects.filter(rangeid=rangeid, studentid=useremail)
-        answeredquestionlist = []
-        for question in studentquestionsobj:
-            questionid = question.questionid.questionid
-            if questionid not in answeredquestionlist:
-                answeredquestionlist.append(questionid)
-
-        questionsobj = Questions.objects.filter(rangeid=rangeid).exclude(questionid__in=answeredquestionlist)
-        return questionsobj
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        rangeurl = self.kwargs['rangeurl']
-        username = self.kwargs['username']
-        rangeid = Range.objects.filter(rangeurl=rangeurl).values_list('rangeid')[0][0]
-        useremail = User.objects.filter(username=username).values_list('email')[0][0]
-        rangeobj = Range.objects.get(rangeurl=rangeurl)
-        rangestudentsobj = RangeStudents.objects.get(studentID=useremail, rangeID=rangeid)
-        studentquestionsobj = StudentQuestions.objects.filter(studentid=useremail, rangeid=rangeid)
- 
-        context['rangename'] = rangeobj.rangename
-        context['maxscore'] = rangeobj.maxscore
-        pointsawarded = rangestudentsobj.points
-        context['pointsawarded'] = pointsawarded
-
-        hintpenaltyqueryset = StudentHints.objects.filter(studentid=username, rangeid = rangeid, hintactivated = True).values_list('questionid')
-        totalhintpenalty = 0
-        
-        for x in range(0, len(hintpenaltyqueryset)):
-            points = Questions.objects.filter(questionid = hintpenaltyqueryset[x][0]).values_list('hintpenalty')[0][0]
-            totalhintpenalty = totalhintpenalty + int(points)
-
-        context['hintpenalty'] = totalhintpenalty
-        unobtained = rangeobj.maxscore - totalhintpenalty - pointsawarded
-        context['unobtained'] = unobtained
-        context['rangestudentsobj'] = rangestudentsobj
-        context['studentquestionsobj'] = studentquestionsobj
-        context['allquestions'] = Questions.objects.filter(rangeid=rangeid)
-        context['rangeactive'] = Range.objects.filter(rangeid=rangeid).values_list('rangeactive')[0][0]
-
-        ranking = RangeStudents.objects.filter(rangeID=rangeid).order_by('-points')
-        context['username'] = username
-        context['ranking'] = ranking
-
-        return context
-
-@method_decorator(change_password, name='dispatch')
-@method_decorator(user_is_staff, name='dispatch')
-class OEMarkCorrect(View):
-    def get(self, request, rangeurl, username, questionid):
-        rangeinstance = Range.objects.get(rangeurl = rangeurl)
-        studentinstance = User.objects.get(username = username)
-        questioninstance = Questions.objects.get(questionid = questionid)
-        repeatedcheck = StudentQuestions.objects.filter(questionid = questionid, studentid = studentinstance, rangeid = rangeinstance).count()
-        studentquestionobj = StudentQuestions.objects.get(rangeid = rangeinstance, questionid = questioninstance, studentid = studentinstance, attempts = repeatedcheck)
-        studentquestionobj.answercorrect = 1
-
-        questionpoints = Questions.objects.filter(questionid = questionid).values_list('points')[0][0]
-        studentquestionobj.marksawarded = questionpoints
-        studentquestionobj.ismarked = True
-        rangestudentsobj = RangeStudents.objects.get(studentID = studentinstance, rangeID = rangeinstance)
-        rangestudentsobj.points += questionpoints
-
-        studentquestionobj.save()
-        rangestudentsobj.save()
-
-        return redirect('../../../')
-
-
-@method_decorator(change_password, name='dispatch')
-@method_decorator(user_is_staff, name='dispatch')
-class OEMarkWrong(View):
-    def get(self, request, rangeurl, username, questionid):
-        rangeinstance = Range.objects.get(rangeurl = rangeurl)
-        studentinstance = User.objects.get(username = username)
-        questioninstance = Questions.objects.get(questionid = questionid)
-        repeatedcheck = StudentQuestions.objects.filter(questionid = questionid, studentid = studentinstance, rangeid = rangeinstance).count()
-        studentquestionobj = StudentQuestions.objects.get(rangeid = rangeinstance, questionid = questioninstance, studentid = studentinstance, attempts = repeatedcheck)
-        studentquestionobj.answercorrect = 0
-        studentquestionobj.ismarked = True
-        studentquestionobj.save()
-        return redirect('../../../')
-
+# Teacher View
+# lists all the teachers accounts
 @method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class TeacherView(FilterView, ListView):
@@ -3046,6 +3228,10 @@ class AddTeacher(ListView, ModelFormMixin):
 
         else:
             return ListView.get(self, request, *args, **kwargs)
+
+#################################################################
+# The following will support the class management functionalities
+
 
 @method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
@@ -3093,29 +3279,8 @@ class AddClass(ListView, ModelFormMixin):
         kwargs.update({'request': self.request})
         return kwargs
 
-@method_decorator(change_password, name='dispatch')
-@method_decorator(user_is_staff, name='dispatch')
-class IsOpen(View):
-    def get(self, request, *args, **kwargs):
-        rangeurl = self.kwargs['rangeurl']
-        selectedrangeinstance = Range.objects.get(rangeurl = rangeurl)
-        selectedrangeinstance.isopen = 1
-        selectedrangeinstance.save()
-
-        returnurl = ('/teachers/rangemanagement/view/' + str(rangeurl))
-        return HttpResponseRedirect(returnurl)
-
-@method_decorator(change_password, name='dispatch')
-@method_decorator(user_is_staff, name='dispatch')
-class IsClose(View):
-    def get(self, request, *args, **kwargs):
-        rangeurl = self.kwargs['rangeurl']
-        selectedrangeinstance = Range.objects.get(rangeurl = rangeurl)
-        selectedrangeinstance.isopen = 0
-        selectedrangeinstance.save()
-
-        returnurl = ('/teachers/rangemanagement/view/' + str(rangeurl))
-        return HttpResponseRedirect(returnurl)
+#################################################################
+# The following will support the self-directed learning management functionalities
 
 @method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')

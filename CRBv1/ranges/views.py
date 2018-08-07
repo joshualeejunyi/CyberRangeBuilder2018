@@ -880,41 +880,67 @@ class QuestionsView(ListView):
             questions = None
         return questions
 
+# HouseKeeping View
+# This housekeeping is to 
+# 1. activate ranges when the start date and time has passed
+# 2. deactivate ranges when end date and time has passed
+# 3. check if the teacher override the activation
 class Housekeeping(View):
+    # get the currentranges from the previous view that called this view
     def get(self, currentranges):
+        # forloop each range 
         for x in currentranges:
+            # get the date end
             dateend = Range.objects.filter(rangeid = x[0]).values_list("dateend")[0][0]
+            # get the time end
             timeend = Range.objects.filter(rangeid = x[0]).values_list("timeend")[0][0]
+            # get the date start
             datestart = Range.objects.filter(rangeid = x[0]).values_list('datestart')[0][0]
+            # get the time start
             timestart = Range.objects.filter(rangeid = x[0]).values_list('timestart')[0][0]
+            # get the range object
             rangeobject = Range.objects.get(rangeid = x[0])
 
+            # check if the datestart is not None
             if datestart != None:
+                # check if the date is between the start and end
                 datecheck = datetime.date.today() >= datestart and datetime.date.today() <= dateend
                 if datecheck is True:
+                    # if true, check if the time is after timestart and before timeend
                     timecheck = datetime.datetime.now().time() >= timestart and datetime.datetime.now().time() <= timeend
                     if timecheck is True:
+                        # if it is true, activate the range
                         rangeobject.rangeactive = True
+                        # save the object
                         rangeobject.save()
                     else:
+                        # otherwise just set as inactive
                         rangeobject.rangeactive = False
-
-            rangeobject.save()
+                        # save the rangeobject
+                        rangeobject.save()
                 
+            # check if the teacher manually activated the range
             manualstart = Range.objects.filter(rangeid = x[0]).values_list('manualactive')[0][0]
             if manualstart is True:
-                rangeobject = Range.objects.get(rangeid = x[0])
+                # if it is true, set the manualdeactive as 0
                 rangeobject.manualdeactive = 0
+                # set the rangeactive as 1
                 rangeobject.rangeactive = 1
-                rangeobject.save()            
-
-            manualstop = Range.objects.filter(rangeid = x[0]).values_list('manualdeactive')[0][0]
-            if manualstop is True:
-                rangeobject = Range.objects.get(rangeid = x[0])
-                rangeobject.manualactive = 0
-                rangeobject.rangeactive = 0
+                # save the object
                 rangeobject.save()
 
+            # check if the teacher manually stopped the range
+            manualstop = Range.objects.filter(rangeid = x[0]).values_list('manualdeactive')[0][0]
+            if manualstop is True:
+                # if it is true, set the manual active as 0
+                rangeobject.manualactive = 0
+                # set the rangeactive as 0
+                rangeobject.rangeactive = 0
+                #save the rangeobject
+                rangeobject.save()
+
+# RangesView
+# get all the ranges and list out for students to scroll through
 class RangesView(ListView):
     template_name = 'ranges/viewranges.html'
     context_object_name = 'rangeobject'
@@ -923,17 +949,19 @@ class RangesView(ListView):
         context = super().get_context_data(**kwargs)
         user = self.request.user
         inactiveranges = RangeStudents.objects.filter(studentID=user, rangeID__rangeactive=0).order_by('-lastaccess', '-dateJoined', '-pk')
-
         context['inactive'] = inactiveranges
         return context
 
     def get_queryset(self):
+        # call the dockerkill view
         DockerKill.get(self, self.request)
         # get the email address of current user
         user = self.request.user
         # get the rangeIDs that are assigned to current user (in a queryset)
         assignedranges = RangeStudents.objects.filter(studentID=user, rangeID__rangeactive=1).order_by('-lastaccess', '-dateJoined', '-pk')
+        # get the currentranges
         currentranges = RangeStudents.objects.filter(studentID = user).values_list('rangeID')
+        # call the housekeeping view
         Housekeeping.get(self, currentranges)
-
+        # return the queryset
         return assignedranges

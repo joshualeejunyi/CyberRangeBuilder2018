@@ -45,14 +45,12 @@
                                     <label for="title">Name:</label>
                                     {% render_field filter.form.name class="form-control" %}
                                 </div>
-                                <div class="form-group col-sm-4 col-md-3">
-                                        <label for="title">Date Joined:</label>
-                                        {% render_field filter.form.datejoined class="form-control" %}
-                                </div>
-                                    <button type="submit" class="btn btn-primary btn-flat" style="width: 200px; display: inline-block">
-                                        <span class="glyphicon glyphicon-search"></span> Search
-                                    </button>
-                                    <a href="{{ rangeurl }}" class="btn btn-primary btn-block btn-flat" style="width: 200px;  display: inline-block;" >Reset Filters</a>
+                            </div>
+                            <div>
+                                <button type="submit" class="btn btn-primary btn-flat" style="width: 200px; display: inline-block">
+                                    <span class="glyphicon glyphicon-search"></span> Search
+                                </button>
+                                <a href="{{ rangeurl }}" class="btn btn-primary btn-block btn-flat" style="width: 200px;  display: inline-block;" >Reset Filters</a>
                             </div>
                         </div>
                     </form>
