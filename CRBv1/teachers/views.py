@@ -700,6 +700,7 @@ class UserGroupCommit(View):
             # save the object
             obj.save()
 
+        messages.success(request, 'User(s) Successfully Added to Group')
         # set the url to redirect to
         url = "/teachers/groupmanagement/" + groupname
         # delete the session
@@ -1324,6 +1325,7 @@ class AddQuestioninRangeCommit(View):
                     Error.get(self, request, error)
         
         # set the url to redirect to 
+        messages.success(request, 'Questions Successfully Imported')
         url = '/teachers/rangemanagement/view/' + rangeurl
         # delete the session
         del request.session['questionscart']
@@ -1808,6 +1810,7 @@ class UserRangeCommit(View):
             # save the object
             obj.save()
 
+        messages.success(request, 'User(s) Successfully Added to Range')
         # set the url to redirect to
         url = "/teachers/rangemanagement/view/" + rangeurl
         # delete the session
@@ -1957,6 +1960,7 @@ class GroupRangeCommit(View):
                 # save the object
                 obj.save()
 
+        messages.success(request, 'Group(s) Successfully Added to Range')
         # set the url to redirect to 
         url = "/teachers/rangemanagement/view/" + rangeurl 
         # delete session
@@ -3196,20 +3200,31 @@ class AdminDockerKill(View):
 @method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class TeacherView(FilterView, ListView):
+    # use the template teachers/teachermanagement.html
     template_name = 'teachers/teachermanagement.html'
+    # set the contextobjectname as teacherobjects
     context_object_name = 'teacherobjects'
+    # use the TeacherFilter
     filterset_class = TeacherFilter
 
     def get_queryset(self):
+        # get all the teachers
         allteachers = User.objects.filter(is_staff = 1)
+        # return queryset
         return allteachers
 
+# AddTeacher View
+# allows teachers to add more teachers
 @method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class AddTeacher(ListView, ModelFormMixin):
+    # use template teachers/addteacher.html
     template_name = 'teachers/addteacher.html'
+    # set contextobjectname as teachersobject
     context_object_name = 'teachersobject'
+    # use User model
     model = User
+    # use the TeacherRegisterForm
     form_class = TeacherRegisterForm
 
     def get(self, request, *args, **kwargs):
@@ -3222,9 +3237,12 @@ class AddTeacher(ListView, ModelFormMixin):
         self.form = self.get_form(self.form_class)
 
         if self.form.is_valid():
+            # save the form
             self.form.save(request)
+            # set the message
             messages.success(request, 'Teacher account successfully created')
-            return render(request, 'teachers/addteacher.html/')
+            # direct to teacher
+            return redirect('/teachers/teachermanagement/')
 
         else:
             return ListView.get(self, request, *args, **kwargs)
@@ -3232,29 +3250,42 @@ class AddTeacher(ListView, ModelFormMixin):
 #################################################################
 # The following will support the class management functionalities
 
-
+# ClassView
+# list all the classes in the class management
 @method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class ClassView(FilterView, ListView):
+    # use template teachers/classmanagement.html
     template_name = 'teachers/classmanagement.html'
+    # set contextobjectname as classobjects
     context_object_name = 'classobjects'
+    # use ClassFilter
     filterset_class = ClassFilter
 
     def get_queryset(self):
+        # get the user classes
         alluserclass = UserClass.objects.all()
         return alluserclass
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        # set the number of users as context
         context['classcount'] = UserClass.objects.all().count()
+        # return context
         return context
 
+# AddClass View
+# form to add new class into database
 @method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class AddClass(ListView, ModelFormMixin):
+    # use template teachers/addclass.html
     template_name = 'teachers/addclass.html'
+    # set contextobjectname as classobjects
     context_object_name = 'classobjects'
+    # use UserClass model
     model = UserClass
+    # use ClassForm
     form_class = ClassForm
 
     def get(self, request, *args, **kwargs):
@@ -3267,9 +3298,12 @@ class AddClass(ListView, ModelFormMixin):
         self.form = self.get_form(self.form_class)
 
         if self.form.is_valid():
+            # save the form
             self.form.save()
+            # set the message
             messages.success(request, 'New Class Added Successfuly')
-            return render(request, template_name='teachers/addclass.html')
+            # return to the 
+            return redirect('/teachers/classmanagement/')
         
         else:
             return ListView.get(self, request, *args, **kwargs)
@@ -3282,28 +3316,44 @@ class AddClass(ListView, ModelFormMixin):
 #################################################################
 # The following will support the self-directed learning management functionalities
 
+# SDLManagement View
+# manage all the self directed learning materials
+# able to view all posts, edit and create new posts
 @method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class SDLManagement(FilterView, ListView):
+    # use template teachers/SDLmanagement.html
     template_name='teachers/SDLmanagement.html'
+    # set the contextobjectname as posts
     context_object_name = 'posts'
+    # paginate by 10
     paginate_by = 10
+    # use the SDLPostFilter
     filterset_class = SDLPostFilter
 
     def get_queryset(self):
+        # get all the posts
         allposts = SDLPost.objects.all().order_by('-lastmodifieddate','-lastmodifiedtime', '-datecreated', '-timecreated', '-postid')
+        # return queryset
         return allposts
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        # set the teachers as context
         context['teachers'] = User.objects.filter(is_staff=1).values_list('username', flat=True)
+        # return context
         return context
 
+# AddPost View
+# form to allow teachers to create posts
 @method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class AddPost(FormView):
+    # use the template teachers/addSDLpost.html
     template_name = 'teachers/addSDLpost.html'
+    # use SDLPost model
     model = SDLPost
+    # use SDLAddPostForm
     form_class = SDLAddPostForm
 
     def get(self, request, *args, **kwargs):
@@ -3316,76 +3366,117 @@ class AddPost(FormView):
         self.form = self.get_form(self.form_class)
 
         if self.form.is_valid():
+            # save the form
             self.form.save()
+            # redirect back to SDL management
             return redirect('/teachers/SDLmanagement')
         else:
             return FormView.get(self, request, *args, **kwargs)
 
     def get_form_kwargs(self):
         kwargs = super(AddPost, self).get_form_kwargs()
+        # set the request as a kwarg
         kwargs.update({'request': self.request})
+        # return kwargs
         return kwargs
 
+# EditPost View
+# allows the teacher to edit existing posts
 @method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class EditPost(UpdateView):
-    form_class = PostModifyForm
-    model = SDLPost
+    # use the template teachers/modifypost.html
     template_name = 'teachers/modifypost.html'
-    success_url = '/teachers/SDLmanagement'
+    # set the contextobjectname as result
     context_object_name = 'result'
+    # use the PostModifyForm class
+    form_class = PostModifyForm
+    # use the SDLPost model
+    model = SDLPost
+    # set the success url to sdl management
+    success_url = '/teachers/SDLmanagement'
 
     def get_object(self):
+        # get the selected post object
         selectedpost = SDLPost.objects.get(postid = self.kwargs['postid'])
+        # return object
         return selectedpost
 
     def get_form_kwargs(self):
         kwargs = super(EditPost, self).get_form_kwargs()
+        # set the request as kwarg
         kwargs.update({'request': self.request})
+        # return kwargs
         return kwargs
 
+# PublishPost View
+# allow teachers to publish the post so that the users can see
 @method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class PublishPost(View):
+    # get the postid
     def get(self, request, postid):
+        # get the post object
         selectedpost = SDLPost.objects.get(postid = postid)
+        # set the post active flag to True
         selectedpost.postactive = True
         # If a teacher chooses to set a post to active, the date and time posted will be updated.
         selectedpost.dateposted = datetime.date.today()
         selectedpost.timeposted = datetime.datetime.now().time()
-
+        # save the object
         selectedpost.save()
+        # redirect to SDL management
         return redirect('/teachers/SDLmanagement')
 
+# WithdrawPost View
+# allow teachers to withdraw post to hide from users
 @method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class WithdrawPost(View):
+    # get the postid
     def get(self, request, postid):
+        # get the sdlpost object
         selectedpost = SDLPost.objects.get(postid = postid)
+        # set the postactive flag to False
         selectedpost.postactive = False
-
+        # save the object
         selectedpost.save()
+        # redirect to SDL management
         return redirect('/teachers/SDLmanagement')
 
+# DeletePost View
+# allow teachers to delete a post
 @method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class DeletePost(View):
+    # get the postid
     def get(self, request, postid):
+        # get the sdlpost object
         selectedpost = SDLPost.objects.get(postid = postid)
+        # delete the object
         selectedpost.delete()
+        # redirect to SDL management
         return redirect('/teachers/SDLmanagement')
 
+# ViewPost View
 @method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class ViewPost(ListView, ModelFormMixin):
+    # use the template teachers/viewpost.html
     template_name='teachers/viewpost.html'
+    # set the contextobjectname as post
     context_object_name = 'post'
+    # use the SDLPost model
     model = SDLPost
+    # use the SDLPostComment formclass
     form_class = SDLPostComment
 
     def get_queryset(self):
+        # get the postid
         postid = self.kwargs['postid']
+        # get the object
         post = SDLPost.objects.filter(postid=postid)
+        # return the post object
         return post
 
     def get_form_kwargs(self):
@@ -3403,27 +3494,43 @@ class ViewPost(ListView, ModelFormMixin):
         self.form = self.get_form(self.form_class)
 
         if self.form.is_valid():
-            postinstance = SDLPost.objects.get(postid=self.kwargs['postid'])
+            # get the postinstance
+            postid = self.kwargs['postid']
+            postinstance = SDLPost.objects.get(postid=postid)
+            # get the currenctuser
             user = self.request.user
+            # save the form
             self.form.save(postinstance, user)
-            return HttpResponseRedirect("")
+            # set the url redirect to
+            url = '/selfdirected/view/' + postid
+            # return to the post 
+            return redirect(url)
         else:
             return ListView.get(self, request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        # get the postid
         postid = self.kwargs['postid']
+        # get the comments queryset
         comments = SDLComment.objects.filter(postid=postid)
-
+        # set the comments as context
         context['comments'] = comments
-
+        # return context
         return context
+
+# DeleteComment View
+# allows teachers to delete the comment
 @method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class DeleteComment(View):
     def get(self, request, postid, commentid):
+        # get the sdlcomment object
         comment = SDLComment.objects.get(commentid=commentid)
+        # delete the comment object
         comment.delete()
+        # get the url to redirect to
         url = '/teachers/SDLmanagement/view/' + postid
+        # redirect back to the post
         return redirect(url)
 
