@@ -163,23 +163,40 @@ class DockerContainerStart(View):
 
             # generate a randompassword for the docker container
             randompassword = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(6))
-            # attempt to change the password
+            # changing the password using docker exec
+            # set the payload
             execcmd = {
-                "AttachStdin": "true",
-                "AttachStdout": "true",
-                "AttachStderr": "true",
-                "Tty": "true",
-                "Cmd": '["/bin/bash","-c","echo \"guest:%s\" | chpasswd"]' % randompassword
+                'AttachStdin': True,
+                'AttachStdout': True,
+                'AttachStderr': True,
+                'Tty': True,
+                'Cmd': [
+                    "/bin/bash",
+                    "-c",
+                    "echo \'guest:%s\' | chpasswd" % randompassword
+                    ]
             }
-            execurl = 'http://' + serverip + ':8051/containers/%s/exec' % containerid
+            # set the url
+            execurl = 'http://' + serverip + ':8051/containers/' + containerid + '/exec'
+            # request the url with the json payload
             execresponse = requests.post(execurl, json=execcmd)
+            # check if it is successful
             if execresponse.status_code == 201:
-                execdata = response.json()
+                # get the json response
+                execdata = execresponse.json()
+                # get the exec cond id
                 execconid = execdata['Id']
-                execstarturl = 'http://' + serverip + ':8051/exec/%s/start' % execconid
-                startexecres = requests.post(execstarturl)
-            
+                # set the exec payload
+                execpayload = {
+                    'Detach': False,
+                    'Tty': False,
+                }
+                # set the exec start url
+                execstarturl = 'http://' + serverip + ':8051/exec/' + execconid + '/start'
+                # send the request
+                startexecres = requests.post(execstarturl, json=execpayload)
 
+            # return the password and the url
             return randompassword, finalsiaburl
 
         elif response.status_code == 400:
@@ -273,7 +290,7 @@ class DockerKill(View):
         # first, we get all the used ports from the database
         allentriesinportsdb = UnavailablePorts.objects.all()
         # check if there are no entries
-        if allentriesinportsdb != 0:
+        if len(allentriesinportsdb) != 0:
             # if there are entries, use a forloop to traverse the queryset
             for entry in allentriesinportsdb:
                 # check the time difference between now and the date and time the docker was created
@@ -472,15 +489,22 @@ class AttemptQuestionView(ListView, ModelFormMixin):
         # set the context as topicname
         context['topic'] = topicname
 
+        # get the number of attempts for that question
         attempted = StudentQuestions.objects.filter(questionid = questionid, studentid = self.request.user, rangeid = rangeid).count()
+        # check if it is attempted
         if attempted != 0:
+            # get the latest points awarded
             latestpoints = StudentQuestions.objects.get(studentid = self.request.user, rangeid = rangeid, questionid = questionid, attempts = attempted)
+            # set the latestpoints context
             context['latestpoints'] = latestpoints
             # check if the open ended question is marked
             if questiontype == 'OE':
+                # check if it is repeated
                 repeatedcheck = StudentQuestions.objects.filter(questionid = questionid, studentid = self.request.user, rangeid = rangeid).count()
+                # check if it is marked
                 checkoemarked = StudentQuestions.objects.get(studentid = self.request.user, rangeid = rangeid, questionid = questionid, attempts = repeatedcheck)
                 marked = checkoemarked.ismarked
+                # set the mark as context
                 context['ismarked'] = marked
 
         # return context

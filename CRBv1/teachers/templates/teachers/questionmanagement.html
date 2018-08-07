@@ -72,6 +72,9 @@
                     ID
                 </th>
                 <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
+                    Range URL
+                </th>
+                <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
                     Type
                 </th>
                 <th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="asceding">
@@ -116,6 +119,9 @@
                     {{ x.questionid }}
                 </td>
                 <td>
+                    {{ x.rangeid.rangeurl }}
+                </td>
+                <td>
                     {% if x.questiontype == 'FL' %}
                         Flag
                     {% elif x.questiontype == 'MCQ' %}
@@ -157,7 +163,7 @@
                 </td>
                 <td>{{ x.createdby }}</td>
                 <td>
-                {% if x.createdby == creator %} 
+                {% if x.createdby == creator and x.rangeid.rangeactive is False%} 
                     <a class="btn btn-block btn-primary" href="view/{{ x.questionid }}">View</a>
                     <a class="btn btn-block btn-success" href="edit/{{ x.questionid }}">Edit</a>
                     <a class="btn btn-block btn-danger" onclick="return confirm('Archive Question {{ x.questionid}} ?')" href="archive/{{ x.questionid }}">Archive</a>

@@ -99,7 +99,9 @@
 							</div>
 							
 							<div class="box-body">
-								<h5>Shell Password: {{password}}</h5>
+								{% if password is not False %}
+									<h5>Shell Password: {{password}}</h5>
+								{% endif %}
 								<p>{{question.text | safe | cut:"<p>" | cut:"</p>"}}</p>
 								<div>
 									<form method="post" class="pull-right" style="width:100%;">
