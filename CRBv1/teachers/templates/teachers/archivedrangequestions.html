@@ -42,24 +42,22 @@
                                 </th>
                             </tr>
                         </thead>
-                        {% for e in range %}
                             <tr role="row">
-                                <td> {{e.rangename }}</td>
-                                <td> {{e.datecreated }}</td>
-                                <td> {{e.datestart }}</td>
-                                <td> {{e.dateend }}</td>
+                                <td> {{range.rangename }}</td>
+                                <td> {{range.datecreated }}</td>
+                                <td> {{range.datestart }}</td>
+                                <td> {{range.dateend }}</td>
                                 <td> 
-                                    {% if e.maxscore is None %}
+                                    {% if range.maxscore is None %}
                                         0
                                     {% else %}
-                                        {{e.maxscore }}
+                                        {{range.maxscore }}
                                     {% endif %}
                                     </td>
-                                <td> {{e.lastmodifiedby }}</td>
-                                <td> {{e.lastmodifieddate}}</td>
-                                <td> {{e.rangecode }}</td>
+                                <td> {{range.lastmodifiedby }}</td>
+                                <td> {{range.lastmodifieddate}}</td>
+                                <td> {{range.rangecode }}</td>
                             </tr>
-                        {% endfor %}
                     </table>
                 </div>
             </div>
