@@ -3169,6 +3169,27 @@ class ViewQuestion(ListView):
         # return context
         return context
 
+# DeleteQuestion
+# allows the teacher to delete question from the archived question management
+@method_decorator(change_password, name='dispatch')
+@method_decorator(user_is_staff, name='dispatch')
+class DeleteQuestion(View):
+    # get the rangeurl and questionid
+    def get(self, request, questionid):
+        # get the prevoius url
+        previousurl = request.META.get('HTTP_REFERER')
+        # get the selected question instance object
+        selectedquestioninstance = Questions.objects.get(questionid = questionid)
+        # get the questionid
+        questionid = selectedquestioninstance.questionid
+        mcqoptionsobject = MCQOptions.objects.get(questionid = questionid)
+        mcqoptionsobject.delete()
+        # delete object
+        selectedquestioninstance.delete()
+        # redirect to the previous url
+        return redirect(previousurl)
+
+
 #################################################################
 # The following will support the docker management 
 

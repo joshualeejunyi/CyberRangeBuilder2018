@@ -89,6 +89,7 @@ urlpatterns = [
     path('questionmanagement/archived/', login_required(views.ArchivedQuestionManagement.as_view()), name='archivedquestionmanagement'),
     path('questionmanagement/archived/view/<questionid>/', login_required(views.ViewQuestion.as_view()), name='unarchivefromquestionmanagement'),
     path('questionmanagement/archived/unarchive/<questionid>/', login_required(views.UnarchiveFromQuestionManagement.as_view()), name='unarchivefromquestionmanagement'),
+    path('questionmanagement/archived/delete/<questionid>/', login_required(views.DeleteQuestion.as_view()), name='deletequestionfromquestionmanagement'),
     
     path('<username>/changepassword/', login_required(settingview.ResetPassword.as_view()), name='forcechangepassword'),
 
