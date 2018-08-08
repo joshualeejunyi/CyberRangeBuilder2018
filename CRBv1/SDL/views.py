@@ -14,7 +14,6 @@ from django.shortcuts import render, redirect
 from django.utils.decorators import method_decorator
 from ranges.decorators import *
 
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_student, name='dispatch')
 class SDLView(FilterView, ListView):
     template_name = 'SDL/SDL.html'
@@ -34,7 +33,6 @@ class SDLView(FilterView, ListView):
         context['teachers'] = User.objects.filter(is_staff=1)
         return context
 
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_student, name='dispatch')
 class ViewPost(ListView, ModelFormMixin):
     template_name='SDL/viewpost.html'
@@ -83,7 +81,6 @@ class ViewPost(ListView, ModelFormMixin):
         
         return context
 
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_student, name='dispatch')
 class DeleteComment(View):
     # After a user deletes their comment, they will simply be redirected to their own page.

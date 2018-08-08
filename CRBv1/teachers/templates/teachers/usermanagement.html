@@ -44,17 +44,8 @@
                                         <label for="username">Username:</label>
                                     {% render_field filter.form.username class="form-control" %}
                                     </div>
-                                    <div class="form-group col-sm-4 col-md-3">
-                                        <label for="userclass">Class:</label>
-                                        <select name="userclass" class="form-control" placeholder="Class">
-                                            <option value="" selected></option>
-                                            {% for class in classesobject %}	
-                                            <option value='{{ class.id }}'>{{ class.userclass }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
                                 </div>
-                                <div class="row" style="display: flex; justify-content: right;">
+                                <div class="row">
                                     <div class="form-group col-sm-4 col-md-3">
                                         <label for="isaccepted">Accepted</label>
                                         <select name="isaccepted" class="form-control" placeholder="Class">
@@ -64,8 +55,8 @@
                                         </select>
                                     </div>
                                     <div class="form-group col-sm-4 col-md-3">
-                                        <label for="userclass">Class (Keyword Search):</label>
-                                        {% render_field filter.form.userclass class="form-control" %}
+                                        <label for="userclass__userclass">Class (Keyword Search):</label>
+                                        {% render_field filter.form.userclass__userclass class="form-control" %}
                                     </div>
                                 </div>
                                 <div>

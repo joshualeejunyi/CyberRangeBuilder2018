@@ -5,6 +5,7 @@ from settings import views as settingview
 from django_filters.views import FilterView
 from .filters import *
 from django.contrib.auth.decorators import login_required
+from teachers import views as teacherview
 
 urlpatterns = [
     url(r'^$', login_required(views.TeacherDashboard.as_view()), name="teacherdashboard"),
@@ -90,8 +91,6 @@ urlpatterns = [
     path('questionmanagement/archived/view/<questionid>/', login_required(views.ViewQuestion.as_view()), name='unarchivefromquestionmanagement'),
     path('questionmanagement/archived/unarchive/<questionid>/', login_required(views.UnarchiveFromQuestionManagement.as_view()), name='unarchivefromquestionmanagement'),
     path('questionmanagement/archived/delete/<questionid>/', login_required(views.DeleteQuestion.as_view()), name='deletequestionfromquestionmanagement'),
-    
-    path('<username>/changepassword/', login_required(settingview.ResetPassword.as_view()), name='forcechangepassword'),
 
     #DOCKER MANAGEMENT
     path('dockermanagement/', login_required(views.DockerManagement.as_view()), name='dockermanagement'),
@@ -115,4 +114,8 @@ urlpatterns = [
     path('SDLmanagement/view/<postid>/deletecomment/<commentid>', login_required(views.DeleteComment.as_view()), name="deletecomment"),
 
     path('error/', views.Error.as_view()),
+
+    path('settings/', views.ModifyTeacher.as_view(), name="settings"),
+    path('settings/changepassword/', views.ChangePasswordView.as_view(), name="WTF"),
+    path('settings/success/', views.ModifyTeacherSuccess.as_view(), name="success"),
 ]  

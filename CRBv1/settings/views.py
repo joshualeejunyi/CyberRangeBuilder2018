@@ -18,7 +18,7 @@ from django.contrib.auth.mixins import PermissionRequiredMixin
 import requests
 from django.utils.decorators import method_decorator
 from ranges.decorators import *
-@method_decorator(change_password, name='dispatch')
+
 @method_decorator(user_is_student, name='dispatch')
 class ModifyUser(UpdateView):
     form_class = UserModifyForm
@@ -36,7 +36,6 @@ class ModifyUser(UpdateView):
         kwargs.update({'request': self.request})
         return kwargs
 
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_student, name='dispatch')
 class ResetPassword(UpdateView):
     form_class = ResetPasswordForm
@@ -54,25 +53,6 @@ class ResetPassword(UpdateView):
         kwargs.update({'request': self.request})
         return kwargs
 
-@method_decorator(change_password, name='dispatch')
-@method_decorator(user_is_student, name='dispatch')
-class ResetPasswordStudent(UpdateView):
-    form_class = ResetPasswordForm
-    model = User
-    template_name = 'ranges/changepassword.html'
-    success_url = '/login/'
-
-    def get_object(self):
-        user = self.request.user
-        selecteduser = User.objects.get(username=user)
-        return selecteduser
-
-    def get_form_kwargs(self):
-        kwargs = super(ResetPassword, self).get_form_kwargs()
-        kwargs.update({'request': self.request})
-        return kwargs
-
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_student, name='dispatch')
 class ModifyUserSuccess(generic.TemplateView):
     template_name = 'settings/success.html'

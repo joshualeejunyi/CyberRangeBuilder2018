@@ -138,6 +138,7 @@ class ResetPasswordForm(ResetPasswordModelForm):
         user.lastmodifiedtime = datetime.datetime.now().time()
         admin = self.request.user
         user.lastmodifiedby = User.objects.get(username = admin)
+        user.isdefault = False
         if commit:
             user.save()
         return user

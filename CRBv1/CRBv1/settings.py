@@ -37,9 +37,9 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'dmit2.bulletplus.com']
 INSTALLED_APPS = [
     'SDL',
     'tinymce',
+    'teachers',
     'settings',
     'progress',
-    'teachers',
     'accounts',
     'dashboard',
     'ranges',

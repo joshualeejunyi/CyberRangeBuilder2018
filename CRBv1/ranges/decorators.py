@@ -23,19 +23,3 @@ def user_is_student(function):
     wrap.__doc__ = function.__doc__
     wrap.__name__ = function.__name__
     return wrap
-
-# The use of this method decorator is to make sure that the user changes their password upon login if it is default or resetted password #
-def change_password(function):
-    def wrap(request, *args, **kwargs):
-        profile = request.user
-        if profile.isdefault == 1:
-            if profile.is_staff == 1:
-                redirecturl = ('/ranges/'+str(profile.username)+'/changepassword')
-                print(redirecturl)
-                return redirect(redirecturl)
-        else:
-            return function(request, *args, **kwargs)
-    
-    wrap.__doc__ = function.__doc__
-    wrap.__name__ = function.__name__
-    return wrap

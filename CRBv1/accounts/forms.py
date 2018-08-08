@@ -138,6 +138,7 @@ class AdminRegisterForm(UserCreationForm):
         user.acceptedby = User.objects.get(username = admin)
         user.isdisabled = False
         user.isaccepted = True
+        user.isdefault = True
         user.isacceptedby = User.objects.get(username = admin)
         userclass = self.cleaned_data.get("userclass")
         userclassobj = UserClass.objects.get(userclass = userclass.userclass)
@@ -223,6 +224,7 @@ class AdminResetCommit(AdminResetPassword):
         admin = self.request.user
         user.lastmodifiedby = User.objects.get(username = admin)
         user.acceptedby = User.objects.get(username = admin)
+        user.isdefault = True
         if commit:
             user.save()
         return user
@@ -272,6 +274,7 @@ class TeacherRegisterForm(UserCreationForm):
         user.is_staff = 1
         user.isdisabled = 0
         user.isaccepted = 1
+        user.isdefault = True
         if commit:
             user.save()
         return user

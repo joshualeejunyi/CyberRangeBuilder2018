@@ -3,6 +3,7 @@ from ranges.models import RangeStudents, StudentQuestions, Range
 from accounts.models import User
 from ranges.views import Housekeeping
 from django.views.generic.base import TemplateView
+from django.contrib import messages
 
 class DashboardView(generic.ListView):
     template_name='dashboard/dashboard.html'
@@ -46,6 +47,15 @@ class DashboardView(generic.ListView):
         context['latestranges'] = latestrange
         if len(self.reportboxes) == 0:
             context['norange'] = True
+
+        # check if the teacher's password is default 
+        # get the current user 
+        username = self.request.user
+        # get the object
+        userobj = User.objects.get(username = username)
+        # check if the password is default
+        if userobj.isdefault is True:
+            messages.error(self.request, 'Default Password Detected. Please Change Your Password!')
 
         return context
 

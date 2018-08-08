@@ -23,7 +23,6 @@ from django.db.models.functions import Lower
 from django.contrib.auth.mixins import PermissionRequiredMixin
 import requests
 from .choices import *
-from django.contrib import messages
 import datetime
 from tablib import *
 import logging
@@ -52,7 +51,6 @@ class Error(TemplateView):
 # CreateImage View
 # This view will receive the rangeurl, questionid and imageid 
 # This is so that we can create the docker image for that specific question
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class CreateImage(View):
     # create image class to pull from registry and create the image in the local server
@@ -124,7 +122,6 @@ class CreateImage(View):
 # The teacher can then choose the accept or reject the user (see views AcceptUser and RejectUser)
 
 # Teacher Dashboard View
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class TeacherDashboard(ListView, PermissionRequiredMixin):
     # use the template at teachers/teacherdashboard.html
@@ -153,12 +150,20 @@ class TeacherDashboard(ListView, PermissionRequiredMixin):
         context = super().get_context_data(**kwargs)
         # set the UserClass as a context to be used in the template
         context['classesobject'] = UserClass.objects.all()
+
+        # check if the teacher's password is default 
+        # get the current user 
+        username = self.request.user
+        # get the object
+        userobj = User.objects.get(username = username)
+        # check if the password is default
+        if userobj.isdefault is True:
+            messages.error(self.request, 'Default Password Detected. Please Change Your Password!')
         # return the context
         return context
 
 # AcceptUser View
 # This view will process the function to accept the user
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class AcceptUser(View):
     # use a simple get function because its not a big functionality
@@ -197,7 +202,7 @@ class AcceptUser(View):
 
 # RejectUserView
 # This view will process the function to reject the user
-@method_decorator(change_password, name='dispatch')
+
 @method_decorator(user_is_staff, name='dispatch')
 class RejectUser(View):
     # get will receive the user name of the user to be rejected
@@ -215,7 +220,7 @@ class RejectUser(View):
 # UserManagement View
 # This view will give the teacher access to all functionalities related to handling and managing users (that are not disabled and are accepted)
 # The users displayed in this page are not disabled and are accepted
-@method_decorator(change_password, name='dispatch')
+
 @method_decorator(user_is_staff, name='dispatch')
 class UserManagement(FilterView, ListView):
     # use the template teachers/usermanagement.html
@@ -248,7 +253,7 @@ class UserManagement(FilterView, ListView):
 
 # DisabledUserManagement
 # This view will give the teacher access to all functionalities related to handling and managing disabled users
-@method_decorator(change_password, name='dispatch')
+
 @method_decorator(user_is_staff, name='dispatch')
 class DisabledUserManagement(FilterView, ListView):
     # use the template teachers/disabledusermanagement.html
@@ -282,7 +287,6 @@ class DisabledUserManagement(FilterView, ListView):
 
 # AddUser View
 # This view will allow the teacher to manually add additional users
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class AddUser(ListView, ModelFormMixin):
     # use the template teachers/adduserform.html
@@ -336,7 +340,6 @@ class AddUser(ListView, ModelFormMixin):
 
 # ModifyUser View
 # This view will allow the teacher to modify user accounts
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class ModifyUser(UpdateView):
     # set the form class as AdminModifyForm in forms.py
@@ -404,7 +407,6 @@ class ResetPasswordView(UpdateView):
 
 # DisableUser View
 # This view will process the function to disable the user selected in user management
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class DisableUser(View):
     # def get to process view
@@ -422,7 +424,6 @@ class DisableUser(View):
 
 # EnableUser View
 # This will reverse the disable user function
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class EnableUser(View):
     # def get to process
@@ -440,24 +441,36 @@ class EnableUser(View):
 
 # DeleteUser View
 # This will delete the user selected by the teacher
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class DeleteUser(View):
     # receives the username of the selected user
     def get(self, request, username):
         # get the userobject of the username
-        selecteduser = User.objects.get(username = self.kwargs['username'])
+        selecteduser = User.objects.get(username = username)
         # get the student's class
         userclass = selecteduser.userclass
         # get the userclass obj of the user's class
-        userclassobj = UserClass.objects.get(userclass = userclass)
+        userclassobj = UserClass.objects.get(userclass = userclass.userclass)
         # reduce the student count of the class by 1
         userclassobj.studentcount = userclassobj.studentcount - 1
         # save the userclass object
         userclassobj.save()
+        # get the useremail
+        useremail = selecteduser.email
+        # delete the user studentquestions db
+        studentquestionsobj = StudentQuestions.objects.filter(studentid = useremail)
+        for obj in studentquestionsobj:
+            # delete
+            obj.delete()
+        # delete the user rangestudents db object
+        rangestudentsobj = RangeStudents.objects.filter(studentID = useremail)
+        # forloop all the objects in queryset
+        for obj in rangestudentsobj:
+            # delete
+            obj.delete()
         # get the fakeuser object from the fakeuser model to delete
         # fake objects are to delete the object without foreign key constraints 
-        fakeuser = FakeUser.objects.get(username = self.kwargs['username'])
+        fakeuser = FakeUser.objects.get(username = username)
         # delete the fake objects
         fakeuser.delete()
         # delete the selected user object
@@ -470,7 +483,6 @@ class DeleteUser(View):
 #################################################################
 # The following code will support Group Management 
 # GroupManagement View
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class GroupManagement(FilterView, ListView):
     # use the template teachers/groupmanagement.html
@@ -490,7 +502,6 @@ class GroupManagement(FilterView, ListView):
         return allgroups
 
 # AddGroup View
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class AddGroup(ListView, ModelFormMixin):
     # use template teachers/addgroupform.html
@@ -536,7 +547,6 @@ class AddGroup(ListView, ModelFormMixin):
 
 # GroupView
 # Details of the group along with users within it 
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class GroupView(ListView):
     # use template teachers/groupiew.html
@@ -580,7 +590,6 @@ class GroupView(ListView):
 
 # AddUserInGroup View
 # Displays all the users that can be added into the group and gives teachers the option to add users
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class AddUserInGroup(FilterView, ListView):
     # use template teachers/adduseringroup.html
@@ -621,7 +630,6 @@ class AddUserInGroup(FilterView, ListView):
 
 # AddUserToCart View
 # Processes the adding of user to cart
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class AddUserToCart(View):
     # gets the groupname and username
@@ -650,7 +658,6 @@ class AddUserToCart(View):
 
 # RemoveUserFromCart
 # Processes the removal of users in cart
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class RemoveUserFromCart(View):
     # gets the groupname and username
@@ -679,7 +686,6 @@ class RemoveUserFromCart(View):
 
 # UserGroupCommit View
 # handles the commiting of adding user into group
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class UserGroupCommit(View):
     # gets the groupname
@@ -710,7 +716,6 @@ class UserGroupCommit(View):
 
 # RemoveStudentFromGroup View
 # removes the student from the group
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class RemoveStudentFromGroup(View):
     # gets the groupname and username
@@ -730,7 +735,6 @@ class RemoveStudentFromGroup(View):
         return redirect(url)
 
 # MakeLeader View
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class MakeLeader(View):
     # gets the groupname and username
@@ -751,7 +755,6 @@ class MakeLeader(View):
 
 # DeleteGroup View
 # delete the group
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class DeleteGroup(View):
     # gets the groupname
@@ -772,7 +775,6 @@ class DeleteGroup(View):
 #################################################################
 # The following code will support Range Management 
 # RangeManagement View
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class RangeManagement(FilterView, ListView):
     # use template teachers/rangemanagement.html
@@ -795,7 +797,6 @@ class RangeManagement(FilterView, ListView):
 
 # ArchivedRangeManagement View
 # manage all the archived ranges
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class ArchivedRangeManagement(FilterView, ListView):
     # use template teachers/archivedrangemanagement.html
@@ -816,7 +817,6 @@ class ArchivedRangeManagement(FilterView, ListView):
 
 # CreateRange View
 # allows teachers to create a new range
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class CreateRange(CreateView, RedirectView):
     # use the template teachers/addrange.html
@@ -865,7 +865,6 @@ class CreateRange(CreateView, RedirectView):
 
 # RangeView
 # Manage the range 
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class RangeView(ListView, FilterView):
     # use the teachers/rangeview.html
@@ -956,7 +955,6 @@ class RangeView(ListView, FilterView):
 
 # ReportView
 # Displays the selected user's report of the range
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class ReportView(generic.ListView):
     # use template teachers/report.html
@@ -1056,7 +1054,6 @@ class ReportView(generic.ListView):
 
 # OEMarkCorrect View
 # This will process to mark a student's openended answer as correct
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class OEMarkCorrect(View):
     # get the rangeurl, username and questionid
@@ -1094,7 +1091,6 @@ class OEMarkCorrect(View):
 
 # OEMarkWrong View
 # This will process to mark a student's openended answer as wrong
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class OEMarkWrong(View):
     def get(self, request, rangeurl, username, questionid):
@@ -1119,7 +1115,6 @@ class OEMarkWrong(View):
 
 # ArchivedRangeQuestions View
 # Manage all the archived range questions
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class ArchivedRangeQuestions(ListView, FilterView):
     # use the teachers/archivedrangequestions.html
@@ -1164,7 +1159,6 @@ class ArchivedRangeQuestions(ListView, FilterView):
 
 # AddQuestioninRange
 # show the questions that can be added into the range, allow the teacher to select and add to cart
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class AddQuestioninRange(FilterView, ListView):
     # use the template teachers/addquestionsinrange.html
@@ -1217,7 +1211,6 @@ class AddQuestioninRange(FilterView, ListView):
 
 # AddQuestionsToCart View
 # adds the question selected to the cart
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class AddQuestionToCart(View):
     # def get function
@@ -1247,7 +1240,6 @@ class AddQuestionToCart(View):
 
 # RemoveQuestionFromCart View
 # removes the question in the cart
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class RemoveQuestionFromCart(View):
     # def get function
@@ -1277,7 +1269,6 @@ class RemoveQuestionFromCart(View):
 
 # AddQuestioninRangeCommit View
 # will save the changes to the database when adding questions from database
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class AddQuestioninRangeCommit(View):
     # def get function
@@ -1344,7 +1335,6 @@ class AddQuestioninRangeCommit(View):
 
 # EditQuestion View
 # An UpdateView to allow teachers to modify questions
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class EditQuestion (UpdateView):
     # use the ModifyQuestionForm formclass
@@ -1405,7 +1395,6 @@ class EditQuestion (UpdateView):
 
 # EditRangeQuestion View
 # edit the rangequestion, different from the above. This is from rangeview.
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class EditRangeQuestion (UpdateView):
     # use the ModifyRangeQuestionForm
@@ -1467,7 +1456,6 @@ class EditRangeQuestion (UpdateView):
 
 # ModifyRange View
 # modify the details of the range
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class ModifyRange(UpdateView):
     # set ModifyRangeForm as formclass
@@ -1553,7 +1541,6 @@ class ModifyRange(UpdateView):
 
 # ArchiveRange View
 # functionality to archive range
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class ArchiveRange(View):
     # def get function
@@ -1572,7 +1559,6 @@ class ArchiveRange(View):
         return redirect(previousurl)
 # UnarchiveRange View
 # allows the teacher to unarchive the range
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class UnarchiveRange(View):
     # get the rangeurl
@@ -1591,7 +1577,6 @@ class UnarchiveRange(View):
 
 # DeleteRange View
 # allows the teacher to delete the range
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class DeleteRange(View):
     # def get 
@@ -1619,7 +1604,6 @@ class DeleteRange(View):
 
 # ArchiveQuestion View
 # archives the selected question
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class ArchiveQuestion(View):
     # get rangeurl and the questionid
@@ -1647,7 +1631,6 @@ class ArchiveQuestion(View):
 
 # UnarchiveQuestion View
 # unarchives the question
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class UnarchiveQuestion(View):
     # get rangeurl and questionid
@@ -1673,7 +1656,6 @@ class UnarchiveQuestion(View):
 
 # DeleteQuestionFromRange
 # allows the teacher to delete question from the range
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class DeleteQuestionFromRange(View):
     # get the rangeurl and questionid
@@ -1698,7 +1680,6 @@ class DeleteQuestionFromRange(View):
 
 # AssignUser View
 # lists all the students that can be added into the range
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class AssignUser(FilterView, ListView):
     # use the template teachers/assignuserrange.html
@@ -1746,7 +1727,6 @@ class AssignUser(FilterView, ListView):
 
 # AddUserRangeCart
 # allows the teacher to add the user into the add range cart
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class AddUserRangeCart(View):
     # def get function
@@ -1776,7 +1756,6 @@ class AddUserRangeCart(View):
 
 # RemoveUserRangeCart
 # removes the user from the add to range cart
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class RemoveUserRangeCart(View):
     # get the rangeurl and username
@@ -1804,7 +1783,6 @@ class RemoveUserRangeCart(View):
 
 # UserRangeCommit
 # saves the changes of the assigning of users into the database
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class UserRangeCommit(View):
     # get the rangeurl
@@ -1837,7 +1815,6 @@ class UserRangeCommit(View):
 
 # AssignGroup View
 # assign groups a range
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class AssignGroup(FilterView, ListView):
     # use the template teachers/assigngrouprange.html
@@ -1881,7 +1858,6 @@ class AssignGroup(FilterView, ListView):
 
 # AddGroupRangeCart
 # add the group into the cart to be added
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class AddGroupRangeCart(View):
     # get the rangeurl and groupname
@@ -1907,7 +1883,6 @@ class AddGroupRangeCart(View):
 
 # RemoveGroupRangeCart View
 # remove the group from the cart
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class RemoveGroupRangeCart(View):
     # get the rangeurl and groupname
@@ -1933,7 +1908,6 @@ class RemoveGroupRangeCart(View):
 
 # GroupRangeCommit
 # save the cart of adding group to range into the database
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class GroupRangeCommit(View):
     # get the rangeurl
@@ -1993,7 +1967,6 @@ class GroupRangeCommit(View):
 
 # RemoveStudentFromRange View
 # removes the student from a range
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class RemoveStudentFromRange(View):
     # get the rangeurl and username
@@ -2016,7 +1989,6 @@ class RemoveStudentFromRange(View):
 
 # RemoveGroupFromRange
 # removes a whole group from a range
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class RemoveGroupFromRange(View):
     # get the rangeurl and groupname
@@ -2055,7 +2027,6 @@ class RemoveGroupFromRange(View):
 
 # CreateQuestion View
 # this view is the base view for creating questions
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class CreateQuestion(ListView, ModelFormMixin):
     # use the template teachers/addquestion.html
@@ -2176,7 +2147,6 @@ class CreateQuestion(ListView, ModelFormMixin):
 
 # CreateFLQuestion View
 # This view is specifically to create flag type questions
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class CreateFLQuestion(ListView, ModelFormMixin):
     # use the teacheres/addflquestion.html template
@@ -2297,7 +2267,6 @@ class CreateFLQuestion(ListView, ModelFormMixin):
 
 # CreateMCQQuestion View
 # This view is to specifically create MCQ Questions
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class CreateMCQQuestion(ListView, ModelFormMixin):
     # use the template teachers/addmcqquestion.html
@@ -2427,7 +2396,6 @@ class CreateMCQQuestion(ListView, ModelFormMixin):
 
 # CreateSAQuestion View
 # This view is to specifically create short answer questions
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class CreateSAQuestion(ListView, ModelFormMixin):
     # use template teachers/addsaquestion.html
@@ -2548,7 +2516,6 @@ class CreateSAQuestion(ListView, ModelFormMixin):
 
 # CreateOEQuestion View
 # This view is to specifically create open ended answer questions
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class CreateOEQuestion(ListView, ModelFormMixin):
     # use template teachers/addoequestion.html
@@ -2669,7 +2636,6 @@ class CreateOEQuestion(ListView, ModelFormMixin):
 
 # CreateTFQuestion View
 # This view is to specifically create true or false questions
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class CreateTFQuestion(ListView, ModelFormMixin):
     # use the template teachers/addtfquestion.html
@@ -2790,7 +2756,6 @@ class CreateTFQuestion(ListView, ModelFormMixin):
 
 # ActivateRange View
 # This view is to activate the range after the teacher clicks the activate button
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class ActivateRange(View):
     # gets the rangeurl
@@ -2810,7 +2775,6 @@ class ActivateRange(View):
 
 # DeactivateRange View
 # This view is to deactivate the range after the teacher clicks the deactivate button
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class DeactivateRange(View):
     # get the rangeurl
@@ -2830,7 +2794,6 @@ class DeactivateRange(View):
 
 # DownloadCSVTemplate View
 # This will generate the CSV template for download
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class DownloadCSVTemplate(View):
     def get(self, request, *args, **kwargs):
@@ -2847,7 +2810,6 @@ class DownloadCSVTemplate(View):
 
 # ImportCSV View
 # This will receive the CSV from the user and store into the database
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class ImportCSV(View):
     def get(self, request, *args, **kwargs):
@@ -2954,7 +2916,6 @@ class ImportCSV(View):
         return render(request, 'teachers/importqns.html', {"redirect": redirect})
 
 
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class ExportCSV(View):
     def get(self, request, *args, **kwargs):
@@ -2984,7 +2945,6 @@ class ExportCSV(View):
 # IsOpen View
 # This will allow the teacher to set whether the rangecode can be used to add the range
 # whether the range 'IsOpen' to be added by range code
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class IsOpen(View):
     def get(self, request, *args, **kwargs):
@@ -3004,7 +2964,6 @@ class IsOpen(View):
 
 # IsClose View
 # Opposite of the IsOpen View, allow the teacher to disable adding range by range code
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class IsClose(View):
     def get(self, request, *args, **kwargs):
@@ -3026,7 +2985,6 @@ class IsClose(View):
 
 # QuestionManagement View
 # Displays all the (active) questions as a table
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class QuestionManagement(FilterView, ListView):
     # use the template teachers/questionmanagement.html
@@ -3056,7 +3014,6 @@ class QuestionManagement(FilterView, ListView):
 
 # ArchiveQuestioninManagement View
 # This view will archive the question selected by the teacher
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class ArchiveQuestioninManagement(View):
     # get the questionid
@@ -3074,7 +3031,6 @@ class ArchiveQuestioninManagement(View):
 
 # ArchivedQuestionManagement
 # displays all the archived questions
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class ArchivedQuestionManagement(FilterView, ListView):
     # use the template teachers/archivedquestionmanagement.html
@@ -3104,7 +3060,6 @@ class ArchivedQuestionManagement(FilterView, ListView):
 
 # UnarchiveFromQuestionmanagement View
 # This will unarchive the question selected by the teacher
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class UnarchiveFromQuestionManagement(View):
     def get(self, request, *args, **kwargs):
@@ -3123,7 +3078,6 @@ class UnarchiveFromQuestionManagement(View):
 
 # ViewQuestion View
 # teachers can view the question and all its details with this view
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class ViewQuestion(ListView):
     # use the template teachers/viewquestion.html
@@ -3174,7 +3128,6 @@ class ViewQuestion(ListView):
 
 # DeleteQuestion
 # allows the teacher to delete question from the archived question management
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class DeleteQuestion(View):
     # get the rangeurl and questionid
@@ -3200,7 +3153,6 @@ class DeleteQuestion(View):
 
 # Docker Management
 # Lists all the dockers currently being opened, allows the teachers to manually kill dockers
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class DockerManagement(ListView):
     # use template teachers/dockermanagement.html
@@ -3218,7 +3170,6 @@ class DockerManagement(ListView):
 
 # AdminDockerKill
 # kills the selected container
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class AdminDockerKill(View):
     def get(self, request, containername):
@@ -3246,7 +3197,6 @@ class AdminDockerKill(View):
 
 # Teacher View
 # lists all the teachers accounts
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class TeacherView(FilterView, ListView):
     # use the template teachers/teachermanagement.html
@@ -3264,7 +3214,6 @@ class TeacherView(FilterView, ListView):
 
 # AddTeacher View
 # allows teachers to add more teachers
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class AddTeacher(ListView, ModelFormMixin):
     # use template teachers/addteacher.html
@@ -3301,7 +3250,6 @@ class AddTeacher(ListView, ModelFormMixin):
 
 # ClassView
 # list all the classes in the class management
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class ClassView(FilterView, ListView):
     # use template teachers/classmanagement.html
@@ -3325,7 +3273,6 @@ class ClassView(FilterView, ListView):
 
 # AddClass View
 # form to add new class into database
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class AddClass(ListView, ModelFormMixin):
     # use template teachers/addclass.html
@@ -3368,7 +3315,6 @@ class AddClass(ListView, ModelFormMixin):
 # SDLManagement View
 # manage all the self directed learning materials
 # able to view all posts, edit and create new posts
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class SDLManagement(FilterView, ListView):
     # use template teachers/SDLmanagement.html
@@ -3395,7 +3341,6 @@ class SDLManagement(FilterView, ListView):
 
 # AddPost View
 # form to allow teachers to create posts
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class AddPost(FormView):
     # use the template teachers/addSDLpost.html
@@ -3431,7 +3376,6 @@ class AddPost(FormView):
 
 # EditPost View
 # allows the teacher to edit existing posts
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class EditPost(UpdateView):
     # use the template teachers/modifypost.html
@@ -3460,7 +3404,6 @@ class EditPost(UpdateView):
 
 # PublishPost View
 # allow teachers to publish the post so that the users can see
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class PublishPost(View):
     # get the postid
@@ -3479,7 +3422,6 @@ class PublishPost(View):
 
 # WithdrawPost View
 # allow teachers to withdraw post to hide from users
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class WithdrawPost(View):
     # get the postid
@@ -3495,7 +3437,6 @@ class WithdrawPost(View):
 
 # DeletePost View
 # allow teachers to delete a post
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class DeletePost(View):
     # get the postid
@@ -3508,7 +3449,6 @@ class DeletePost(View):
         return redirect('/teachers/SDLmanagement')
 
 # ViewPost View
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class ViewPost(ListView, ModelFormMixin):
     # use the template teachers/viewpost.html
@@ -3570,7 +3510,6 @@ class ViewPost(ListView, ModelFormMixin):
 
 # DeleteComment View
 # allows teachers to delete the comment
-@method_decorator(change_password, name='dispatch')
 @method_decorator(user_is_staff, name='dispatch')
 class DeleteComment(View):
     def get(self, request, postid, commentid):
@@ -3583,3 +3522,41 @@ class DeleteComment(View):
         # redirect back to the post
         return redirect(url)
 
+#########################
+# teacher settings
+@method_decorator(user_is_staff, name='dispatch')
+class ModifyTeacher(UpdateView):
+    form_class = TeacherModifyForm
+    model = User
+    template_name = 'teachers/settings.html'
+    success_url = '/teachers/settings/success'
+
+    def get_object(self):
+        user = self.request.user
+        selecteduser = User.objects.get(username=user)
+        return selecteduser
+
+    def get_form_kwargs(self):
+        kwargs = super(ModifyTeacher, self).get_form_kwargs()
+        kwargs.update({'request': self.request})
+        return kwargs
+
+class ChangePasswordView(UpdateView):
+    form_class = ResetTeacherPasswordForm
+    model = User
+    template_name = 'teachers/changepassword.html'
+    success_url = '/login/'
+
+    def get_object(self):
+        user = self.request.user
+        selecteduser = User.objects.get(username=user)
+        return selecteduser
+
+    def get_form_kwargs(self):
+        kwargs = super(ChangePasswordView, self).get_form_kwargs()
+        kwargs.update({'request': self.request})
+        return kwargs
+
+@method_decorator(user_is_staff, name='dispatch')
+class ModifyTeacherSuccess(generic.TemplateView):
+    template_name = 'teachers/success.html'
