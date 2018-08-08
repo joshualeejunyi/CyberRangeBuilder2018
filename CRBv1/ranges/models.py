@@ -75,23 +75,6 @@ class RangeStudents(models.Model):
         db_table = 'RangeStudents'
         verbose_name_plural = 'RangeStudents'
 
-class FakeRangeStudents(models.Model):
-    dateJoined = models.DateTimeField(db_column='dateJoined', max_length=45, blank=True, null=True)
-    points = models.IntegerField(db_column='points', default=0)
-    datecompleted = models.DateTimeField(db_column='datecompleted', null=True)
-    rangeID = models.ForeignKey(Range, on_delete=models.CASCADE, db_column='rangeID',unique=False)
-    studentID = models.ForeignKey('accounts.User', on_delete=models.CASCADE, db_column='email', unique=False)
-    lastaccess = models.DateTimeField(db_column='lastaccess', null=True)
-    groupid = models.ForeignKey('accounts.Group', on_delete=models.CASCADE, db_column="groupid", null=True, blank=True)
-
-    REQUIRED_FIELDS = ['rangeID', 'studentID']
-
-    class Meta:
-        app_label = RangeStudents._meta.app_label
-        db_table = RangeStudents._meta.db_table
-        managed = False
-
-
 class QuestionTopic(models.Model):
     topicid = models.AutoField(db_column='topicid', primary_key=True)
     topicname = models.CharField(db_column='topicname', max_length=100, null=True)
