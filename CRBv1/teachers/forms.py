@@ -358,6 +358,8 @@ class ModifyRangeQuestionForm(ModelForm):
             msg = u"Please enter the Registry Image Name!"
             self._errors["usedocker"] = self.error_class([msg])
         
+        if points is None:
+            points = 0
          # check if the hintpenalty or points is not None
         if hintpenalty is not None or points is not None:
             # check if the hint penalty is more than points (cause it shouldn't be)
@@ -426,6 +428,8 @@ class ModifyQuestionForm(ModelForm):
             msg = u"Please enter the Registry Image Name!"
             self._errors["usedocker"] = self.error_class([msg])
         
+        if points is None:
+            points = 0
         # check if the hintpenalty or points is not None
         if hintpenalty is not None or points is not None:
             # check if the hint penalty is more than points (cause it shouldn't be)

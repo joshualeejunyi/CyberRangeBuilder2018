@@ -2850,7 +2850,6 @@ class ImportCSV(View):
                 if line and x > 0:
                     marks=0
                     fields = line.split(",")
-
                     data_dict = {}
                     questiontype = fields[1]
                     topicname = fields[2]
