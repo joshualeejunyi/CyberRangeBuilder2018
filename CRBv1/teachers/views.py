@@ -1684,6 +1684,10 @@ class DeleteQuestionFromRange(View):
         rangeinstance = Range.objects.get(rangeurl = rangeurl)
         # get the selected question instance object
         selectedquestioninstance = Questions.objects.get(questionid = questionid)
+        # get the questionid
+        questionid = selectedquestioninstance.questionid
+        mcqoptionsobject = MCQOptions.objects.get(questionid = questionid)
+        mcqoptionsobject.delete()
         # delete object
         selectedquestioninstance.delete()
         # redirect to the previous url
