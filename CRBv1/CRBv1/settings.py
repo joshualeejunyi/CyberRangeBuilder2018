@@ -27,7 +27,7 @@ SECRET_KEY = 'jwftngrirhwff#+c2t_9p_ap!zd67t=n17xaui4(=71o^!8l4a'
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'dmit2.bulletplus.com']
 

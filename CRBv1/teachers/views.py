@@ -75,14 +75,14 @@ class CreateImage(View):
                 # if 200 (okay), it will pass, not returning errors
                 pass
             elif response.status_code == 404:
-                # if 404 (no container found), it will return -1 as indication
-                return -1 
+                # if 404 (no container found), raise 404
+                return HttpResponseNotFound()
             elif response.status_code == 500:
-                # if 500 (server error), it will return 02
-                return -2
+                # if 500 (server error), raise 500
+                return HttpResponseServerError()
             else:
-                # if any other error, return the status_code
-                return response.status_code
+                # if any other error, raise bad request
+                return HttpResponseBadRequest()
 
             # next, we have to rename the image
             reference = {}
@@ -97,20 +97,20 @@ class CreateImage(View):
                 # if 201 (okay), will pass
                 pass
             elif response.status_code == 400:
-                # if 400 (bad parameter), will return -3
-                return -3
+                # if 400 (bad parameter), raise badrequest
+                return HttpResponseBadRequest()
             elif response.status_code == 404:
-                # if 404 (no image found), will return a -4
-                return -4
+                # if 404 (no image found), raise 404
+                return HttpResponseNotFound()
             elif response.status_code == 409:
-                # if 409 (conflict), will return -5
-                return -5
+                # if 409 (conflict), raise forbiden
+                return HttpResponseForbidden()
             elif response.status_code == 500:
-                # if 500 (server error), will return -2 (same as above)
-                return -2
+                # if 500 (server error), raise 500
+                return HttpResponseServerError()
             else:
-                # otherwise, return the code
-                return response.status_code
+                # otherwise, raise bad request
+                return HttpResponseBadRequest()
 
         # if all okay, return 0 
         return 0
@@ -1320,10 +1320,6 @@ class AddQuestioninRangeCommit(View):
             if questionobj.usedocker is True:
                 # run the CreateImage View
                 error = CreateImage.get(self, request, rangeurl, questionid, imageid)
-                # check if successful
-                if error is not 0:
-                    # if it is not, get the error page
-                    Error.get(self, request, error)
         
         # set the url to redirect to 
         messages.success(request, 'Questions Successfully Imported')
@@ -2084,10 +2080,6 @@ class CreateQuestion(ListView, ModelFormMixin):
                 imageid = registryid
                 # call the createimage class
                 error = CreateImage.get(self, request, rangeurl, questionid, imageid)
-                # check if there is an error
-                if error is not 0:
-                    # if there is an error, show an error message
-                   return HttpResponse('ERROR')
 
             # return to the form        
             return ListView.get(self, request, *args, **kwargs)
@@ -2204,10 +2196,6 @@ class CreateFLQuestion(ListView, ModelFormMixin):
                 imageid = registryid
                 # call the createimage class
                 error = CreateImage.get(self, request, rangeurl, questionid, imageid)
-                # check if there is an error
-                if error is not 0:
-                    # if there is an error, show an error message
-                   return HttpResponse('ERROR')
 
             # return to the form        
             return ListView.get(self, request, *args, **kwargs)
@@ -2333,10 +2321,6 @@ class CreateMCQQuestion(ListView, ModelFormMixin):
                 imageid = registryid
                 # call the createimage class
                 error = CreateImage.get(self, request, rangeurl, questionid, imageid)
-                # check if there is an error
-                if error is not 0:
-                    # if there is an error, show an error message
-                   return HttpResponse('ERROR')
 
             # return to the form        
             return ListView.get(self, request, *args, **kwargs)
@@ -2454,9 +2438,6 @@ class CreateSAQuestion(ListView, ModelFormMixin):
                 # call the createimage class
                 error = CreateImage.get(self, request, rangeurl, questionid, imageid)
                 # check if there is an error
-                if error is not 0:
-                    # if there is an error, show an error message
-                   return HttpResponse('ERROR')
 
             # return to the form        
             return ListView.get(self, request, *args, **kwargs)
@@ -2573,10 +2554,6 @@ class CreateOEQuestion(ListView, ModelFormMixin):
                 imageid = registryid
                 # call the createimage class
                 error = CreateImage.get(self, request, rangeurl, questionid, imageid)
-                # check if there is an error
-                if error is not 0:
-                    # if there is an error, show an error message
-                   return HttpResponse('ERROR')
 
             # return to the form        
             return ListView.get(self, request, *args, **kwargs)
@@ -2694,9 +2671,6 @@ class CreateTFQuestion(ListView, ModelFormMixin):
                 # call the createimage class
                 error = CreateImage.get(self, request, rangeurl, questionid, imageid)
                 # check if there is an error
-                if error is not 0:
-                    # if there is an error, show an error message
-                   return HttpResponse('ERROR')
 
             # return to the form        
             return ListView.get(self, request, *args, **kwargs)

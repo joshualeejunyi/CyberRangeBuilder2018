@@ -291,6 +291,8 @@ class QuestionForm(ModelForm):
         
         if points is None:
             points = 0
+        if hintpenalty is None:
+            hintpenalty = 0
         # check if the hintpenalty or points is not None
         if hintpenalty is not None or points is not None:
             # check if the hint penalty is more than points (cause it shouldn't be)
@@ -360,6 +362,8 @@ class ModifyRangeQuestionForm(ModelForm):
         
         if points is None:
             points = 0
+        if hintpenalty is None:
+            hintpenalty = 0
          # check if the hintpenalty or points is not None
         if hintpenalty is not None or points is not None:
             # check if the hint penalty is more than points (cause it shouldn't be)
@@ -390,10 +394,6 @@ class ModifyRangeQuestionForm(ModelForm):
             imageid = registryid
             # call the CreateImage() View to create the image
             error = teachersview.CreateImage.get(self, self.request, self.rangeurl, self.questionid, imageid)
-            # check if no error
-            if error is not 0:
-                # if got error, response
-                return HttpResponse('ERROR')
 
         if commit:
             question.save()
@@ -430,6 +430,8 @@ class ModifyQuestionForm(ModelForm):
         
         if points is None:
             points = 0
+        if hintpenalty is None:
+            hintpenalty = 0
         # check if the hintpenalty or points is not None
         if hintpenalty is not None or points is not None:
             # check if the hint penalty is more than points (cause it shouldn't be)
