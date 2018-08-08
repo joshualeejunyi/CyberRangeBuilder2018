@@ -100,7 +100,7 @@
 							
 							<div class="box-body">
 								{% if password is not False %}
-									<h5>Shell Password: {{password}}</h5>
+									<h5><b>Shell Password:</b> {{password}}</h5>
 								{% endif %}
 								<p>{{question.text | safe | cut:"<p>" | cut:"</p>"}}</p>
 								<div>
