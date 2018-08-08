@@ -1304,6 +1304,16 @@ class AddQuestioninRangeCommit(View):
             # save the questionobject
             questionobj.save()
 
+            # check if it is mcq
+            questiontype = questionobj.questiontype
+            if questiontype == 'MCQ':
+                mcqoptionsobj = MCQOptions.objects.get(questionid = questionid)
+                mcqoptionsobj.pk = None
+                mcqoptionsobj.rangeid = rangeobj
+                newquestionobj = Questions.objects.get(questionid = questionobj.questionid)
+                mcqoptionsobj.questionid = newquestionobj
+                mcqoptionsobj.save()
+
             # get the question points
             questionpoints = questionobj.points
             # get the questionid
@@ -1445,7 +1455,7 @@ class EditRangeQuestion (UpdateView):
         # check if question is MCQ
         if questionobj.questiontype == 'MCQ':
             # get the mcqoptions object for that question
-            mcqoptions_obj = MCQOptions.objects.get(questionid = selectedquestion)
+            mcqoptions_obj = MCQOptions.objects.get(questionid = questionobj.questionid)
             # set the options as context
             context['optionone'] = mcqoptions_obj.optionone
             context['optiontwo'] = mcqoptions_obj.optiontwo

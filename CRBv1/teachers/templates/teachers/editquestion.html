@@ -19,8 +19,9 @@
                     <div class="form-group has-feedback">
                         <label for="topicname">Topic of Question: <span style="color:#dd4b39;">*</span></label>
                         <select name="topicname" id = "ourtopic" class="form-control" value="" required>
-                            <option value="{{result.topicid.topicid}}" disabled selected hidden>{{result.topicid.topicname}}</option>
-                            {% for e in questiontopic %}	
+                            <option value="{{result.topicid.topicname}}" selected hidden>{{result.topicid.topicname}}</option>
+                            {% for e in questiontopic %}
+
                                 <option value='{{ e.0 }}'>{{ e.0 }}</option>
                             {% endfor %}
                         </select>
