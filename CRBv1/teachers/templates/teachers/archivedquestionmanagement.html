@@ -64,7 +64,7 @@
                                 </div>
                             </div>
                         </form>
-    <table class="table table-bordered table-hover dataTable">
+    <table class="table table-bordered table-hover dataTable"  style="table-layout: fixed; width: 100%; word-wrap: break-word; display: table;">
         {% if questions.all %}
         <thead>
             <tr role="row">
@@ -157,7 +157,8 @@
                 <td>
                 {% if x.createdby == createdby %}
                     <a class="btn btn-block btn-primary" href="view/{{ x.questionid }}">View</a>
-                    <a class="btn btn-block btn-danger" onclick="return confirm('Unarchive Question {{ x.questionid}} ?')"  href="unarchive/{{ x.questionid }}">Unarchive</a>
+                    <a class="btn btn-block btn-success" onclick="return confirm('Unarchive Question {{ x.questionid}} ?')"  href="unarchive/{{ x.questionid }}">Unarchive</a>
+                    <a class="btn btn-block btn-danger" onclick="return confirm('Delete Question {{ x.questionid}} ?')"  href="delete/{{ x.questionid }}">Delete</a>
                 {% else %}
                     <a class="btn btn-block btn-primary" href="view/{{ x.questionid }}">View</a>
                 {% endif %}

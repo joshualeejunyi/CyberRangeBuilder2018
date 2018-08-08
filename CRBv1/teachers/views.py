@@ -1685,9 +1685,12 @@ class DeleteQuestionFromRange(View):
         # get the selected question instance object
         selectedquestioninstance = Questions.objects.get(questionid = questionid)
         # get the questionid
-        questionid = selectedquestioninstance.questionid
-        mcqoptionsobject = MCQOptions.objects.get(questionid = questionid)
-        mcqoptionsobject.delete()
+        # check if its an mcq question
+        questiontype = selectedquestioninstance.questiontype
+        if questiontype == 'MCQ':
+            questionid = selectedquestioninstance.questionid
+            mcqoptionsobject = MCQOptions.objects.get(questionid = questionid)
+            mcqoptionsobject.delete()
         # delete object
         selectedquestioninstance.delete()
         # redirect to the previous url
@@ -3181,14 +3184,16 @@ class DeleteQuestion(View):
         # get the selected question instance object
         selectedquestioninstance = Questions.objects.get(questionid = questionid)
         # get the questionid
-        questionid = selectedquestioninstance.questionid
-        mcqoptionsobject = MCQOptions.objects.get(questionid = questionid)
-        mcqoptionsobject.delete()
+        # check if its an mcq question
+        questiontype = selectedquestioninstance.questiontype
+        if questiontype == 'MCQ':
+            questionid = selectedquestioninstance.questionid
+            mcqoptionsobject = MCQOptions.objects.get(questionid = questionid)
+            mcqoptionsobject.delete()
         # delete object
         selectedquestioninstance.delete()
         # redirect to the previous url
         return redirect(previousurl)
-
 
 #################################################################
 # The following will support the docker management 
