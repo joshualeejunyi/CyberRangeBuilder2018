@@ -644,7 +644,7 @@ class AddUserToCart(View):
         request.session['usercart'] = userslist
 
         # set the url to direct to
-        url = "/teachers/groupmanagement/" + groupname + "/addusers"
+        url = request.META.get('HTTP_REFERER')
         # redirect back to the addusersingroup page
         return redirect(url)
 
@@ -673,7 +673,7 @@ class RemoveUserFromCart(View):
         request.session['usercart'] = userslist
 
         # set the url to redirect to 
-        url = "/teachers/groupmanagement/" + groupname + "/addusers"
+        url = request.META.get('HTTP_REFERER')
         # redirect to the addusersingroup page
         return redirect(url)
 
@@ -1241,7 +1241,7 @@ class AddQuestionToCart(View):
         request.session['questionscart'] = questionslist
 
         # set the url to redirect to
-        url = '/teachers/rangemanagement/view/' + rangeurl + '/import/'
+        url = request.META.get('HTTP_REFERER')
         # redirect to the addquestionsinrange page
         return redirect(url)
 
@@ -1271,7 +1271,7 @@ class RemoveQuestionFromCart(View):
         request.session['questionscart'] = questionslist
 
         # set the url to redirect to
-        url = '/teachers/rangemanagement/view/' + rangeurl + '/import/'
+        url = request.META.get('HTTP_REFERER')
         # redirect to the addqustionsinrange 
         return redirect(url)
 
@@ -1753,7 +1753,7 @@ class AddUserRangeCart(View):
         # set the userslist as the session
         request.session['userrangecart'] = userslist
         # set the url to redirect to
-        url = "/teachers/rangemanagement/view/" + rangeurl + "/assignusers"
+        url = request.META.get('HTTP_REFERER')
         # redirect to the assignusers page
         return redirect(url)
 
@@ -1781,7 +1781,7 @@ class RemoveUserRangeCart(View):
         # update the session with the new list
         request.session['userrangecart'] = userslist
         # set the url to redirect to
-        url = "/teachers/rangemanagement/view/" + rangeurl + "/assignusers"
+        url = request.META.get('HTTP_REFERER')
         # redirect to the assignusers page
         return redirect(url)
 
@@ -1884,7 +1884,7 @@ class AddGroupRangeCart(View):
         # set the new grouplist as the session
         request.session['grouprangecart'] = groupslist
         # set the url to be redirected to
-        url = "/teachers/rangemanagement/view/" + rangeurl + "/assigngroups"
+        url = request.META.get('HTTP_REFERER')
         # redirect to the assigngroups page
         return redirect(url)
 
@@ -1910,7 +1910,7 @@ class RemoveGroupRangeCart(View):
         # update the session
         request.session['grouprangecart'] = groupslist
         # set the url to redirect to
-        url = "/teachers/rangemanagement/view/" + rangeurl + "/assigngroups"
+        url = request.META.get('HTTP_REFERER')
         # redirect to the assigngroups page
         return redirect(url)
 

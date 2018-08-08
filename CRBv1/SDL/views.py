@@ -31,7 +31,7 @@ class SDLView(FilterView, ListView):
         context = super().get_context_data(**kwargs)
 
         # Return list of teachers to select for search filter
-        context['teachers'] = User.objects.filter(is_staff=1).values_list('username', flat=True)
+        context['teachers'] = User.objects.filter(is_staff=1)
         return context
 
 @method_decorator(change_password, name='dispatch')
