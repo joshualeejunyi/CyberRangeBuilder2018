@@ -37,7 +37,7 @@
                         <div class="form-group has-feedback">
                                 <label for="name">Full Name:</label>
                             {% if form.name.errors %}
-                                <input type="text" name="name" class="form-control" value="{{ user.name }}" required style="border-color: #dd4b39;">
+                                <input type="text" name="name" class="form-control" value="{{ user.name }}" maxlength="50" required style="border-color: #dd4b39;">
                                 <span class="glyphicon glyphicon-user form-control-feedback"></span>
                                 <ul style="color: #dd4b39">
                                     {% for error in form.name.errors %}
@@ -45,14 +45,14 @@
                                     {% endfor %}
                                 </ul>
                             {% else %}
-                                <input type="text" name="name" class="form-control" value="{{ user.name }}" required>
+                                <input type="text" name="name" class="form-control" value="{{ user.name }}" maxlength="50" required>
                                 <span class="glyphicon glyphicon-user form-control-feedback"></span>
                             {% endif %}
                         </div>
                         <div class="form-group has-feedback">
                             <label for="username">Username:</label>
                             {% if form.username.errors %}
-                                <input type="text" name="username" class="form-control" value="{{ user.username }}" required style="border-color: #dd4b39;">
+                                <input type="text" name="username" class="form-control" value="{{ user.username }}" required maxlength="45" style="border-color: #dd4b39;">
                                 <span class="glyphicon glyphicon-user form-control-feedback"></span>
                                 <ul style="color: #dd4b39">
                                     {% for error in form.username.errors %}
@@ -60,7 +60,7 @@
                                     {% endfor %}
                                 </ul>
                             {% else %}
-                                <input type="text" name="username" class="form-control" value="{{ user.username }}" required>
+                                <input type="text" name="username" class="form-control" maxlength="45" value="{{ user.username }}" required>
                                 <span class="glyphicon glyphicon-user form-control-feedback"></span>
                             {% endif %}
                         </div>

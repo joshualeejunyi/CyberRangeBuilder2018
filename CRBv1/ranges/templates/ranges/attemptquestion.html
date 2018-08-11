@@ -26,8 +26,13 @@
 								</div>
 							
 								<div class="box-body">
-									<h5>Shell Password: {{password}}</h5>
-									<p>{{question.text | safe | cut:"<p>" | cut:"</p>"}}</p>
+									{% if password is not False %}
+										<h5>Shell Password: {{password}}</h5>
+									{% endif %}
+									<div style="width: 100%; word-break: break-all;">
+										<p>{{question.text | safe | cut:"<p>" | cut:"</p>"}}</p>
+									</div>
+									
 									<div class="pull-right" style="width: 100%">
 										<form method="post">
 											Your Answer:
@@ -36,7 +41,11 @@
 												{% if hint is None %}
 													<a href="activatehint" class="btn btn-block btn-danger pull-left" style="margin-top: 2%; max-width: 50%;">Use Hint <b>{% if question.hintpenalty is 0%}(no points deducted){%else%}({{question.hintpenalty}} points deducted){% endif %}</b></a>
 												{% else %}
-													<h5 class="pull-left" style="width: 20%; margin-top: 2%;"><b>Hint:</b> {{question.hint}}</h5>
+													<h5 class="pull-left" style="margin-top: 2%; width: 50%; word-break: break-all;">
+														<b>Hint:</b>
+														<br>
+															{{question.hint}}
+													</h5>
 												{% endif %}
 												<div style="text-align: right; padding: 1%; margin-top: 2%; ">
 													{% if correct is True%}
@@ -61,9 +70,9 @@
 								</div>
 								<div class="box-footer">
 									<p class="pull-right">
-										{{questionpoints}} points 
+										<b>{{ question.points }} points</b>
 										{% if hint is not None %}
-										({{question.hintpenalty}} deducted)
+											({{question.hintpenalty}} deducted)
 										{% endif %}
 									</p>
 								</div>
@@ -102,7 +111,9 @@
 								{% if password is not False %}
 									<h5><b>Shell Password:</b> {{password}}</h5>
 								{% endif %}
-								<p>{{question.text | safe | cut:"<p>" | cut:"</p>"}}</p>
+								<div style="width: 100%; word-break: break-all;">
+									<p>{{question.text | safe | cut:"<p>" | cut:"</p>"}}</p>
+								</div>
 								<div>
 									<form method="post" class="pull-right" style="width:100%;">
 										{% csrf_token %}
@@ -174,7 +185,16 @@
 										</div>
 										<div>
 										{% if hint is None %}
-											<a href="activatehint" class="btn btn-block btn-danger pull-left" style="margin-top: 2%; max-width: 50%;">Use Hint <b>{% if question.hintpenalty is 0%}(no points deducted){%else%}({{question.hintpenalty}} points deducted){% endif %}</b></a>
+											<a href="activatehint" class="btn btn-block btn-danger pull-left" style="margin-top: 2%; max-width: 50%;">
+												Use Hint 
+												<b>
+													{% if question.hintpenalty is 0%}
+														(no points deducted)
+													{%else%}
+														({{question.hintpenalty}} points deducted)
+													{% endif %}
+												</b>
+											</a>
 											{% if question.questiontype != 'OE' %}
 												<button class="btn btn-block btn-primary pull-right" type="submit" style="width: 20%; margin-top: 2%;">Submit</button>
 											{% else %}
@@ -185,8 +205,14 @@
 												{% endif %}
 											{% endif %}
 										{% else %}
-											<h5 class="pull-left" style="width: 20%; margin-top: 2%;"><b>Hint:</b> {{question.hint}}</h5>
-											<button class="btn btn-block btn-primary pull-right" type="submit" style="width: 20%; margin-top: 2%;">Submit</button>
+											<div>
+												<h5 class="pull-left" style="margin-top: 2%; width: 50%; word-break: break-all;">
+													<b>Hint:</b>
+													<br> 
+													{{question.hint}}
+												</h5>
+												<button class="btn btn-block btn-primary pull-right" type="submit" style="width: 20%; margin-top: 2%;">Submit</button>
+											</div>
 										{% endif %}
 										</div>
 									</form>
@@ -195,6 +221,7 @@
 							
 							<div class="box-footer">
 								<p class="pull-right">
+									<b>{{ question.points }} points</b>
 									{% if hint is not None %}
 										({{question.hintpenalty}} deducted)
 									{% endif %}
