@@ -425,7 +425,7 @@ class AttemptQuestionView(ListView, ModelFormMixin):
         # check if the question exists, otherwise raise 404
         self.questionid = get_object_or_404(Questions, questionid=self.kwargs['questionid'])
         # check if the range exists, otherwise raise 404
-        self.rangeid = get_object_or_404(Range, rangeurl=self.kwargs['rangeurl'], rangeactive=1)
+        self.rangeid = get_object_or_404(Range, rangeurl=self.kwargs['rangeurl'], rangeactive=1, isdisabled=0)
         # get the questions
         question = Questions.objects.filter(questionid = self.kwargs['questionid'])[0]
         return question
@@ -633,7 +633,7 @@ class AttemptMCQQuestionView(ListView, ModelFormMixin):
         # check if the question exists, otherwise raise 404
         self.questionid = get_object_or_404(Questions, questionid=self.kwargs['questionid'])
         # check if the range exists, otherwise raise 404
-        self.rangeid = get_object_or_404(Range, rangeurl=self.kwargs['rangeurl'], rangeactive=1)
+        self.rangeid = get_object_or_404(Range, rangeurl=self.kwargs['rangeurl'], rangeactive=1, isdisabled=0)
         # get the questions
         question = Questions.objects.filter(questionid = self.kwargs['questionid'])[0]
         return question
@@ -883,7 +883,7 @@ class QuestionsView(ListView):
         return context
 
     def get_queryset(self):
-        self.rangeurl = get_object_or_404(Range, rangeurl=self.kwargs['rangeurl'], rangeactive=1)
+        self.rangeid = get_object_or_404(Range, rangeurl=self.kwargs['rangeurl'], rangeactive=1, isdisabled=0)
         DockerKill.get(self, self.request)
         currentrangeid = Range.objects.filter(rangeurl = self.kwargs['rangeurl']).values_list('rangeid')[0][0]
         questions = Questions.objects.filter(rangeid = currentrangeid)
