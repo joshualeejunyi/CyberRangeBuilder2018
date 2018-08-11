@@ -38,11 +38,9 @@
 											Your Answer:
 											<input type="text" class="form-control" placeholder="{{ latestanswer }}" disabled>
 											<div>
-												{% if hint is None %}
-													<a href="activatehint" class="btn btn-block btn-danger pull-left" style="margin-top: 2%; max-width: 50%;">Use Hint <b>{% if question.hintpenalty is 0%}(no points deducted){%else%}({{question.hintpenalty}} points deducted){% endif %}</b></a>
-												{% else %}
+												{% if hint is not None %}
 													<h5 class="pull-left" style="margin-top: 2%; width: 50%; word-break: break-all;">
-														<b>Hint:</b>
+														<b>Hint Used:</b>
 														<br>
 															{{question.hint}}
 													</h5>
@@ -185,7 +183,7 @@
 										</div>
 										<div>
 										{% if hint is None %}
-											<a href="activatehint" class="btn btn-block btn-danger pull-left" style="margin-top: 2%; max-width: 50%;">
+											<a href="activatehint" class="btn btn-block btn-danger pull-left" style="margin-top: 2%; width: 20%;">
 												Use Hint 
 												<b>
 													{% if question.hintpenalty is 0%}
