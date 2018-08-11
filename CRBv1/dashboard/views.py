@@ -11,7 +11,7 @@ class DashboardView(generic.ListView):
 
     def get_queryset(self):
         user = self.request.user
-        assignedranges = RangeStudents.objects.filter(studentID=user, rangeID__rangeactive=1).order_by('-lastaccess', '-dateJoined', '-pk')[:5]
+        assignedranges = RangeStudents.objects.filter(studentID=user, rangeID__rangeactive=1, rangeID__isdisabled=0).order_by('-lastaccess', '-dateJoined', '-pk')[:5]
         self.reportboxes = assignedranges[:4]
         latestfive = assignedranges[:5]
         currentranges = RangeStudents.objects.filter(studentID = user).values_list('rangeID')
