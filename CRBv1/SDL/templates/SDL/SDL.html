@@ -41,7 +41,6 @@
 					</select>
 				</div>
 			</div>
-
 			<div>
 				<button type="submit" class="btn btn-primary btn-flat" style="width: 200px; display: inline-block">
 					<span class="glyphicon glyphicon-search"></span> Search
@@ -51,64 +50,63 @@
 		</form>
 	</div>
 
-		{% if posts %}
-			{% for post in posts %}
-			<a href="view/{{post.postid}}" style="color:black;">
-			<div class="row">
-				<div style="width:98%; margin: 0 auto;">
-					<div class="box box-widget">
-						<div class="box-header with-border">
-						<div class="user-block">
-							<h4>{{ post.title }}</h4>
+	{% if posts %}
+		{% for post in posts %}
+		<a href="view/{{post.postid}}" style="color:black;">
+		<div class="row">
+			<div style="width:98%; margin: 0 auto;">
+				<div class="box box-widget">
+					<div class="box-header with-border">
+					<div class="user-block">
+						<h4>{{ post.title }}</h4>
+					</div>
+					<div class="box-tools">
+						<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+					</div>
+					</div>
+				
+					<div class="box-body">
+						<div style="max-height:100px; text-overflow:ellipsis; overflow:hidden;">
+							{{ post.text | safe | slice:":255"}}
 						</div>
-						<div class="box-tools">
-							<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
-						</div>
-						</div>
+					</div>
 					
-						<div class="box-body">
-							<div style="max-height:100px; text-overflow:ellipsis; overflow:hidden;">
-								{{ post.text | safe | slice:":255"}}
-							</div>
-						</div>
-						
-						<div class="box-footer">
-							<span> Posted By: {{ post.createdby }}</span>
-							<span style="float:right;">
-								Date Posted: {{ post.dateposted }} {{ post.timeposted }}
-							</span>
-						</div>
+					<div class="box-footer">
+						<span> Posted By: {{ post.createdby }}</span>
+						<span style="float:right;">
+							Date Posted: {{ post.dateposted }} {{ post.timeposted }}
+						</span>
 					</div>
 				</div>
 			</div>
-			</a>
+		</div>
+		</a>
+		{% endfor %}
+	{% else %}
+		<h3 class="text-center" style="padding-bottom: 2%"> No Posts Found.</h3>
+	{% endif %}
+
+	{% if is_paginated %}
+		<ul class="pagination">
+			{% if page_obj.has_previous %}
+				<li><a href="?page={{ page_obj.previous_page_number }}">&laquo;</a></li>
+			{% else %}
+				<li class="disabled"><span>&laquo;</span></li>
+			{% endif %}
+
+			{% for i in paginator.page_range %}
+				{% if page_obj.number == i %}
+					<li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+				{% else %}
+					<li><a href="?page={{ i }}">{{ i }}</a></li>
+				{% endif %}
 			{% endfor %}
-		{% else %}
-			<h3 class="text-center" style="padding-bottom: 2%"> No Posts Yet.</h3>
-		{% endif %}
 
-		{% if is_paginated %}
-			<ul class="pagination">
-				{% if page_obj.has_previous %}
-					<li><a href="?page={{ page_obj.previous_page_number }}">&laquo;</a></li>
-				{% else %}
-					<li class="disabled"><span>&laquo;</span></li>
-				{% endif %}
-
-				{% for i in paginator.page_range %}
-					{% if page_obj.number == i %}
-						<li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
-					{% else %}
-						<li><a href="?page={{ i }}">{{ i }}</a></li>
-					{% endif %}
-				{% endfor %}
-
-				{% if page_obj.has_next %}
-					<li><a href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>
-				{% else %}
-					<li class="disabled"><span>&raquo;</span></li>
-				{% endif %}
-			</ul>
-		{% endif %}
-	</div>
+			{% if page_obj.has_next %}
+				<li><a href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>
+			{% else %}
+				<li class="disabled"><span>&raquo;</span></li>
+			{% endif %}
+		</ul>
+	{% endif %}
 {% endblock %}
