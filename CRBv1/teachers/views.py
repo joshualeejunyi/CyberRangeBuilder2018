@@ -32,6 +32,7 @@ from django.utils.decorators import method_decorator
 from SDL.forms import *
 from SDL.filters import *
 from SDL.models import *
+from ranges.views import Housekeeping
 
 # Error TemplateView
 # Currently working on designing a customized error page 
@@ -897,6 +898,11 @@ class RangeView(ListView, FilterView):
         selectedrange = Range.objects.get(rangeurl= self.kwargs['rangeurl'])
         # get the rangeid
         selectedrangeid = selectedrange.rangeid
+
+        # call the housekeeping class from ranges side
+        # get the queryset first
+        housekeepingqueryset = Range.objects.filter(rangeid = selectedrangeid).values_list('rangeid')
+        Housekeeping.get(self, housekeepingqueryset)
 
         # set isopen as context
         context['isopen'] = selectedrange.isopen
@@ -1944,7 +1950,6 @@ class GroupRangeCommit(View):
                 groupobj = Group.objects.get(groupname = groupname)
                 # before creating, we need to check if there is the student already in the range
                 checkobj = RangeStudents.objects.filter(studentID = studentobj, rangeID = rangeid).count()
-                print(checkobj)
                 # check if count is 0
                 if checkobj == 0:
                     # then can save

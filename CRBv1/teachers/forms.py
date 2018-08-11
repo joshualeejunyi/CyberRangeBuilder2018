@@ -159,7 +159,7 @@ class RangeForm(ModelForm):
                 # timestart at 0830
                 createdrange.timestart = '08:30:AM'
                 # time end at 2359
-                createdrange.timeend = '11:59:PM'
+                createdrange.timeend = '23:59:PM'
 
         if commit:
             createdrange.save()
@@ -253,7 +253,7 @@ class ModifyRangeForm(ModelForm):
                 # timestart at 0830
                 modifyrange.timestart = '08:30:AM'
                 # time end at 2359
-                modifyrange.timeend = '11:59:PM'
+                modifyrange.timeend = '23:59:PM'
             # save the object
             modifyrange.save()
         return modifyrange

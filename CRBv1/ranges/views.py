@@ -918,18 +918,23 @@ class Housekeeping(View):
                 # check if the date is between the start and end
                 datecheck = datetime.date.today() >= datestart and datetime.date.today() <= dateend
                 if datecheck is True:
-                    # if true, check if the time is after timestart and before timeend
-                    timecheck = datetime.datetime.now().time() >= timestart and datetime.datetime.now().time() <= timeend
-                    if timecheck is True:
-                        # if it is true, activate the range
-                        rangeobject.rangeactive = True
-                        # save the object
-                        rangeobject.save()
-                    else:
-                        # otherwise just set as inactive
-                        rangeobject.rangeactive = False
-                        # save the rangeobject
-                        rangeobject.save()
+                    # check if it is the datestart day
+                    startdatecheck = datetime.date.today() == datestart
+                    if startdatecheck is True:
+                        # check if the timestart has passed
+                        starttimecheck = datetime.datetime.now().time() >= timestart
+                        if starttimecheck is True:
+                            rangeobject.rangeactive = True
+
+                    # check if it is the dateend day
+                    enddatecheck = datetime.date.today() == dateend
+                    if enddatecheck is True:
+                        # check if the timeend has passed
+                        endtimecheck = datetime.datetime.now().time() >= timeend
+                        if endtimecheck is True:
+                            rangeobject.rangeactive = False
+
+                    rangeobject.save()
                 else:
                     rangeobject.rangeactive = False
                     rangeobject.save()
