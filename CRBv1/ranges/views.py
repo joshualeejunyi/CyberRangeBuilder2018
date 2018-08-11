@@ -969,7 +969,7 @@ class RangesView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
-        inactiveranges = RangeStudents.objects.filter(studentID=user, rangeID__rangeactive=0).order_by('-lastaccess', '-dateJoined', '-pk')
+        inactiveranges = RangeStudents.objects.filter(studentID=user, rangeID__rangeactive=0, rangeID__isdisabled=0).order_by('-lastaccess', '-dateJoined', '-pk')
         context['inactive'] = inactiveranges
         return context
 
@@ -979,7 +979,7 @@ class RangesView(ListView):
         # get the email address of current user
         user = self.request.user
         # get the rangeIDs that are assigned to current user (in a queryset)
-        assignedranges = RangeStudents.objects.filter(studentID=user, rangeID__rangeactive=1).order_by('-lastaccess', '-dateJoined', '-pk')
+        assignedranges = RangeStudents.objects.filter(studentID=user, rangeID__rangeactive=1, rangeID__isdisabled=0).order_by('-lastaccess', '-dateJoined', '-pk')
         # get the currentranges
         currentranges = RangeStudents.objects.filter(studentID = user).values_list('rangeID')
         # call the housekeeping view
