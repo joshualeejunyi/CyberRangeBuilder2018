@@ -59,6 +59,8 @@ class CreateImage(View):
         data = {}
         # declare a list of server ip addresses for the for loop later
         serverip = ['192.168.100.42:8051', '192.168.100.43:8051']
+        # in development mode, uncomment the following line
+        serverip = ['localhost']
         # conver the imageid to be lowercase
         imageid = imageid.lower()
         
@@ -66,6 +68,8 @@ class CreateImage(View):
         for ip in serverip:
             # set the enpoints and header to communicate with the server
             endpoint1 = 'http://' + ip + '/images/create?fromImage=dmit2.bulletplus.com:8053/{conid}'
+            # in development mode, uncomment the following
+            endpoint1 = 'http://' + ip + '/images/create?fromImage={conid}'
             header1 = {"X-Registry-Auth": "eyAidXNlcm5hbWUiOiAiYWRtaW4iLCAicGFzc3dvcmQiOiAicGFzc3dvcmQiLCAic2VydmVyYWRkcmVzcyI6ICJkbWl0Mi5idWxsZXRwbHVzLmNvbTo4MDUzIiB9Cg=="}
             # format the url to be sent
             url1 = endpoint1.format(conid=imageid)
@@ -91,6 +95,8 @@ class CreateImage(View):
             imagename = str(rangeurl) + '.' + str(questionid)
             # set the endpoint
             endpoint2 = 'http://' + ip + '/images/dmit2.bulletplus.com:8053/' + imageid + '/tag?repo=' + imagename
+            # in development mode, uncomment the following
+            endpoint2 = 'http://' + ip + '/images/' + imageid + '/tag?repo=' + imagename
             # request for response
             response = requests.post(endpoint2)
             # check the status code

@@ -11,6 +11,28 @@
 	</section>
 {% endblock%}
 
+{% block javascript %}
+	<script type="text/javascript">
+		// Get the modal
+		var modal = document.getElementById('siabbox');
+
+		// Get the button that opens the modal
+		var btn = document.getElementById("siabbutton");
+
+		var siab = document.getElementById('siab');
+
+		// When the user clicks the button, open the modal 
+		btn.onclick = function() {
+		modal.style.display = "block"
+		btn.style.display = "none"
+		siab.setAttribute('src', siab.getAttribute('data-src'));
+		}
+
+		var trailerbox = document.getElementById("close");
+	</script>
+{% endblock %}
+
+
 {% block content %}
 	<section class="content">
 		<div class="float-left">
@@ -87,8 +109,9 @@
 					
 						{% if siab is not False %}
 							<div class="float-right">
-								<div>
-									<iframe id ='siab' width="50%" height="700px" src="https://{{ siab }}" frameborder="0"></iframe>
+									<button class="btn btn-block btn-success" style="width: 10%;"id="siabbutton">Connect</button>
+								<div id="siabbox">
+									<iframe id ='siab' width="50%" height="700px" data-src="https://{{ siab }}" frameborder="0"></iframe>
 								</div>
 							</div>
 						{% endif %}
@@ -183,7 +206,7 @@
 										</div>
 										<div>
 										{% if hint is None %}
-											<a href="activatehint" class="btn btn-block btn-danger pull-left" style="margin-top: 2%; width: 20%;">
+											<a href="activatehint" class="btn btn-block btn-danger pull-left" style="margin-top: 2%; width: 50%;">
 												Use Hint 
 												<b>
 													{% if question.hintpenalty is 0%}
@@ -237,8 +260,9 @@
 					</div>
 					{% if siab is not False %}
 					<div class="float-right">
-						<div>
-							<iframe id ='siab' width="50%" height="700px" src="https://{{ siab }}" frameborder="0"></iframe>
+						<button class="btn btn-block btn-success" style="width: 10%;"id="siabbutton">Connect</button>
+						<div id="siabbox">
+							<iframe id ='siab' width="50%" height="700px" data-src="https://{{ siab }}" frameborder="0"></iframe>
 						</div>
 					</div>
 					{% endif %}

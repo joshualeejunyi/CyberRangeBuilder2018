@@ -19,6 +19,10 @@ from django.utils.decorators import method_decorator
 from django.contrib import messages
 
 @method_decorator(user_is_student, name='dispatch')
+class ShellConnect(generic.TemplateView):
+    template_name = 'ranges/shellconnect'
+
+@method_decorator(user_is_student, name='dispatch')
 class CheckPorts(View):
     def get(self):
         # get all the entries of the ports currently being used
@@ -122,6 +126,8 @@ class DockerContainerStart(View):
         elif port <= 9050:
             # else if it is less than 9050 inclusive, it must be the web server
             serverip = '192.168.100.43'
+        # in development mode, uncomment the following to override the serverip
+        serverip = 'localhost'
         # convert the port to a string for concatenation later
         port = str(port)
         # get the current rangeurl
@@ -134,6 +140,8 @@ class DockerContainerStart(View):
         # create the payload for the docker engine api
         # the imagename used is to determine the image name to be created
         # the image should be already created in the docker server
+        # in development mode, uncomment the following to override the serverip
+        imagename = 'siab_server'
         payload = {
             'Image':imagename,
             'HostConfig': {
@@ -147,6 +155,9 @@ class DockerContainerStart(View):
         }
         # use the docker engine api to create the container
         url = 'http://' + serverip + ':8051/containers/create'
+        # in development mode, uncomment the following to override the serverip
+        url = 'http://' + serverip + ':3125/containers/create'
+        print(url)
         # request with the payload
         response = requests.post(url, json=payload)
         if response.status_code == 201:
@@ -157,6 +168,8 @@ class DockerContainerStart(View):
             containerid = data['Id']
             # get the url to start the container
             starturl = 'http://' + serverip + ':8051/containers/%s/start' % containerid
+            # in development mode, uncomment the following to override the serverip
+            starturl = 'http://' + serverip + ':3125/containers/%s/start' % containerid
             # request to start the container
             response = requests.post(starturl)
             # create a new entry in the database
@@ -165,6 +178,8 @@ class DockerContainerStart(View):
             portsdb.save()
             # get the final url for the iframe
             finalsiaburl = 'dmit2.bulletplus.com:' + port
+            # in development mode, uncomment the following to override the serverip
+            finalsiaburl = 'localhost:' + port
 
             # generate a randompassword for the docker container
             randompassword = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(6))
@@ -183,6 +198,8 @@ class DockerContainerStart(View):
             }
             # set the url
             execurl = 'http://' + serverip + ':8051/containers/' + containerid + '/exec'
+            # in development mode, uncomment the following to override the serverip
+            execurl = 'http://' + serverip + ':3125/containers/' + containerid + '/exec'
             # request the url with the json payload
             execresponse = requests.post(execurl, json=execcmd)
             # check if it is successful
@@ -198,6 +215,8 @@ class DockerContainerStart(View):
                 }
                 # set the exec start url
                 execstarturl = 'http://' + serverip + ':8051/exec/' + execconid + '/start'
+                # in development mode, uncomment the following to override the serverip
+                execstarturl = 'http://' + serverip + ':3125/exec/' + execconid + '/start'
                 # send the request
                 startexecres = requests.post(execstarturl, json=execpayload)
 
@@ -206,13 +225,16 @@ class DockerContainerStart(View):
 
         elif response.status_code == 400:
             # return error
-            return -1
+            print('400')
+            return -1, -1
         elif response.status_code == 409:
             # return error
-            return -2
+            print('409')
+            return -2, -2
         else:
             # return error
-            return -3
+            print('something else')
+            return -3, -3
 
 @method_decorator(user_is_student, name='dispatch')
 class EnterCode(View):
@@ -281,8 +303,12 @@ class DockerKill(View):
             elif int(port) <= 9050:
                 # else if the port is less than 9051 inclusive, the server must be ther web server
                 serverip = '192.168.100.43'
+            # in development mode, uncomment the following to override the serverip
+            serverip = 'localhost'
             # url for the web server to talk to
             endpoint = 'http://' + serverip + ':8051/containers/{conid}?force=True'
+            # in development mode, uncomment the following
+            endpoint = 'http://' + serverip + ':3125/containers/{conid}?force=True'
             url = endpoint.format(conid=containername)
             # request to delete the container
             response = requests.delete(url)
@@ -315,8 +341,12 @@ class DockerKill(View):
                     elif int(port) <= 9050:
                         # else if is is less than 9051 inclusive, it must be the web srver
                         serverip = '192.168.100.43'
+                    # in development mode, uncomment the following to override the serverip
+                    serverip = 'localhost'
                     # get the url for the request
                     endpoint = 'http://' + serverip + ':8051/containers/{conid}?force=True'
+                    # in development mode, uncomment the following
+                    endpoint = 'http://' + serverip + ':3125/containers/{conid}?force=True'
                     url = endpoint.format(conid=containername)
                     # send the request to delete the container
                     response = requests.delete(url)
@@ -918,6 +948,8 @@ class Housekeeping(View):
                 # check if the date is between the start and end
                 datecheck = datetime.date.today() >= datestart and datetime.date.today() <= dateend
                 if datecheck is True:
+                    # activate range first
+                    rangeobject.rangeactive = True
                     # check if it is the datestart day
                     startdatecheck = datetime.date.today() == datestart
                     if startdatecheck is True:

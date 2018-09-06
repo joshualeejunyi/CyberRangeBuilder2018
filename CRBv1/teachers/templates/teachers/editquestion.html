@@ -106,7 +106,15 @@
 
                     <div class="form-group has-feedback">
                         <label for="usedocker">Use shell-in-a-box? <span style="color:#dd4b39;">*</span></label>
-                        <input type="text" name="usedocker" value="{% if result.usedocker %}Yes{% else %}No{% endif %}" class="form-control" required disabled>
+                        <select name="usedocker" class="form-control">
+                            {% if result.usedocker is True%}
+                                <option value="True" selected>Yes</option>
+                                <option value="False">No</option>
+                            {% else %}
+                                <option value="False" selected>No</option>
+                                <option value="True">Yes</option>
+                            {% endif %}
+                        </select>
                     </div>
                     <div class="form-group has-feedback">
                         <label for="registryid">Registry Image Name (if using shell-in-a-box): <p style="color:#dd4b39;"><i>(Warning: will not work if the wrong image name is entered)</i></p></label>
