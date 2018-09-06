@@ -35,6 +35,7 @@
 				<div class="form-group col-sm-4 col-md-3">
 					<label for="createdby__username">Created By:</label>
 					<select name="createdby__username" class="form-control" placeholder="Created By">
+						<option value="" selected>----</option>
 						{% for name in teachers %}
 							<option value='{{ name.username }}'>{{ name.username }}</option>
 						{% endfor %}

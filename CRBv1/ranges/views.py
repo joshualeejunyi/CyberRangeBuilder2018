@@ -19,10 +19,6 @@ from django.utils.decorators import method_decorator
 from django.contrib import messages
 
 @method_decorator(user_is_student, name='dispatch')
-class ShellConnect(generic.TemplateView):
-    template_name = 'ranges/shellconnect'
-
-@method_decorator(user_is_student, name='dispatch')
 class CheckPorts(View):
     def get(self):
         # get all the entries of the ports currently being used
