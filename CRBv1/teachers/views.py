@@ -7,7 +7,7 @@ from django.views.generic.list import ListView
 from django.views.generic.edit import FormView, ModelFormMixin, UpdateView, DeleteView, CreateView
 from django.views.generic.base import TemplateView
 from django.views import generic 
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseNotFound, HttpResponseServerError, HttpResponseBadRequest
 from accounts.forms import *
 from ranges.models import *
 from accounts.models import *
@@ -69,7 +69,7 @@ class CreateImage(View):
             # set the enpoints and header to communicate with the server
             endpoint1 = 'http://' + ip + '/images/create?fromImage=dmit2.bulletplus.com:8053/{conid}'
             # in development mode, uncomment the following
-            endpoint1 = 'http://' + ip + '/images/create?fromImage={conid}'
+            endpoint1 = 'http://' + ip + '/images/create?fromImage=localhost:5000{conid}'
             header1 = {"X-Registry-Auth": "eyAidXNlcm5hbWUiOiAiYWRtaW4iLCAicGFzc3dvcmQiOiAicGFzc3dvcmQiLCAic2VydmVyYWRkcmVzcyI6ICJkbWl0Mi5idWxsZXRwbHVzLmNvbTo4MDUzIiB9Cg=="}
             # format the url to be sent
             url1 = endpoint1.format(conid=imageid)
@@ -96,7 +96,7 @@ class CreateImage(View):
             # set the endpoint
             endpoint2 = 'http://' + ip + '/images/dmit2.bulletplus.com:8053/' + imageid + '/tag?repo=' + imagename
             # in development mode, uncomment the following
-            endpoint2 = 'http://' + ip + '/images/' + imageid + '/tag?repo=' + imagename
+            endpoint2 = 'http://' + ip + '/images/localhost:5000' + imageid + '/tag?repo=' + imagename
             # request for response
             response = requests.post(endpoint2)
             # check the status code

@@ -1,0 +1,38 @@
+Hi there. Looks like you want to setup your own registry.
+
+Here's some stuff to help you out.
+
+Copy the certs folder into root '/'.
+
+Copy auth_server into your home directory '~'.
+
+RUN:
+sudo docker run -d --name docker_auth -p 5001:5001 -v `pwd`/auth_server/config:/config:ro --restart=always -v `pwd`/auth_server/ssl:/ssl cesanta/docker_auth /config/auth_config.yml
+
+RUN:
+sudo docker run -d -v /certs:/certs -p 5000:443 -e REGISTRY_HTTP_ADDR=0.0.0.0:443 -e REGISTRY_HTTP_TLS_CERTIFICATE=/certs/dmit2.cer -e REGISTRY_HTTP_TLS_KEY=/certs/dmit2.bulletplus.com.key -e REGISTRY_AUTH=token -e REGISTRY_AUTH_TOKEN_REALM=https://127.0.0.1:5001/auth -e REGISTRY_AUTH_TOKEN_SERVICE="Docker Registry" -e REGISTRY_AUTH_TOKEN_ISSUER="Auth Service" -e REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE=/certs/certificate.pem -e REGISTRY_STORAGE_DELETE_ENABLED=true -v /root/auth_server/ssl:/ssl --restart=always --name registry registry:2
+
+Copy the file daemon.json into /etc/docker. If the file exists, copy and paste the contents within it. Also, change the domain and port if needed.
+
+Login to the registry.
+RUN:
+docker login https://localhost:5000
+
+Use the following credentials if required:
+Username: admin
+Password: password
+
+To push images into the registry:
+Tag the image first
+RUN:
+docker image tag <image name> <ip>:<port>/<name>
+
+eg. docker image tag siab_server localhost:5000/test1
+
+Now, push the image
+RUN:
+docker push <ip>:<port>/<name>
+
+eg. docker push localhost:5000/test1
+
+Should be all but I may be wrong.

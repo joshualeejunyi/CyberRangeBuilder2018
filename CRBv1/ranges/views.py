@@ -151,8 +151,6 @@ class DockerContainerStart(View):
         }
         # use the docker engine api to create the container
         url = 'http://' + serverip + ':8051/containers/create'
-        # in development mode, uncomment the following to override the serverip
-        url = 'http://' + serverip + ':3125/containers/create'
         print(url)
         # request with the payload
         response = requests.post(url, json=payload)
@@ -164,8 +162,6 @@ class DockerContainerStart(View):
             containerid = data['Id']
             # get the url to start the container
             starturl = 'http://' + serverip + ':8051/containers/%s/start' % containerid
-            # in development mode, uncomment the following to override the serverip
-            starturl = 'http://' + serverip + ':3125/containers/%s/start' % containerid
             # request to start the container
             response = requests.post(starturl)
             # create a new entry in the database
@@ -194,8 +190,6 @@ class DockerContainerStart(View):
             }
             # set the url
             execurl = 'http://' + serverip + ':8051/containers/' + containerid + '/exec'
-            # in development mode, uncomment the following to override the serverip
-            execurl = 'http://' + serverip + ':3125/containers/' + containerid + '/exec'
             # request the url with the json payload
             execresponse = requests.post(execurl, json=execcmd)
             # check if it is successful
@@ -211,8 +205,6 @@ class DockerContainerStart(View):
                 }
                 # set the exec start url
                 execstarturl = 'http://' + serverip + ':8051/exec/' + execconid + '/start'
-                # in development mode, uncomment the following to override the serverip
-                execstarturl = 'http://' + serverip + ':3125/exec/' + execconid + '/start'
                 # send the request
                 startexecres = requests.post(execstarturl, json=execpayload)
 
@@ -303,8 +295,6 @@ class DockerKill(View):
             serverip = 'localhost'
             # url for the web server to talk to
             endpoint = 'http://' + serverip + ':8051/containers/{conid}?force=True'
-            # in development mode, uncomment the following
-            endpoint = 'http://' + serverip + ':3125/containers/{conid}?force=True'
             url = endpoint.format(conid=containername)
             # request to delete the container
             response = requests.delete(url)
@@ -341,8 +331,6 @@ class DockerKill(View):
                     serverip = 'localhost'
                     # get the url for the request
                     endpoint = 'http://' + serverip + ':8051/containers/{conid}?force=True'
-                    # in development mode, uncomment the following
-                    endpoint = 'http://' + serverip + ':3125/containers/{conid}?force=True'
                     url = endpoint.format(conid=containername)
                     # send the request to delete the container
                     response = requests.delete(url)

@@ -1,0 +1,37 @@
+server:  # Server settings.
+  # Address to listen on.
+  addr: ":5001"
+  # TLS certificate and key.
+  certificate: "/ssl/certificate.pem"
+  key: "/ssl/dmit2.bulletplus.com.key"
+
+token:  # Settings for the tokens.
+  issuer: "Auth Service"  # Must match issuer in the Registry config.
+  expiration: 900
+
+
+# Static user map.
+users:
+  # Password is specified as a BCrypt hash. Use htpasswd -B to generate.
+  "admin":
+    password: "$2b$10$epyZ4XjvD89fPAv3KKPdd.TUH7Ia98Mxy0szLr5/PgFFTiFfBV8SS"
+  "hussein":
+    password: "$2b$10$epyZ4XjvD89fPAv3KKPdd.TUH7Ia98Mxy0szLr5/PgFFTiFfBV8SS"
+  "": {}  # Allow anonymous (no "docker login") access.
+
+acl:
+  # Admin has full access to everything.
+  - match: {account: "admin"}
+    actions: ["*"]
+  # User "test" has full access to ubuntu image but nothing else.
+  - match: {account: "hussien", name: "ubuntu"}
+    actions: ["*"]
+  - match: {account: "test"}
+    actions: []
+  # All logged in users can pull all images.
+  - match: {account: "/.+/"}
+    actions: ["pull"]
+  # Anonymous users can pull "hello-world".
+  - match: {account: "", name: "hello-world"}
+    actions: ["pull"]
+  # Access is denied by default.
