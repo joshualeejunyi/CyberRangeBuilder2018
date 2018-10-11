@@ -123,7 +123,7 @@ class DockerContainerStart(View):
             # else if it is less than 9050 inclusive, it must be the web server
             serverip = '192.168.100.43'
         # in development mode, uncomment the following to override the serverip
-        serverip = 'localhost'
+        #serverip = 'localhost'
         # convert the port to a string for concatenation later
         port = str(port)
         # get the current rangeurl
@@ -137,7 +137,7 @@ class DockerContainerStart(View):
         # the imagename used is to determine the image name to be created
         # the image should be already created in the docker server
         # in development mode, uncomment the following to override the serverip
-        imagename = 'siab_server'
+        #imagename = 'siab_server'
         payload = {
             'Image':imagename,
             'HostConfig': {
@@ -171,7 +171,7 @@ class DockerContainerStart(View):
             # get the final url for the iframe
             finalsiaburl = 'dmit2.bulletplus.com:' + port
             # in development mode, uncomment the following to override the serverip
-            finalsiaburl = 'localhost:' + port
+            #finalsiaburl = 'localhost:' + port
 
             # generate a randompassword for the docker container
             randompassword = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(6))
@@ -292,7 +292,7 @@ class DockerKill(View):
                 # else if the port is less than 9051 inclusive, the server must be ther web server
                 serverip = '192.168.100.43'
             # in development mode, uncomment the following to override the serverip
-            serverip = 'localhost'
+            #serverip = 'localhost'
             # url for the web server to talk to
             endpoint = 'http://' + serverip + ':8051/containers/{conid}?force=True'
             url = endpoint.format(conid=containername)
@@ -328,7 +328,7 @@ class DockerKill(View):
                         # else if is is less than 9051 inclusive, it must be the web srver
                         serverip = '192.168.100.43'
                     # in development mode, uncomment the following to override the serverip
-                    serverip = 'localhost'
+                    #serverip = 'localhost'
                     # get the url for the request
                     endpoint = 'http://' + serverip + ':8051/containers/{conid}?force=True'
                     url = endpoint.format(conid=containername)
